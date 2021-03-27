@@ -120,8 +120,6 @@ class PlgContentpdfviewer extends JPlugin
 				//PDF viewer settings:
 				$height = '800' ;
 				$height =  $this->params->get('height');
-				
-				// If width is numeric then px else asume there is a %
 				$width = '100%';
 				$width = $this->params->get('width');
 				
@@ -138,11 +136,9 @@ class PlgContentpdfviewer extends JPlugin
 						// output should be application/pdf			
 						if ( $Filetype == 'application/pdf' ){
 							
-
 							//replace the file_pdfviewer with the pdfjsviewer
 							$output = CreatePdfviewer('%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $tagparameters['jdownloadsid'],$search,$Pagenumber,$height,$width,$this->params->get('Style'));
 						} 
-						
 					
 				}
 			}
@@ -155,7 +151,7 @@ class PlgContentpdfviewer extends JPlugin
 
 		
 	}
-	
+
 
 }
 
@@ -174,12 +170,11 @@ function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style) {
 		}	else {
 			$width = 'width:' .$width. ';';
 		}
-		
-		return $style. '/*Embed*/<iframe src="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
-		
-	}	
-	IF ($style=='Popup')  {
+		return '<iframe src="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
+	}
 	// Popup
+	IF ($style=='Popup')  {
+	
 		JHTML::_('behavior.modal');
 
 		return '/*Popup*/ <a class="modal" rel="{handler: \'iframe\', size: {x:' . str_replace('%','',$width) . ', y:' . $height . '}}" /*x is width */ href="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '">open in modal</a>';
@@ -190,3 +185,5 @@ function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style) {
 	}
 
 }
+
+
