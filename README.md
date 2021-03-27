@@ -29,12 +29,4 @@ For this advanced example I created 2 custom fields:
 
 {pdfviewer jdownloadsid={file\_id} page={jdfield 4} showpdfpreview={jdfield 3} }
 
-![](RackMultipart20210327-4-19e8027_html_3f7e7939da6e3df3.png)
 
-![](RackMultipart20210327-4-19e8027_html_137635ecbf5c20ab.png)
-
-![](RackMultipart20210327-4-19e8027_html_d67b781b49694687.png)
-
-In layout &#39;&#39;downloads&#39; or &#39;downloads details&#39;
-
-{pdfviewer jdownloadsid={file\_id} page={jdfield 4} showpdfpreview={jdfield 3} }
