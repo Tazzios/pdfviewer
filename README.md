@@ -30,8 +30,8 @@ Open on specific page
 Page will be ignore if there is a smartsearch highlight present in the url.  
 Use ctrl+f5 to test it, else it will remember the old pagenumber.
 
-Highlight key words
->Search=[string]
+Highlight keywords
+>Search=[keyword1-keyword2] (no spaces allowed use "-" as seperator)
 
 Additional parameter for use with jdownloads and a customfield, see advanced section.
 >showpdfpreview=[Yes] (case sensitive) 
@@ -51,10 +51,17 @@ Article example custom field integer {field 2}
 If you do not want to show every pdf file as preview you can create an custom field in jdownloads which you can use to turn it on or off.
 {jdfield 3} if returns &quot;Yes&quot; (case sensitive) then it will show the pdfviewer. You can use a checkbox or dropdown for this.
 
-Jdownloads example custom field checkbox {jdfield 4}  
+Show preview  
+Jdownloads example custom field checkbox {jdfield 3}  
 >{pdfviewer jdownloadsid={file\_id} showpdfpreview={jdfield 3} }
 
 Article example custom field checkbox {field 2}   
 >{pdfviewer jdownloadsid=4 page={field 2} } 
 
+Search terms  
+Jdownloads example custom field text {jdfield 5}  
+>{pdfviewer jdownloadsid={file\_id} showpdfpreview={jdfield 5} }
+
+Article example custom field text {field 5}   
+>{pdfviewer jdownloadsid=4 search={field 5} } 
 
