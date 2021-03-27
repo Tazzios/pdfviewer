@@ -26,7 +26,8 @@ You can use them in &#39;&#39;downloads&#39; and &#39;downloads details&#39; lay
 ### Optional parameters
 
 Open on specific page
->page=[integer]  
+>page=[integer]
+
 Page will be ignore if there is a smartsearch highlight present in the url.  
 Use ctrl+f5 to test it, else it will remember the old pagenumber.
 
