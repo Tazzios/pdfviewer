@@ -26,7 +26,7 @@ You can use them in &#39;&#39;downloads&#39; and &#39;downloads details&#39; lay
 
 **Open the pdfviewer on specific page and if it is allowed for this file.**  
 For this advanced example I created 2 custom fields:  
-{jdfield 4} will return an integer to represent the page number. default none 
+{jdfield 4} will return an integer to represent the page number. default none  
 {jdfield 3} if returns &quot;Yes&quot; (case sensitive) then it will show the preview. default Yes
 You can create an checkbox or dropdown for this.
 
