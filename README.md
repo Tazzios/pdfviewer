@@ -1,11 +1,12 @@
 # Pdfviewer
-PFFviewer is a joomla content plugin which make it possible to show pdf files in content.
+PDFviewer is a joomla content plugin which make it possible to show pdf files in content based on https://github.com/mozilla/pdf.js.
+Compared to other existing pdfviewer for joomla this one is focused on integration with jDownloads (which does not have a pdfviewer) and searching.
 
 ## Features
 
 - Set pagenumber
 - Joomla Highlight smartsearch integration
-- Advanced Jdownloads integration
+- Advanced jDownloads integration
 
 ## Examples
 
