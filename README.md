@@ -10,7 +10,7 @@
 
 ### Content Examples
 
-Show jdownloads file 4 open on page 10.  
+Show jdownloads file with ID 4 open on page 10.  
 >{pdfviewer jdownloadsid=4 page=10}
 
 Page will be ignore if there is a smartsearch highlight present in the url.  
