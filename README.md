@@ -39,16 +39,23 @@ Additional parameter for use with jdownloads and a customfield, see advanced sec
 ### Advanced 
 
 **Use custom field for page**
-For this advanced example I created a custom integer field {jdfield 4} this will return an integer to represent the page number. You can create this custom field for in article or jdownloads. 
+For this advanced example I created a custom integer field {jdfield 4} this will return an integer to represent the page number. You can create this custom field for in article or jdownloads. Note, You can not use the jdownloads custom field for in an article. Set 'Show label' to hide when creating a custom field for article. 
 
-Open the pdfviewer on specific page. 
+Jdownloads example custom field integer {jdfield 4}  
 >{pdfviewer jdownloadsid={file\_id} page={jdfield 4} }
+
+Article example custom field integer {field 2}  
+>{pdfviewer jdownloadsid=4 page={field 2} } 
 
 **Use custom field to those for which file pdfpreview is enabled**
 If you do not want to show every pdf file as preview you can create an custom field in jdownloads which you can use to run it on or off.
 {jdfield 3} if returns &quot;Yes&quot; (case sensitive) then it will show the preview. default Yes
-You can create an checkbox or dropdown for this. 
+You can create an checkbox or dropdown for this.
+
+Jdownloads example custom field checxbox {jdfield 4}  
 >{pdfviewer jdownloadsid={file\_id} showpdfpreview={jdfield 3} }
 
+Article example custom field checkbox {field 2}   
+>{pdfviewer jdownloadsid=4 page={field 2} } 
 
 
