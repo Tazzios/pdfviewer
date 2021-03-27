@@ -104,6 +104,11 @@ class PlgContentpdfviewer extends JPlugin
 					$search= str_replace(',', ' ' , $search);
 					$search = '#search=' . $search ;
 				}
+				
+				//get searchterm from tagparameters if exist
+				if (isset($tagparameters['search']) and $search =='') {
+					$search = '#search=' . str_replace('-', ' ' ,$tagparameters['search']);
+				}
 
 				// If there is a search term ignore the goto page
 				$Pagenumber= '';
@@ -111,21 +116,16 @@ class PlgContentpdfviewer extends JPlugin
 					$Pagenumber = '#page=' . $tagparameters['page'];
 				}
 				
+
 				//PDF viewer settings:
-				$height = 'height:800px;' ;
-				$height = 'height:'. $this->params->get('height') . 'px;' ;
+				$height = '800' ;
+				$height =  $this->params->get('height');
 				
 				// If width is numeric then px else asume there is a %
 				$width = '100%';
 				$width = $this->params->get('width');
 				
-				if (is_numeric($width)) {
-						$width = 'width:' .$width. 'px;';
-				}	else {
-					$width = 'width:' .$width. ';';
-				}
-				
-				
+								
 				// check tag parameters jdownloadsid  			
 				if ( isset($tagparameters['jdownloadsid']) ) {
 					
@@ -137,9 +137,10 @@ class PlgContentpdfviewer extends JPlugin
 						$Filetype = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
 						// output should be application/pdf			
 						if ( $Filetype == 'application/pdf' ){
-									
+							
+
 							//replace the file_pdfviewer with the pdfjsviewer
-							$output = CreatePdfviewer('%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $tagparameters['jdownloadsid'],$search,$Pagenumber,$height,$width);
+							$output = CreatePdfviewer('%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $tagparameters['jdownloadsid'],$search,$Pagenumber,$height,$width,$this->params->get('Style'));
 						} 
 						
 					
@@ -148,140 +149,44 @@ class PlgContentpdfviewer extends JPlugin
 				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
 				$article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
 			
-
-			
 			}
 			//$article->text .= 'x'.$ID;
 		}
 
-		// Find all instances of plugin and put in $matchesmod for loadmodule
-		/*preg_match_all($regexmod, $article->text, $matchesmod, PREG_SET_ORDER);
-
-		// If no matches, skip this
-		if ($matchesmod)
-		{
-			foreach ($matchesmod as $matchmod)
-			{
-				$matchesmodlist = explode(',', $matchmod[1]);
-
-				// We may not have a specific module so set to null
-				if (!array_key_exists(1, $matchesmodlist))
-				{
-					$matchesmodlist[1] = null;
-				}
-
-
-				$module = trim($matchesmodlist[0]);
-				$name   = htmlspecialchars_decode(trim($matchesmodlist[1]));
-
-				// $match[0] is full pattern match, $match[1] is the module,$match[2] is the title
-				$output = $this->_loadmod($module, $name, $stylemod);
-
-				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
-				$article->text = preg_replace("|$matchmod[0]|", addcslashes($output, '\\$'), $article->text, 1);
-
-			}
-			
-		}*/
 		
 	}
 	
 
-	
-
-	/**
-	 * Loads and renders the module
-	 *
-	 * @param   string  $position  The position assigned to the module
-	 * @param   string  $style     The style assigned to the module
-	 *
-	 * @return  mixed
-	 *
-	 * @since   1.6
-	 */
-	protected function _load($position, $style = 'none')
-	{
-		self::$modules[$position] = '';
-		$document	= JFactory::getDocument();
-		$renderer	= $document->loadRenderer('module');
-		$modules	= JModuleHelper::getModules($position);
-		$params		= array('style' => $style);
-		ob_start();
-
-		foreach ($modules as $module)
-		{
-			echo $renderer->render($module, $params);
-		}
-
-		self::$modules[$position] = ob_get_clean();
-
-		return self::$modules[$position];
-	}
-
-	/**
-	 * This is always going to get the first instance of the module type unless
-	 * there is a title.
-	 *
-	 * @param   string  $module  The module title
-	 * @param   string  $title   The title of the module
-	 * @param   string  $style   The style of the module
-	 *
-	 * @return  mixed
-	 *
-	 * @since   1.6
-	 */
-	protected function _loadmod($module, $title, $style = 'none')
-	{
-		self::$mods[$module] = '';
-		$document	= JFactory::getDocument();
-		$renderer	= $document->loadRenderer('module');
-		$mod		= JModuleHelper::getModule($module, $title);
-
-		// If the module without the mod_ isn't found, try it with mod_.
-		// This allows people to enter it either way in the content
-		if (!isset($mod))
-		{
-			$name = 'mod_'.$module;
-			$mod  = JModuleHelper::getModule($name, $title);
-		}
-
-		$params = array('style' => $style);
-		ob_start();
-
-		echo $renderer->render($mod, $params);
-
-		self::$mods[$module] = ob_get_clean();
-
-		return self::$mods[$module];
-	}
 }
 
-function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width) {
+function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style) {
 	// Path to pdfjs/web/viewer.html from the base of joomla
 	$Path_pdfjs = JUri::base().'plugins/content/pdfviewer/assets/pdfjs/web/viewer.html' ;
+	
+	//PDF viewer embed settings:
+	IF ($style=='Embed')  {
+		
+		$height = 'height:'. $height . 'px;' ;
+		
+		// If width is numeric then px else asume there is a %
+		if (is_numeric($width)) {
+				$width = 'width:' .$width. 'px;';
+		}	else {
+			$width = 'width:' .$width. ';';
+		}
+		
+		return $style. '/*Embed*/<iframe src="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
+		
+	}	
+	IF ($style=='Popup')  {
+	// Popup
+		JHTML::_('behavior.modal');
 
+		return '/*Popup*/ <a class="modal" rel="{handler: \'iframe\', size: {x:' . str_replace('%','',$width) . ', y:' . $height . '}}" /*x is width */ href="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '">open in modal</a>';
+	}
+	// New window
+	IF ($style=='Blank')  {
+		return	'/*New windows*/ <a target=_blank href="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '">open in new window</a>';  
+	}
 
-	return '<iframe src="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe><a href="javascript:void(0);" data-href="getContent.php?id=1" class="openPopup">About Us</a>
-
-<!-- Modal -->
-<div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
-    
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Bootstrap Modal with Dynamic Content</h4>
-            </div>
-            <div class="modal-body">
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-      
-    </div>
-</div>';  
-	// ***** the style parameters should be configurable at the backend 
 }

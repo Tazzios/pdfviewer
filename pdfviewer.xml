@@ -20,15 +20,26 @@
 		<fields name="params">
 			<fieldset name="basic">
 				<field 
+					name="Style" type="list"
+					default="Embed"
+					label="Preview style"
+				>
+				<option value="Embed">Embedded</option>
+				<option value="Popup">Modal Popup</option>
+				<option value="Blank">Open in new window</option>		
+			</field>
+			<field 
 				name="width" 
 				type="text" default="100%" 
 				label="width pdfviewer" 
-				description=""/>
-				<field 
+				description=""
+			/>
+			<field 
 				name="height" 
 				type="text" default="800" 
 				label="height pdfviewer" 
-				description=""/>
+				description=""
+			/>
 			</fieldset>
 		</fields>
 	</config>
