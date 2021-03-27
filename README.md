@@ -11,8 +11,10 @@
 ### Content Examples
 
 Show jdownloads file 4 open on page 10.  
->{pdfviewer jdownloadsid=4 page=10}  
+>{pdfviewer jdownloadsid=4 page=10}
+
 Page will be ignore if there is a smartsearch highlight present in the url.  
+Use ctrl+f5 to test it on a page, else it will remember the old pagenumber.
 
 ### Jdownloads examples
 
