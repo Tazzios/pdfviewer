@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.1" type="plugin" group="content" method="upgrade">
+	<name>plg_content_pdfviewer</name>
+	<author>Joomla! Project</author>
+	<creationDate>November 2005</creationDate>
+	<copyright>Copyright (C) 2005 - 2020 Open Source Matters. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<authorEmail>admin@joomla.org</authorEmail>
+	<authorUrl>www.joomla.org</authorUrl>
+	<version>3.0.0</version>
+	<description>PLG_LOADMODULE_XML_DESCRIPTION</description>
+	<files>
+		<filename plugin="pdfviewer">pdfviewer.php</filename>
+	</files>
+	<languages>
+		<language tag="en-GB">en-GB.plg_content_loadmodule.ini</language>
+		<language tag="en-GB">en-GB.plg_content_loadmodule.sys.ini</language>
+	</languages>
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field 
+				name="width" 
+				type="text" default="100%" 
+				label="width pdfviewer" 
+				description=""/>
+				<field 
+				name="height" 
+				type="text" default="800" 
+				label="height pdfviewer" 
+				description=""/>
+			</fieldset>
+		</fields>
+	</config>
+</extension>
