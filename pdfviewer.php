@@ -154,7 +154,7 @@ class PlgContentpdfviewer extends JPlugin
 						if ( $Filetype == 'application/pdf' ){
 									
 							//replace the file_pdfviewer with the pdfjsviewer
-							$output = CreatePdfviewer(/*urlencode*/($tagparameters['file']),$search,$Pagenumber,$height,$width);
+							$output = CreatePdfviewer(/*urlencode*/($tagparameters['file']),$search,$Pagenumber,$height,$width,$this->params->get('Style'));
 						} 
 					
 				}
