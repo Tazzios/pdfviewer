@@ -141,6 +141,23 @@ class PlgContentpdfviewer extends JPlugin
 						} 
 					
 				}
+				// Is it a other pdf file?
+				if ( isset($tagparameters['file']) ) {
+					
+						//check or it is an PDF file
+						$ch = curl_init($tagparameters['file']);
+						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+						curl_exec($ch);
+						# get the content type
+						$Filetype = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+						// output should be application/pdf			
+						if ( $Filetype == 'application/pdf' ){
+									
+							//replace the file_pdfviewer with the pdfjsviewer
+							$output = CreatePdfviewer(/*urlencode*/($tagparameters['file']),$search,$Pagenumber,$height,$width);
+						} 
+					
+				}
 			}
 				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
 				$article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
@@ -170,18 +187,18 @@ function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style) {
 		}	else {
 			$width = 'width:' .$width. ';';
 		}
-		return '<iframe src="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
+		return '<iframe src="' . $Path_pdfjs . '?file=' . $filelink . $search . $Pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
 	}
 	// Popup
 	IF ($style=='Popup')  {
 	
 		JHTML::_('behavior.modal');
 
-		return '/*Popup*/ <a class="modal" rel="{handler: \'iframe\', size: {x:' . str_replace('%','',$width) . ', y:' . $height . '}}" /*x is width */ href="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '">open in modal</a>';
+		return '/*Popup*/ <a class="modal" rel="{handler: \'iframe\', size: {x:' . str_replace('%','',$width) . ', y:' . $height . '}}" /*x is width */ href="' . $Path_pdfjs . '?file=' . $filelink . $search . $Pagenumber . '">open in modal</a>';
 	}
 	// New window
 	IF ($style=='Blank')  {
-		return	'/*New windows*/ <a target=_blank href="' . $Path_pdfjs . '?file=%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $filelink . $search . $Pagenumber . '">open in new window</a>';  
+		return	'/*New windows*/ <a target=_blank href="' . $Path_pdfjs . '?file=' . $filelink . $search . $Pagenumber . '">open in new window</a>';  
 	}
 
 }
