@@ -46,8 +46,8 @@ Override default preview style
 
 with the embed and popup you can change the size
 >height=[integer] width=[integer]
-With embed you can use % for width
 
+With embed you can use % for width
 >width=80%
 
 
