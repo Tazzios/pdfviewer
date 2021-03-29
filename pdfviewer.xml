@@ -29,6 +29,12 @@
 				<option value="New">Open in new window</option>		
 			</field>
 			<field 
+				name="linktext" 
+				type="text" default="Download" 
+				label="Default linktext for Popup and open in new window link" 
+				description=""
+			/>
+			<field 
 				name="width" 
 				type="text" default="100%" 
 				label="width pdfviewer" 

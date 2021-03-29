@@ -75,19 +75,27 @@ class PlgContentpdfviewer extends JPlugin
 				//Delete space around the = and replace others by , to put then in an array
 				// there are still scenarios where it goes wrong
 				$tagparams = preg_replace('/^\p{Z}+|\p{Z}+$/u', '', $match[1]); // remove blank 
-				$tagparams = str_replace('= ','=', $tagparams); //avoid that key and value are seprated
-				$tagparams = str_replace(' =','=', $tagparams); //avoid that key and value are seprated
-				$tagparams = str_replace(' ',',', $tagparams);					
-				$tagparams = preg_replace('!\s+!', '', $tagparams); //remove all spaces
+				//$tagparams = str_replace('= ','=', $tagparams); //avoid that key and value are seprated
+				//$tagparams = str_replace(' =','=', $tagparams); //avoid that key and value are seprated
 				
+				//$tagparams = preg_replace('~(?:\G(?!\A)|")[^"\s]*\K(?:\s|"(*SKIP)(*F))~','', $tagparams);
+				
+				// replace space for , if the text is not between qoutes. Special for the linktext
+				$tagparams = preg_replace('~\s+(?=([^"]*"[^"]*")*[^"]*$)~',',', $tagparams); 
+				
+				// replace existing spaces which should be between qoutes for %20 before output it will be changed back
+				$tagparams = str_replace(' ','%20', $tagparams); 
+				
+				//$tagparams = str_replace(' ',',', $tagparams);					
+				//$tagparams = preg_replace('!\s+!', '', $tagparams); //remove all spaces
+
 												
 				// create named array for key and values , key to lower case
 				preg_match_all("/([^,= ]+)=([^,= ]+)/", $tagparams, $r); 
 				$tagparameters = array_combine($r[1], $r[2]);
-				$tagparameters = array_change_key_case($tagparameters, CASE_LOWER);
-				
-				
-				$output= ''; //clear to avoid placing a pdfviewer double if the tag parameter are incorrect
+				$tagparameters = array_change_key_case($tagparameters, CASE_LOWER); //keys to lower to avoid mismatch
+							
+				$output= ''; //clear to avoid placing a pdfviewer double if the tag parameter are incorrect after first loop
 				
 				$Showpdfpreview = 'Yes';
 				if (isset($tagparameters['showpdfpreview'])) {
@@ -127,6 +135,13 @@ class PlgContentpdfviewer extends JPlugin
 				}
 				$style = strtolower($style); // to lower to avoid mis match
 				
+				//linktext
+				$linktext = $this->params->get('linktext');
+				if (isset($tagparameters['linktext']) ) {
+					$linktext =  str_replace('%20',' ', $tagparameters['linktext']); //replace dummy space
+					$linktext = trim($linktext,'"'); // any combination of ' and "
+				}
+				
 				
 				//PDF viewer settings:
 				$height = '800' ;
@@ -143,41 +158,30 @@ class PlgContentpdfviewer extends JPlugin
 				}
 				
 				
-								
+				$filelink = '' ;			
 				// check tag parameters jdownloadsid  			
 				if ( isset($tagparameters['jdownloadsid']) ) {
 					
-						//check or it is an PDF file
-						$ch = curl_init(JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $tagparameters['jdownloadsid']);
-						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-						curl_exec($ch);
-						# get the content type
-						$Filetype = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-						// output should be application/pdf			
-						if ( $Filetype == 'application/pdf' ){
-							
-							//replace the file_pdfviewer with the pdfjsviewer
-							$output = CreatePdfviewer('%22index.php%3Foption%3Dcom_jdownloads%26task%3Ddownload.send%26id%3D' . $tagparameters['jdownloadsid'],$search,$Pagenumber,$height,$width,$style);
-						} 
-					
+						$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $tagparameters['jdownloadsid'] ;
 				}
 				// Is it a other pdf file?
 				if ( isset($tagparameters['file']) ) {
-					
-						//check or it is an PDF file
-						$ch = curl_init($tagparameters['file']);
-						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-						curl_exec($ch);
-						# get the content type
-						$Filetype = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-						// output should be application/pdf			
-						if ( $Filetype == 'application/pdf' ){
-									
-							//replace the file_pdfviewer with the pdfjsviewer
-							$output = CreatePdfviewer($tagparameters['file'],$search,$Pagenumber,$height,$width,$style);
-						} 
-					
+					$filelink = $tagparameters['file'];
+
 				}
+				
+					//check or it is an PDF file
+					$ch = curl_init($filelink);
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+					curl_exec($ch);
+					# get the content type
+					$Filetype = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+					// output should be application/pdf			
+					if ( $Filetype == 'application/pdf' ){
+								
+					//Call create viewer function
+					$output = CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext);
+					} 
 			}
 				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
 				$article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
@@ -192,10 +196,12 @@ class PlgContentpdfviewer extends JPlugin
 
 }
 
-function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style) {
+function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext) {
 	// Path to pdfjs/web/viewer.html from the base of joomla
 	$Path_pdfjs = JUri::base().'plugins/content/pdfviewer/assets/pdfjs/web/viewer.html' ;
 	
+	// the pdfjs needs encode url
+	$filelink = urlencode($filelink);
 	
 	//PDF viewer embed settings:
 	IF ($style=='embed')  {
@@ -209,7 +215,7 @@ function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style) {
 			$width = 'width:' .$width. ';';
 		}
 		return '<iframe src="' . $Path_pdfjs . '?file=' . $filelink . $search . $Pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
-	}
+	}	
 	// Popup
 	IF ($style=='popup')  {
 	
@@ -217,11 +223,11 @@ function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style) {
 		
 		$width = str_replace('%','',$width);
 
-		return '<a class="modal" rel="{handler: \'iframe\', size: {x:' . $width . ', y:' . $height . '}}" /*x is width */ href="' . $Path_pdfjs . '?file=' . $filelink . $search . $Pagenumber . '">open in modal</a>';
+		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $search . $Pagenumber .'">'. $linktext .'</a>';
 	}
 	// New window
 	IF ($style=='new')  {
-		return	'<a target=_blank href="' . $Path_pdfjs . '?file=' . $filelink . $search . $Pagenumber . '">open in new window</a>';  
+		return	'<a target=_blank href="'. $Path_pdfjs .'?file='. $filelink . $search . $Pagenumber .'">'. $linktext .'</a>';  
 	}
 
 }
