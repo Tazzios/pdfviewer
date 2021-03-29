@@ -12,6 +12,8 @@
     <tags>
         <tag>stable</tag>
     </tags>
+    <folder>content</folder>
+    <client>0</client>
     <maintainer>Tazzios</maintainer>
     <maintainerurl>https://github.com/Tazzios/</maintainerurl>
     <targetplatform name="joomla" version="3.9"/>
