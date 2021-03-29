@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.1" type="plugin" group="content" method="upgrade">
-	<name>plg_content_pdfviewer</name>
+	<name>pdfviewer</name>
 	<author>Tazzios</author>
 	<creationDate>april 2021</creationDate>
 	<copyright>Copyright (C) 2005 - 2020 Open Source Matters. All rights reserved.</copyright>
@@ -20,13 +20,13 @@
 		<fields name="params">
 			<fieldset name="basic">
 				<field 
-					name="Style" type="list"
+					name="style" type="list"
 					default="Embed"
 					label="Preview style"
 				>
 				<option value="Embed">Embedded</option>
 				<option value="Popup">Modal Popup</option>
-				<option value="Blank">Open in new window</option>		
+				<option value="New">Open in new window</option>		
 			</field>
 			<field 
 				name="width" 

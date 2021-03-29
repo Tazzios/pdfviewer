@@ -15,6 +15,10 @@ Compared to other existing pdfviewer for joomla this one is focused on integrati
 Show jdownloads file with ID 4.  
 >{pdfviewer jdownloadsid=4 }
 
+Link to a pdf file  
+>{pdfviewer file=https://samedomain.com/file.pdf }  
+Pdfjs does not allow to open pdfs from other domains
+
 ### Jdownloads examples
 
 The following examples are for jdownloads.  
@@ -34,8 +38,16 @@ Use ctrl+f5 to test it, else it will remember the old pagenumber.
 Highlight keywords
 >Search=[keyword1-keyword2] (no spaces allowed use "-" as seperator)
 
-Additional parameter for use with jdownloads and a customfield, see advanced section.
+Parameter for use with jdownloads and a customfield, see advanced section.
 >showpdfpreview=[Yes] (case sensitive) 
+
+Override default preview style  
+>style=[embed|popup|new]
+with the embed and popup you can change the size  
+>height=[integer] width=[integer]
+With embed you can use % for width
+>width=80%
+
 
 ### Advanced 
 
