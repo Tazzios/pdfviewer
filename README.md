@@ -43,9 +43,11 @@ Parameter for use with jdownloads and a customfield, see advanced section.
 
 Override default preview style  
 >style=[embed|popup|new]
-with the embed and popup you can change the size  
+
+with the embed and popup you can change the size
 >height=[integer] width=[integer]
 With embed you can use % for width
+
 >width=80%
 
 
