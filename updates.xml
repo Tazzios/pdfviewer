@@ -3,7 +3,7 @@
     <name>PDFviewer</name>
     <description>PDFviewer</description>
     <element>pdfviewer</element>
-    <type>plugin</type>
+    <type>file</type>
     <version>0.7.0</version>
     <infourl title="Release notes">https://github.com/Tazzios/pdfviewer/releases</infourl>
     <downloads>
