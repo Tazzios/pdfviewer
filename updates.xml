@@ -4,7 +4,7 @@
     <description>PDFviewer</description>
     <element>PDFviewer</element>
     <type>component</type>
-    <version>0.7</version>
+    <version>0.7.0</version>
     <infourl title="Release notes">https://github.com/Tazzios/pdfviewer/releases</infourl>
     <downloads>
         <downloadurl type="full" format="zip">https://github.com/Tazzios/pdfviewer/zipball/master</downloadurl>
