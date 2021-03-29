@@ -45,7 +45,9 @@ Override default preview style
 >style=[embed|popup|new]
 
 with the embed and popup you can change the size at set the link text
->height=[integer] width=[integer] linktext=[string]
+>height=[integer] width=[integer] linktext="[string]"
+
+Use double qoutes around the linktext is it contains a space.
 
 With embed you can use % for width
 >width=80%
