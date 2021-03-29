@@ -7,7 +7,7 @@
     <version>0.7.0</version>
     <infourl title="Release notes">https://github.com/Tazzios/pdfviewer/releases</infourl>
     <downloads>
-        <downloadurl type="full" format="zip">https://github.com/Tazzios/pdfviewer/zipball/master</downloadurl>
+        <downloadurl type="full" format="zip">https://api.github.com/repos/Tazzios/pdfviewer/zipball/v0.7</downloadurl>
     </downloads>
     <tags>
         <tag>stable</tag>
