@@ -36,7 +36,9 @@ Page will be ignore if there is a smartsearch highlight present in the url.
 Use ctrl+f5 to test it, else it will remember the old pagenumber.
 
 Highlight keywords
->Search=[keyword1-keyword2] (no spaces allowed use "-" as seperator)
+>Search="[keyword1-keyword2]" 
+
+double qoutes are only needed with multiple keywords. Each keyword will be highlighted separately.
 
 Parameter for use with jdownloads and a customfield, see advanced section.
 >showpdfpreview=[Yes] (case sensitive) 
