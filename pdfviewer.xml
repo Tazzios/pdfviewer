@@ -7,15 +7,15 @@
 	<license> LICENSE.txt</license>
 	<authorEmail>mail</authorEmail>
 	<authorUrl>https://github.com/Tazzios</authorUrl>
-	<version>0.6.0</version>
-	<description>xxx</description>
+	<version>0.7.0</version>
+	<description>content plugin for PDF</description>
 	<files>
 		<filename plugin="pdfviewer">pdfviewer.php</filename>
+		<filename>index.html</filename>
+		<filename>pdfviewer.xml</filename>
+		<folder>assets</folder>
 	</files>
-	<languages>
-		<language tag="en-GB">en-GB.plg_content_loadmodule.ini</language>
-		<language tag="en-GB">en-GB.plg_content_loadmodule.sys.ini</language>
-	</languages>
+
 	<config>
 		<fields name="params">
 			<fieldset name="basic">
@@ -50,6 +50,6 @@
 		</fields>
 	</config>
 	    <updateservers>
-      <server type="extension" priority="2" name="PDFviewer"> https://raw.githubusercontent.com/Tazzios/pdfviewer/master/updates.xml</server>
+      <server type="extension" priority="2" name="pdfviewer">https://www.famrodenburg.net/test/updates.xml</server>
     </updateservers>
 </extension>
