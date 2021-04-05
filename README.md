@@ -10,6 +10,8 @@ Compared to other existing pdfviewer for joomla this one is focused on integrati
 
 ## Examples
 
+Demo website: http://marijqg132.132.axc.nl/demopdfviewer/
+
 ### Joomla Content Examples
 
 Show jdownloads file with ID 4.  
