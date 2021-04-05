@@ -22,7 +22,7 @@
 				<field 
 					name="style" type="list"
 					default="Embed"
-					label="Preview style"
+					label="Default viewer style"
 				>
 				<option value="Embed">Embedded</option>
 				<option value="Popup">Modal Popup</option>
@@ -34,19 +34,43 @@
 				label="Default linktext for Popup and open in new window link" 
 				description=""
 			/>
+			<field type="spacer" name="myspacer1" label="Size for embed" />
 			<field 
-				name="width" 
+				name="embedwidth" 
 				type="text" default="100%" 
-				label="width pdfviewer" 
+				label="Embed width pdfviewer" 
 				description=""
 			/>
 			<field 
-				name="height" 
+				name="embedheight" 
 				type="text" default="800" 
-				label="height pdfviewer" 
+				label="Embed height pdfviewer" 
 				description=""
 			/>
+			<field type="spacer" name="myspacer" label="Size for popup" />
+			<field 
+				name="popupwidth" 
+				type="text" default="800" 
+				label="Popup width pdfviewer" 
+				description=""
+			/>
+			<field 
+				name="popupheight" 
+				type="text" default="800" 
+				label="Popup height pdfviewer" 
+				description=""
+			/>
+			<field 
+			 	name="debug" type="radio"
+				default="0"
+				label="Turn on DEBUG output to help find errors"
+				>
+					<option value="0">OFF</option>
+					<option value="1">ON</option>
+			</field>
 			</fieldset>
+
+			
 		</fields>
 	</config>
 	    <updateservers>

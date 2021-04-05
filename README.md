@@ -39,7 +39,7 @@ Highlight keywords
 >Search=[keyword1-keyword2] (no spaces allowed use "-" as seperator)
 
 Parameter for use with jdownloads and a customfield, see advanced section.
->showpdfpreview=[Yes] (case sensitive) 
+>showpdfpreview=[Yes] 
 
 Override default preview style  
 >style=[embed|popup|new]

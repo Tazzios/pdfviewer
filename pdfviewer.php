@@ -75,8 +75,8 @@ class PlgContentpdfviewer extends JPlugin
 				//Delete space around the = and replace others by , to put then in an array
 				// there are still scenarios where it goes wrong
 				$tagparams = preg_replace('/^\p{Z}+|\p{Z}+$/u', '', $match[1]); // remove blank 
-				//$tagparams = str_replace('= ','=', $tagparams); //avoid that key and value are seprated
-				//$tagparams = str_replace(' =','=', $tagparams); //avoid that key and value are seprated
+				//$tagparams = str_replace('= ','=', $tagparams); //avoid that key and value are seprated. This one is tricky becasue in jdownloads not every kay gest an value, like search.
+				$tagparams = str_replace(' =','=', $tagparams); //avoid that key and value are seprated
 				
 				//$tagparams = preg_replace('~(?:\G(?!\A)|")[^"\s]*\K(?:\s|"(*SKIP)(*F))~','', $tagparams);
 				
@@ -84,7 +84,7 @@ class PlgContentpdfviewer extends JPlugin
 				$tagparams = preg_replace('~\s+(?=([^"]*"[^"]*")*[^"]*$)~',',', $tagparams); 
 				
 				// replace existing spaces which should be between qoutes for %20 before output it will be changed back
-				$tagparams = str_replace(' ','%20', $tagparams); 
+				$tagparams = str_replace(' ','%20', $tagparams); //replace space for dummy space
 				
 				//$tagparams = str_replace(' ',',', $tagparams);					
 				//$tagparams = preg_replace('!\s+!', '', $tagparams); //remove all spaces
@@ -97,13 +97,20 @@ class PlgContentpdfviewer extends JPlugin
 							
 				$output= ''; //clear to avoid placing a pdfviewer double if the tag parameter are incorrect after first loop
 				
-				$Showpdfpreview = 'Yes';
-				if (isset($tagparameters['showpdfpreview'])) {
-						$Showpdfpreview = $tagparameters['showpdfpreview'];
+				// debug option
+				if ( $this->params->get('debug')==1) {
+						var_dump($tagparameters);
 				}
 				
+				$Showpdfpreview = 'yes';
+				if (isset($tagparameters['showpdfpreview'])) {
+						$Showpdfpreview = strtolower($tagparameters['showpdfpreview']);
+				}
+				
+				
+				
 				// should we show the preview?
-			iF  ($Showpdfpreview=='Yes') {
+			iF  ($Showpdfpreview=='yes') {
 				
 				// get the smartsearch from the url if exist
 				$search ='';
@@ -115,15 +122,21 @@ class PlgContentpdfviewer extends JPlugin
 					$search= str_replace(',', ' ' , $search);
 					$search = '#search=' . $search ;
 				}
+	
 				
 				//get searchterm from tagparameters if exist
 				if (isset($tagparameters['search']) and $search =='') {
-					$search = '#search=' . str_replace('-', ' ' ,$tagparameters['search']);
+					$search = str_replace('%20', ' ' ,$tagparameters['search']); //replace dummy space
+					$search = trim($search);
+					$search = trim($search,'"'); // any combination of ' and "
+					$search = '#search=' . $search ;
 				}
+				
 
+				//Page
 				// If there is a search term ignore the goto page
 				$Pagenumber= '';
-				if (isset($tagparameters['page']) and $search =='') {
+				if (isset($tagparameters['page']) and $search =='' and $tagparameters['page']<>0) {
 					$Pagenumber = '#page=' . $tagparameters['page'];
 				}
 				
@@ -143,27 +156,38 @@ class PlgContentpdfviewer extends JPlugin
 				}
 				
 				
-				//PDF viewer settings:
-				$height = '800' ;
-				$height =  $this->params->get('height');
+				//PDF viewer size settings:
+				$height = '' ;
+				$width = '';
+				
+				// set plugin default for embed
+				if ($style=='embed') {	
+					$height =  $this->params->get('embedheight');
+					$width =  $this->params->get('embedwidth');
+				}
+				
+				// set plugin default for popup
+				if ($style=='popup') {
+					$height =  $this->params->get('popupheight');
+					$width =  $this->params->get('popupwidth');
+				}
+				
+				// get settings from tag is present
 				if (isset($tagparameters['height']) ) {
 					$height =  $tagparameters['height'];
 				}
 				
-				
-				$width = '100%';
-				$width = $this->params->get('width');
 				if (isset($tagparameters['width']) ) {
 					$width =  $tagparameters['width'];
 				}
 				
-				
 				$filelink = '' ;			
 				// check tag parameters jdownloadsid  			
 				if ( isset($tagparameters['jdownloadsid']) ) {
-					
 						$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $tagparameters['jdownloadsid'] ;
 				}
+				
+				
 				// Is it a other pdf file?
 				if ( isset($tagparameters['file']) ) {
 					$filelink = $tagparameters['file'];
@@ -182,6 +206,9 @@ class PlgContentpdfviewer extends JPlugin
 					//Call create viewer function
 					$output = CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext);
 					} 
+					
+				//cleanup before next loop
+				unset($tagparameters);
 			}
 				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
 				$article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
@@ -221,13 +248,11 @@ function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$li
 	
 		JHTML::_('behavior.modal');
 		
-		$width = str_replace('%','',$width);
-
 		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $search . $Pagenumber .'">'. $linktext .'</a>';
 	}
 	// New window
 	IF ($style=='new')  {
-		return	'<a target=_blank href="'. $Path_pdfjs .'?file='. $filelink . $search . $Pagenumber .'">'. $linktext .'</a>';  
+		return	'<a class="pdfviewer_button" target=_blank href="'. $Path_pdfjs .'?file='. $filelink . $search . $Pagenumber .'">'. $linktext .'</a>';  
 	}
 
 }
