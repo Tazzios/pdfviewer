@@ -86,3 +86,6 @@ Jdownloads example custom field text {jdfield 5}
 Article example custom field text {field 5}   
 >{pdfviewer jdownloadsid=4 search={field 5} } 
 
+**Make pdf 'searchable'**
+Create a custom text field (with large pdfs you need multiple)
+copy the text from the pdf in the textfield
