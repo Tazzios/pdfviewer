@@ -74,6 +74,6 @@
 		</fields>
 	</config>
 	    <updateservers>
-      <server type="extension" priority="2" name="pdfviewer">https://www.famrodenburg.net/test/updates.xml</server>
+      <server type="extension" priority="2" name="pdfviewer">https://raw.githubusercontent.com/tazzios/pdfviewer/master/updates.xml</server>
     </updateservers>
 </extension>
