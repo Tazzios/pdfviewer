@@ -10,7 +10,7 @@
 		<version>0.8.0</version>
 		<infourl title="Release notes">https://github.com/Tazzios/pdfviewer/releases</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://raw.githubusercontent.com/tazzios/pdfviewer/master/Releases/pdfviewer%200.8.0.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://github.com/Tazzios/pdfviewer/releases/download/v0.8/pdfviewer.0.8.0.zip</downloadurl>
 		</downloads>
 		<tags>
 			<tag>stable</tag>
