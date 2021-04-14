@@ -107,10 +107,8 @@ class PlgContentpdfviewer extends JPlugin
 						$Showpdfpreview = strtolower($tagparameters['showpdfpreview']);
 				}
 				
-				
-				
-				// should we show the preview?
-			iF  ($Showpdfpreview=='yes') {
+			// should we show the preview?
+			IF  ($Showpdfpreview=='yes') {
 				
 				// get the smartsearch from the url if exist
 				$search ='';
@@ -187,25 +185,23 @@ class PlgContentpdfviewer extends JPlugin
 						$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $tagparameters['jdownloadsid'] ;
 				}
 				
-				
-				// Is it a other pdf file?
-				if ( isset($tagparameters['file']) ) {
-					$filelink = $tagparameters['file'];
-
-				}
-				
-					//check or it is an PDF file
-					$ch = curl_init($filelink);
-					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-					curl_exec($ch);
-					# get the content type
-					$Filetype = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-					// output should be application/pdf			
-					if ( $Filetype == 'application/pdf' ){
+				// check if filename is given only logic in jdownloads layouts
+				if (isset($tagparameters['filename']) ) {
 								
+					// get file extension
+					$filename = explode(".", $tagparameters['filename']);
+					$filename = strtolower(end($filename));
+					if($filename == 'pdf') {
+								
+						//Call create viewer function
+						$output = CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext);
+					}
+				}
+				else { //if filename is not given it is a article tag which place the user by him self so i assume it is a pdf file.
 					//Call create viewer function
 					$output = CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext);
-					} 
+					
+				}
 					
 				//cleanup before next loop
 				unset($tagparameters);
