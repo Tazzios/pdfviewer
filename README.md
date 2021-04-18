@@ -19,6 +19,7 @@ Show jdownloads file with ID 4.
 
 Link to a pdf file  
 >{pdfviewer file=https://samedomain.com/file.pdf }  
+
 Pdfjs does not allow to open pdfs from other domains
 
 ### Jdownloads examples
@@ -27,7 +28,8 @@ The following examples are for jdownloads.
 You can use them in &#39;&#39;downloads&#39; and &#39;downloads details&#39; layouts.
 
 **Show pdfviewer**  
->{pdfviewer jdownloadsid={file\_id}  filename={file\_name} }  
+>{pdfviewer jdownloadsid={file\_id}  filename="{file\_name}" }
+    
 Filename is needed to check if hte file is a .pdf file.
 
 ### Optional parameters
@@ -64,10 +66,10 @@ With embed you can use % for width
 For this advanced example I created a custom integer field {jdfield 4} this will return an integer to represent the page number. You can create this custom field for in article or jdownloads. Note, You can not use the jdownloads custom field for in an article. Set 'Show label' to hide when creating a custom field for article. 
 
 Jdownloads example custom field integer {jdfield 4}  
->{pdfviewer jdownloadsid={file\_id} filename={file\_name} page={jdfield 4} }
+>{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" page={jdfield 4} }
 
 Article example custom field integer {field 2}  
->{pdfviewer jdownloadsid=4 filename={file\_name} page={field 2} } 
+>{pdfviewer jdownloadsid=4 filename="{file\_name}" page={field 2} } 
 
 **Use custom field to choose for which file pdfpreview is enabled**  
 If you do not want to show every pdf file as preview you can create an custom field in jdownloads which you can use to turn it on or off.
@@ -75,14 +77,14 @@ If you do not want to show every pdf file as preview you can create an custom fi
 
 Show preview  
 Jdownloads example custom field checkbox {jdfield 3}  
->{pdfviewer jdownloadsid={file\_id} filename={file\_name} showpdfpreview={jdfield 3} }
+>{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" showpdfpreview={jdfield 3} }
 
 Article example custom field checkbox {field 2}   
 >{pdfviewer jdownloadsid=4 page={field 2} } 
 
 Search terms  
 Jdownloads example custom field text {jdfield 5}  
->{pdfviewer jdownloadsid={file\_id} filename={file\_name} showpdfpreview={jdfield 5} }
+>{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" showpdfpreview={jdfield 5} }
 
 Article example custom field text {field 5}   
 >{pdfviewer jdownloadsid=4 search={field 5} } 
