@@ -191,6 +191,7 @@ class PlgContentpdfviewer extends JPlugin
 					// get file extension
 					$filename = explode(".", $tagparameters['filename']);
 					$filename = strtolower(end($filename));
+					$filename =trim($filename,'\'"');
 					if($filename == 'pdf') {
 								
 						//Call create viewer function
