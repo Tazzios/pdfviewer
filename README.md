@@ -28,9 +28,9 @@ The following examples are for jdownloads.
 You can use them in &#39;&#39;downloads&#39; and &#39;downloads details&#39; layouts.
 
 **Show pdfviewer**  
->{pdfviewer jdownloadsid={file\_id}  filename="{file\_name}" }
+>{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" }
     
-Filename is needed to check if hte file is a .pdf file.
+Filename is needed to check if the file is a .pdf file.
 
 ### Optional parameters
 
@@ -41,7 +41,7 @@ Page will be ignore if there is a smartsearch highlight present in the url.
 Use ctrl+f5 to test it, else it will remember the old pagenumber.
 
 Highlight keywords
->Search="[keyword1 keyword2]" 
+>Search="[keyword1] [keyword2]" 
 
 double qoutes are only needed with multiple keywords. Each keyword will be highlighted separately.
 
