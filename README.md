@@ -73,7 +73,7 @@ Article example custom field integer {field 2}
 
 **Use custom field to choose for which file pdfpreview is enabled**  
 If you do not want to show every pdf file as preview you can create an custom field in jdownloads which you can use to turn it on or off.
-{jdfield 3} if returns &quot;Yes&quot; (case sensitive) then it will show the pdfviewer. You can use a checkbox or dropdown for this.
+{jdfield 3} if returns &quot;Yes&quot; then it will show the pdfviewer. You can use a checkbox or dropdown for this.
 
 Show preview  
 Jdownloads example custom field checkbox {jdfield 3}  
