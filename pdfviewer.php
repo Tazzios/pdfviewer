@@ -50,12 +50,12 @@ class PlgContentpdfviewer extends JPlugin
 		}
 
 		// Expression to search for (positions)
-		$regex		= '/{pdfviewer\s*(.*?)}/i';
+		$regex		= '/{\s*pdfviewer \s*(.*?)}/i';
 		//$regex    = '/{loadposin\s(.*?)}/i';
 		//$style		= $this->params->def('style', 'none');
 
 		// Expression to search for(modules)
-		$regexmod	= '/{pdfviewer\s*(.*?)}/i';
+		$regexmod	= '/{\s*pdfviewer \s*(.*?)}/i';
 		//$stylemod	= $this->params->def('style', 'none');
 
 		// Find all instances of plugin and put in $matches for loadposition
