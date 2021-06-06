@@ -18,9 +18,7 @@ Show jdownloads file with ID 4.
 >{pdfviewer jdownloadsid=4 }
 
 Link to a pdf file  
->{pdfviewer file=https://samedomain.com/file.pdf }  
-
-Pdfjs does not allow to open pdfs from other domains
+>{pdfviewer file=https://domain.com/file.pdf }  
 
 ### Jdownloads examples
 
