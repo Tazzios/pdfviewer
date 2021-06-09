@@ -7,7 +7,7 @@
 		<type>plugin</type>
 		<folder>content</folder>
 		<element>pdfviewer</element>
-		<version>1.0.0</version>
+		<version>1.0</version>
 		<infourl title="Release notes">https://github.com/Tazzios/pdfviewer/releases</infourl>
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/Tazzios/pdfviewer/releases/download/V1.0/pdfviewer-1.0.0.zip</downloadurl>
