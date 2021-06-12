@@ -5,6 +5,7 @@ defined('_JEXEC') or die;
 /**
  * Plug-in to enable loading pdf files into content (e.g. articles)
  * This uses the {pdfviewer} syntax
+ * Licensed under the GNU General Public License version 2 or later; see LICENSE.txt
  */
 class PlgContentpdfviewer extends JPlugin
 {
