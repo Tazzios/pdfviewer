@@ -1,18 +1,19 @@
 # Pdfviewer
 PDFviewer is a joomla content plugin which make it possible to show pdf files in content based on https://github.com/mozilla/pdf.js.
-Compared to other existing pdfviewer for joomla this one is focused on integration with jDownloads (which does not have a pdfviewer) and searching.
+Compared to other existing pdfviewer for joomla this one is focused on integration with jDownloads and searching.
 
 ## Features
 
 - Set pagenumber
 - Joomla Highlight smartsearch integration
 - Advanced jDownloads integration
+- Show a page as a image
 
 ## Examples
 
 Demo website: http://marijqg132.132.axc.nl/demopdfviewer/
 
-### Joomla Content Examples
+### basic article examples
 
 Show jdownloads file with ID 4.  
 >{pdfviewer jdownloadsid=4 }
@@ -20,17 +21,49 @@ Show jdownloads file with ID 4.
 Link to a pdf file  
 >{pdfviewer file=https://domain.com/file.pdf }  
 
-### Jdownloads examples
+### Basic Jdownloads example
 
 The following examples are for jdownloads.  
-You can use them in &#39;&#39;downloads&#39; and &#39;downloads details&#39; layouts.
+You can use them in &#39;downloads&#39; and &#39;downloads details&#39; layouts.
 
-**Show pdfviewer**  
 >{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" }
     
-Filename is needed to check if the file is a .pdf file.
+Filename is needed to check if the file is a pdf file.
+
+### Jdownloads custom field examples
+
+**Page**  
+For this advanced example I created a custom integer field {jdfield 4} this will return an integer to represent the page number. 
+
+Jdownloads example custom field integer {jdfield 4}  
+>{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" page={jdfield 4} }
+
+Article example custom field integer {field 2}  
+>{pdfviewer jdownloadsid=4 page={field 2} } 
+
+**Use custom field to choose for which file pdfpreview is enabled**  
+If you do not want to show every pdf file as preview you can create an custom field in jdownloads which you can use to turn it on or off.
+{jdfield 3} if returns &quot;Yes&quot; then it will show the pdfviewer. You can use a checkbox or dropdown for this.
+
+**Show preview**
+Jdownloads example custom field checkbox {jdfield }  
+>{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" showpdfpreview={jdfield 3} }
+
+**Search terms**  
+Jdownloads example custom field text {jdfield 5}  
+>{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" search={jdfield 5} }
+
+You also can use custom fields from articles in a article. Set 'Show label' to hide when creating a custom field for article. For example highlight keywords:
+>{pdfviewer jdownloadsid=[ID] search={field 5} }
+
+You can create this custom field for in article or jdownloads. Note, You can not use the jdownloads custom field for in an article. Set 'Show label' to hide when creating a custom field for article. 
 
 ### Optional parameters
+
+Select viewer. Show the full pdf or only one page as an image.
+>viewer=[pdfjs|pdfimage]
+
+Only jdownloads pdf files can be shown as image. When set to pdfimage by default the first page will beshown set page= to show an other page. Warning; Images will be created with imagick each time the page is loaded. 
 
 Open on specific page
 >page=[integer]
@@ -52,42 +85,16 @@ Override default preview style
 with the embed and popup you can change the size at set the link text
 >height=[integer] width=[integer] linktext="[string]"
 
-Use double qoutes around the linktext is it contains a space.
+Use double qoutes around the linktext if it contains a space.
 
-With embed you can use % for width
+With embed you can also use % for width
 >width=80%
 
+## Make pdf 'searchable'
+Create a custom text field (with large pdfs you maybe need multiple fields) copy the text from the pdf in the textfield you can now search for the text with smart search.
 
-### Advanced 
+## Override pdfjs
 
-**Use custom field for page**  
-For this advanced example I created a custom integer field {jdfield 4} this will return an integer to represent the page number. You can create this custom field for in article or jdownloads. Note, You can not use the jdownloads custom field for in an article. Set 'Show label' to hide when creating a custom field for article. 
-
-Jdownloads example custom field integer {jdfield 4}  
->{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" page={jdfield 4} }
-
-Article example custom field integer {field 2}  
->{pdfviewer jdownloadsid=4 filename="{file\_name}" page={field 2} } 
-
-**Use custom field to choose for which file pdfpreview is enabled**  
-If you do not want to show every pdf file as preview you can create an custom field in jdownloads which you can use to turn it on or off.
-{jdfield 3} if returns &quot;Yes&quot; then it will show the pdfviewer. You can use a checkbox or dropdown for this.
-
-Show preview  
-Jdownloads example custom field checkbox {jdfield 3}  
->{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" showpdfpreview={jdfield 3} }
-
-Article example custom field checkbox {field 2}   
->{pdfviewer jdownloadsid=4 page={field 2} } 
-
-Search terms  
-Jdownloads example custom field text {jdfield 5}  
->{pdfviewer jdownloadsid={file\_id} filename="{file\_name}" showpdfpreview={jdfield 5} }
-
-Article example custom field text {field 5}   
->{pdfviewer jdownloadsid=4 search={field 5} } 
-
-**Make pdf 'searchable'**
-
-Create a custom text field (with large pdfs you maybe need multiple fields)
-copy the text from the pdf in the textfield
+If you want to customize PDFjs you can place an override in the following folder:
+>[TEMPLATE]/html/plg_content_pdfviewer/assets/pdfjs
+The codes checks if  '[TEMPLATE]/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html' exist if so it will be used instead of the default pdfjs viewer.

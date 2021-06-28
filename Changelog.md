@@ -1,4 +1,9 @@
 
+
+V1.1.0
+New: PDFjs override [TEMPLATE]/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html
+New: Show one page as an image!
+
 V1.0.0
 Fix: The 'file' tag option was not working.
 Update: PDFJS to 2.8.335
