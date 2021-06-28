@@ -19,6 +19,16 @@
 	<config>
 		<fields name="params">
 			<fieldset name="basic">
+			
+			<field 
+					name="viewer" type="list"
+					default="pdfjs"
+					label="Default viewer "
+				>
+				<option value="pdfjs">pdfjs</option>
+				<option value="pdfimage">pdfimage</option>
+			</field>
+			
 				<field 
 					name="style" type="list"
 					default="Embed"
@@ -31,33 +41,33 @@
 			<field 
 				name="linktext" 
 				type="text" default="Download" 
-				label="Default linktext for Popup and open in new window link" 
+				label="Default linktext for popup and new style" 
 				description=""
 			/>
 			<field type="spacer" name="myspacer1" label="Size for embed" />
 			<field 
 				name="embedwidth" 
 				type="text" default="100%" 
-				label="Embed width pdfviewer" 
+				label="Embed width " 
 				description=""
 			/>
 			<field 
 				name="embedheight" 
 				type="text" default="800" 
-				label="Embed height pdfviewer" 
+				label="Embed height " 
 				description=""
 			/>
 			<field type="spacer" name="myspacer" label="Size for popup" />
 			<field 
 				name="popupwidth" 
 				type="text" default="800" 
-				label="Popup width pdfviewer" 
+				label="Popup width " 
 				description=""
 			/>
 			<field 
 				name="popupheight" 
 				type="text" default="800" 
-				label="Popup height pdfviewer" 
+				label="Popup height " 
 				description=""
 			/>
 			<field 
