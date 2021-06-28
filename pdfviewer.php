@@ -125,57 +125,88 @@ class PlgContentpdfviewer extends JPlugin
 					}
 					
 					
-					//PDF viewer size settings:
-					$height = '' ;
-					$width = '';
-					
-					// set plugin default for embed
-					if ($style=='embed') {	
-						$height =  $this->params->get('embedheight');
-						$width =  $this->params->get('embedwidth');
+					//determine viewer with a case statement
+					$viewer = $this->params->get('viewer');
+					if (isset($tagparameters['viewer']) ) {
+						$viewer =  $tagparameters['viewer'];
 					}
+					$viewer = strtolower($viewer); // to lower to avoid mis match
 					
-					// set plugin default for popup
-					if ($style=='popup') {
-						$height =  $this->params->get('popupheight');
-						$width =  $this->params->get('popupwidth');
-					}
+					switch  ($viewer) {
+					case "pdfjs": // 
+
+						//PDF viewer size settings:
+						$height = '' ;
+						$width = '';
 					
-					// get settings from tag is present
-					if (isset($tagparameters['height']) ) {
-						$height =  $tagparameters['height'];
-					}
-					if (isset($tagparameters['width']) ) {
-						$width =  $tagparameters['width'];
-					}
-					
-					
-					$filelink = '' ;			
-					// check if there is a jdownloadsid or file tag parameters
-					if ( isset($tagparameters['jdownloadsid']) ) {
-						$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $tagparameters['jdownloadsid'] ;
-					} elseif ( isset($tagparameters['file']) ) {
-						$filelink = $tagparameters['file'];
-					}
-					
-					// check if filename is given only logic in jdownloads layouts
-					if (isset($tagparameters['filename']) ) {
-									
-						// get file extension
-						$filename = explode(".", $tagparameters['filename']);
-						$filename = strtolower(end($filename));
-						$filename =trim($filename,'\'"');
-						if($filename == 'pdf') {
-									
+						// set plugin default for embed
+						if ($style=='embed') {	
+							$height =  $this->params->get('embedheight');
+							$width =  $this->params->get('embedwidth');
+						}
+						
+						// set plugin default for popup
+						if ($style=='popup') {
+							$height =  $this->params->get('popupheight');
+							$width =  $this->params->get('popupwidth');
+						}
+						
+						// get settings from tag is present
+						if (isset($tagparameters['height']) ) {
+							$height =  $tagparameters['height'];
+						}
+						if (isset($tagparameters['width']) ) {
+							$width =  $tagparameters['width'];
+						}
+						
+						
+						$filelink = '' ;			
+						// check if there is a jdownloadsid or file tag parameters
+						if ( isset($tagparameters['jdownloadsid']) ) {
+							$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $tagparameters['jdownloadsid'] ;
+						} elseif ( isset($tagparameters['file']) ) {
+							$filelink = $tagparameters['file'];
+						}
+						
+						// check if filename is given only logic in jdownloads layouts
+						if (isset($tagparameters['filename']) ) {
+										
+							// get file extension
+							$filename = explode(".", $tagparameters['filename']);
+							$filename = strtolower(end($filename));
+							$filename =trim($filename,'\'"');
+							if($filename == 'pdf') {
+										
+								//Call create viewer function
+								$output = CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext);
+							}
+						}
+						else { //if filename is not given it is a article tag which place the user by him self so i assume it is a pdf file.
 							//Call create viewer function
 							$output = CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext);
+							
 						}
-					}
-					else { //if filename is not given it is a article tag which place the user by him self so i assume it is a pdf file.
-						//Call create viewer function
-						$output = CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext);
+						break;
+					case "pdfimages":
+						$output = 'nothing yet';
+						break;
+					case "pdfimage":
+						$output = 'nothing yet';
+						break;
 						
-					}
+						
+					
+
+					default:
+						// Default wat to proces json values to query 
+						break;
+				}
+					
+					
+					
+					
+					
+
 						
 					//cleanup before next loop
 					unset($tagparameters);
@@ -183,7 +214,7 @@ class PlgContentpdfviewer extends JPlugin
 				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
 				$article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
 			
-			} // end for each matchs
+			} // end foreach matches
 			
 		} // end matches
 	} // end onContentPrepare
@@ -221,6 +252,64 @@ function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$li
 		return	'<a class="pdfviewer_button" target=_blank href="'. $Path_pdfjs .'?file='. $filelink . $search . $Pagenumber .'">'. $linktext .'</a>';  
 	}
 
+}
+
+function CreatePdfimage($filelink,$Pagenumber,$height,$width,$style) {
+
+	// the pdfjs needs encode url
+	$filelink = urlencode($filelink);
+	
+	// code based on https://www.binarytides.com/convert-pdf-image-imagemagick-php/
+
+	//$pdf_file   = '/home/marijqg132/domains/famrodenburg.net/public_html/test/myfile.pdf';
+
+	$img = new imagick();
+
+	//this must be called before reading the image, otherwise has no effect - &quot;-density {$x_resolution}x{$y_resolution}&quot;
+	//this is important to give good quality output, otherwise text might be unclear
+	$img->setResolution(200,200);
+
+	//read the pdf
+	$img->readImage("{$filelink}[{$Pagenumber}]");
+
+	//reduce the dimensions - scaling will lead to black color in transparent regions
+	$img->scaleImage(800,0);
+
+	//set new format
+	$img->setImageFormat('jpeg');
+
+	// -flatten option, this is necessary for images with transparency, it will produce white background for transparent regions
+	$img = $img->mergeImageLayers(imagick::LAYERMETHOD_FLATTEN);
+
+
+	//echo "<img src=data:image/jpg;base64,".base64_encode($img). ">" 
+	
+	//PDF viewer embed settings:
+	IF ($style=='embed')  {
+		
+		$height = ' height='. $height . 'px;' ;
+		
+		// If width is numeric then px else asume there is a %
+		if (is_numeric($width)) {
+				$width = ' width=' . $width . 'px;';
+		}	else {
+			$width = ' width=' . $width . ';';
+		}
+		return "<img src=data:image/jpg;base64,".base64_encode($img) . $height . $ width ">"; 
+	}	
+	// Popup
+	IF ($style=='popup')  {
+	
+		JHTML::_('behavior.modal');
+		
+		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="data:image/jpg;base64,'.  base64_encode($img) . '">'. $linktext .'</a>';
+	}
+	// New window
+	IF ($style=='new')  {
+		return	'<a class="pdfviewer_button" target=_blank href="data:image/jpg;base64,' . base64_encode($img) . '">'. $linktext .'</a>';  
+	}
+
+	
 }
 
 
