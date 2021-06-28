@@ -1,6 +1,6 @@
 
 
-
+V1.1.0
 New: PDFjs override [TEMPLATE]/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html
 New: Show one page as an image!
 
