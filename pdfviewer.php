@@ -2,6 +2,10 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Factory;
+use Joomla\CMS\Categories\CategoryNode;
+use Joomla\CMS\Categories\Categories; // needed for retrieving full file pathfor pdfimage
+
 /**
  * Plug-in to enable loading pdf files into content (e.g. articles)
  * This uses the {pdfviewer} syntax
@@ -65,20 +69,32 @@ class PlgContentpdfviewer extends JPlugin
 				$tagparameters = array_combine($r[1], $r[2]);
 				$tagparameters = array_change_key_case($tagparameters, CASE_LOWER); //keys to lower to avoid mismatch
 							
-				
+				//var_dump( $tagparameters); 
 				
 				// debug option
 				if ( $this->params->get('debug')==1) {
 						var_dump($tagparameters);
 				}
 				
-				$Showpdfpreview = 'yes';
+				$showpdfpreview = 'yes';
 				if (isset($tagparameters['showpdfpreview'])) {
-						$Showpdfpreview = strtolower($tagparameters['showpdfpreview']);
+						$showpdfpreview = strtolower($tagparameters['showpdfpreview']);
 				}
 				
+				// check if filename is given, if it is given it should be pdf.
+				if (isset($tagparameters['filename']) ) {
+								
+					$fileext = explode(".", $tagparameters['filename']);
+					$fileext = strtolower(end($fileext));
+					$fileext =trim($fileext,'\'"');
+					if($fileext <> 'pdf') {
+						$showpdfpreview= 'no';							
+					}
+				}
+				
+				
 				// should we show the preview?
-				IF  ($Showpdfpreview=='yes') {
+				IF  ($showpdfpreview=='yes') {
 					
 					// get the smartsearch from the url if exist
 					$search ='';
@@ -99,13 +115,13 @@ class PlgContentpdfviewer extends JPlugin
 						$search = trim($search,'"'); // any combination of ' and "
 						$search = '#search=' . $search ;
 					}
-					
 
+					
 					//Page
 					// If there is a search term ignore the goto page
-					$Pagenumber= '';
+					$pagenumber= '';
 					if (isset($tagparameters['page']) and $search =='' and $tagparameters['page']<>0) {
-						$Pagenumber = '#page=' . $tagparameters['page'];
+						$pagenumber = $tagparameters['page'];
 					}
 					
 					
@@ -132,85 +148,72 @@ class PlgContentpdfviewer extends JPlugin
 					}
 					$viewer = strtolower($viewer); // to lower to avoid mis match
 					
+					//PDF viewer size settings:
+					$height = '' ;
+					$width = '';
+				
+					// set plugin default for embed
+					if ($style=='embed') {	
+						$height =  $this->params->get('embedheight');
+						$width =  $this->params->get('embedwidth');
+					}
+					
+					// set plugin default for popup
+					if ($style=='popup') {
+						$height =  $this->params->get('popupheight');
+						$width =  $this->params->get('popupwidth');
+					}
+					
+					// get settings from tag if present
+					if (isset($tagparameters['height']) ) {
+						$height =  $tagparameters['height'];
+					}
+					if (isset($tagparameters['width']) ) {
+						$width =  $tagparameters['width'];
+					}
+					
+					
+					$filelink = '' ;
+					$jdownloadsid = '';
+					// check if there is a jdownloadsid or file tag parameters
+					if ( isset($tagparameters['jdownloadsid']) ) {
+						$jdownloadsid = $tagparameters['jdownloadsid'];
+						$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $jdownloadsid ;
+					} elseif ( isset($tagparameters['file']) ) {
+						$filelink = $tagparameters['file'];
+					}
+					
 					switch  ($viewer) {
-					case "pdfjs": // 
-
-						//PDF viewer size settings:
-						$height = '' ;
-						$width = '';
-					
-						// set plugin default for embed
-						if ($style=='embed') {	
-							$height =  $this->params->get('embedheight');
-							$width =  $this->params->get('embedwidth');
-						}
-						
-						// set plugin default for popup
-						if ($style=='popup') {
-							$height =  $this->params->get('popupheight');
-							$width =  $this->params->get('popupwidth');
-						}
-						
-						// get settings from tag is present
-						if (isset($tagparameters['height']) ) {
-							$height =  $tagparameters['height'];
-						}
-						if (isset($tagparameters['width']) ) {
-							$width =  $tagparameters['width'];
-						}
-						
-						
-						$filelink = '' ;			
-						// check if there is a jdownloadsid or file tag parameters
-						if ( isset($tagparameters['jdownloadsid']) ) {
-							$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $tagparameters['jdownloadsid'] ;
-						} elseif ( isset($tagparameters['file']) ) {
-							$filelink = $tagparameters['file'];
-						}
-						
-						// check if filename is given only logic in jdownloads layouts
-						if (isset($tagparameters['filename']) ) {
-										
-							// get file extension
-							$filename = explode(".", $tagparameters['filename']);
-							$filename = strtolower(end($filename));
-							$filename =trim($filename,'\'"');
-							if($filename == 'pdf') {
-										
-								//Call create viewer function
-								$output = CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext);
+						case "pdfimage":
+								
+							if ( $jdownloadsid<>'' ) {
+								$output = Createpdfimage($jdownloadsid,$pagenumber,$height,$width,$style,$linktext);
+							} else {
+								$output = 'Only jdownloads pdf files can beconverted to image';
 							}
-						}
-						else { //if filename is not given it is a article tag which place the user by him self so i assume it is a pdf file.
-							//Call create viewer function
-							$output = CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext);
-							
-						}
-						break;
-					case "pdfimages":
-						$output = 'nothing yet';
-						break;
-					case "pdfimage":
-						$output = 'nothing yet';
-						break;
-						
-						
-					
+							break;
+						/*case "pdfimages":								
+							if ( $jdownloadsid<>'' ) {
+								
+								 multipage
+								 https://stackoverflow.com/questions/45720472/converting-a-multi-page-pdf-to-multiple-jpg-images-with-imagick-and-php
 
-					default:
-						// Default wat to proces json values to query 
-						break;
-				}
-					
-					
-					
-					
-					
+								$output = Createpdfimages($jdownloadsid,$pagenumber,$height,$width,$style,$linktext);
+							} else {
+								$output = 'Only jdownloads pdf files can beconverted to image';
 
-						
+							}
+							break;*/
+						default:
+							// Default pdfjs
+							$output = CreatePdfviewer($filelink,$search,$pagenumber,$height,$width,$style,$linktext);
+							break;
+					}
+
 					//cleanup before next loop
 					unset($tagparameters);
 				}
+				
 				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
 				$article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
 			
@@ -218,14 +221,35 @@ class PlgContentpdfviewer extends JPlugin
 			
 		} // end matches
 	} // end onContentPrepare
-}
+}// end class
 
-function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$linktext) {
-	// Path to pdfjs/web/viewer.html from the base of joomla
+function CreatePdfviewer($filelink,$search,$pagenumber,$height,$width,$style,$linktext) {
+	// set Path to pdfjs viewer.html file and check if there is an override
+	
+	//Set default path
 	$Path_pdfjs = JUri::base().'plugins/content/pdfviewer/assets/pdfjs/web/viewer.html' ;
 	
+	// Get active template path from Joomla: 
+	$app    = JFactory::getApplication();
+	$path   = JURI::base(true).'templates/'.$app->getTemplate().'/';
+	
+	// determine override patch
+	$pdfjs_override =  JPATH_ROOT  .'/templates/'.$app->getTemplate().   '/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html'; 
+	
+	//Check for override
+	if (file_exists($pdfjs_override)) {
+		$Path_pdfjs = JUri::base().'templates/'.$app->getTemplate().  '/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html';
+	}
+		
+		
 	// the pdfjs needs encode url
 	$filelink = urlencode($filelink);
+	
+	
+	if ($pagenumber<>''){
+		$pagenumber = '#page=' . (int) $pagenumber;
+	}
+	
 	
 	//PDF viewer embed settings:
 	IF ($style=='embed')  {
@@ -238,51 +262,97 @@ function CreatePdfviewer($filelink,$search,$Pagenumber,$height,$width,$style,$li
 		}	else {
 			$width = 'width:' .$width. ';';
 		}
-		return '<iframe src="' . $Path_pdfjs . '?file=' . $filelink . $search . $Pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
+		return '<iframe src="' . $Path_pdfjs . '?file=' . $filelink . $search . $pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
 	}	
 	// Popup
 	IF ($style=='popup')  {
 	
 		JHTML::_('behavior.modal');
 		
-		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $search . $Pagenumber .'">'. $linktext .'</a>';
+		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $search . $pagenumber .'">'. $linktext .'</a>';
 	}
 	// New window
 	IF ($style=='new')  {
-		return	'<a class="pdfviewer_button" target=_blank href="'. $Path_pdfjs .'?file='. $filelink . $search . $Pagenumber .'">'. $linktext .'</a>';  
+		return	'<a class="pdfviewer_button" target=_blank href="'. $Path_pdfjs .'?file='. $filelink . $search . $pagenumber .'">'. $linktext .'</a>';  
 	}
 
 }
 
-function CreatePdfimage($filelink,$Pagenumber,$height,$width,$style) {
-
-	// the pdfjs needs encode url
-	$filelink = urlencode($filelink);
+function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	
 	// code based on https://www.binarytides.com/convert-pdf-image-imagemagick-php/
 
-	//$pdf_file   = '/home/marijqg132/domains/famrodenburg.net/public_html/test/myfile.pdf';
+	//imagick needs a local path 
+	$filelink = '';
+	
+	// get root dir from jdownloads
+	$jdownloads_params = JComponentHelper::getParams( 'com_jdownloads' );
+	$root_dir = $jdownloads_params->get( 'root_dir' );
 
-	$img = new imagick();
+	// get categorie ID and file name
+	$db = JFactory::getDbo();
+	$query = $db->getQuery(true)
+	->select(' cat.id, url_download ')	
+	->from('#__jdownloads_files as file')
+	->join('INNER',' #__jdownloads_categories as cat ON file.catid=cat.id' )
+	->where('file.id = '. $file_id );
+	//	->order('ordering ASC');
+	$db->setQuery($query);
+	
+	$fileDB = $db->loadAssocList();
+	
+	$cat_id = ''; 
+	$cat_path = '';
+	$filename = '' ;
+	foreach ($fileDB as $file) {
+		$filename  =  $file['url_download'];
+		$cat_id = $file['id'];
+	}
+	
+	//Retrieve categories file path with the help of category ID
+	$categories = \Joomla\CMS\Categories\Categories::getInstance('jdownloads');
+    $cat        = $categories->get($cat_id);
+	
+	//Full file link
+	$filelink = $root_dir . '/' . $cat->cat_dir_parent . '/'. $cat->title. '/' . $filename;
 
+
+	// Imagick starts with page 0
+	if ($pagenumber <>'') {
+		$pagenumber =  (int) $pagenumber-1;
+	} else {
+		$pagenumber =0;
+	}	
+
+	$imgk = new imagick();
+	
 	//this must be called before reading the image, otherwise has no effect - &quot;-density {$x_resolution}x{$y_resolution}&quot;
 	//this is important to give good quality output, otherwise text might be unclear
-	$img->setResolution(200,200);
-
+	$imgk->setResolution(200,200);
+	
 	//read the pdf
-	$img->readImage("{$filelink}[{$Pagenumber}]");
+	try {
+	$imgk->readImage("{$filelink}[$pagenumber]");
+	} catch (Exception $ex) {
+		// if an exception occurred
+		return 'cannot convert file to image';
+	}
 
 	//reduce the dimensions - scaling will lead to black color in transparent regions
-	$img->scaleImage(800,0);
+	IF ($style=='popup')  {
+		$imgk->scaleImage($width-18,0); // -18 to prevent vertical scroll when zoomed in.
+	} else {
+		$imgk->scaleImage(1000,0); //only testes with a4 pfds
+	}
 
 	//set new format
-	$img->setImageFormat('jpeg');
+	$imgk->setImageFormat('jpeg');
 
-	// -flatten option, this is necessary for images with transparency, it will produce white background for transparent regions
-	$img = $img->mergeImageLayers(imagick::LAYERMETHOD_FLATTEN);
+	// flatten option, this is necessary for images with transparency, it will produce white background for transparent regions
+	$img = '' ; 
+	$img = $imgk->mergeImageLayers(imagick::LAYERMETHOD_FLATTEN);
+	$imgk->clear();
 
-
-	//echo "<img src=data:image/jpg;base64,".base64_encode($img). ">" 
 	
 	//PDF viewer embed settings:
 	IF ($style=='embed')  {
@@ -291,11 +361,13 @@ function CreatePdfimage($filelink,$Pagenumber,$height,$width,$style) {
 		
 		// If width is numeric then px else asume there is a %
 		if (is_numeric($width)) {
-				$width = ' width=' . $width . 'px;';
+				$width = ' width=' . $width . '';
 		}	else {
-			$width = ' width=' . $width . ';';
+			$width = ' width=' . $width . '%';
 		}
-		return "<img src=data:image/jpg;base64,".base64_encode($img) . $height . $ width ">"; 
+		//return 'test'; 
+		return '<img src=data:image/jpg;base64,'.base64_encode($img) . $width . $height . ' class=pdfimage_embed_image>'; 
+		//return   "<img src=data:image/jpg;base64,".base64_encode($img). ">"; 
 	}	
 	// Popup
 	IF ($style=='popup')  {
@@ -311,5 +383,7 @@ function CreatePdfimage($filelink,$Pagenumber,$height,$width,$style) {
 
 	
 }
+
+
 
 
