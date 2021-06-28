@@ -310,11 +310,17 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	}
 	
 	//Retrieve categories file path with the help of category ID
+	$cat_parents = '';
 	$categories = \Joomla\CMS\Categories\Categories::getInstance('jdownloads');
     $cat        = $categories->get($cat_id);
 	
+	if ($cat->cat_dir_parent<>''){
+		$cat_parents = '/' . $cat->cat_dir_parent;	
+	}
+	
+	
 	//Full file link
-	$filelink = $root_dir . '/' . $cat->cat_dir_parent . '/'. $cat->title. '/' . $filename;
+	$filelink = $root_dir . $cat_parents . '/'. $cat->title. '/' . $filename;
 
 
 	// Imagick starts with page 0
@@ -335,7 +341,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	$imgk->readImage("{$filelink}[$pagenumber]");
 	} catch (Exception $ex) {
 		// if an exception occurred
-		return 'cannot convert file to image';
+		return 'cannot convert file to image. Make sure  page '. $pagenumber. ' exists. <br> and the filelink is correct: ' . $filelink ;
 	}
 
 	//reduce the dimensions - scaling will lead to black color in transparent regions
