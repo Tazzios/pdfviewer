@@ -90,10 +90,10 @@ Use double qoutes around the linktext if it contains a space.
 With embed you can also use % for width
 >width=80%
 
-##Make pdf 'searchable'
+## Make pdf 'searchable'
 Create a custom text field (with large pdfs you maybe need multiple fields) copy the text from the pdf in the textfield you can now search for the text with smart search.
 
-##Override pdfjs
+## Override pdfjs
 
 If you want to customize PDFjs you can place an override in the following folder:
 >[TEMPLATE]/html/plg_content_pdfviewer/assets/pdfjs
