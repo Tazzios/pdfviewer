@@ -1,4 +1,8 @@
 
+V1.1.1
+
+Fix: long filenames in jDownloads do not work #6
+Improved: small codes changes.
 
 V1.1.0
 New: PDFjs override [TEMPLATE]/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html

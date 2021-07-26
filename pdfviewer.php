@@ -54,7 +54,8 @@ class PlgContentpdfviewer extends JPlugin
 				//Transform  the keys and values from the tag to an array
 				
 				//Delete space around the = and replace others by , to put then in an array
-				$tagparams = preg_replace('/^\p{Z}+|\p{Z}+$/u', '', $match[1]); // remove blank 
+				$tagparams = preg_replace('/^\p{Z}+|\p{Z}+$/u', '', $match[1]); // remove blank
+				$tagparams = strip_tags($tagparams); //Remove htmlcode see: https://github.com/Tazzios/pdfviewer/issues/6
 				$tagparams = str_replace(' =','=', $tagparams); //avoid that key and value are seprated
 				
 				
@@ -256,7 +257,7 @@ function CreatePdfviewer($filelink,$search,$pagenumber,$height,$width,$style,$li
 		
 		$height = 'height:'. $height . 'px;' ;
 		
-		// If width is numeric then px else asume there is a %
+		// If width is numeric then px else assume there is a %
 		if (is_numeric($width)) {
 				$width = 'width:' .$width. 'px;';
 		}	else {
@@ -283,8 +284,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	// code based on https://www.binarytides.com/convert-pdf-image-imagemagick-php/
 
 	//imagick needs a local path 
-	$filelink = '';
-	
+
 	// get root dir from jdownloads
 	$jdownloads_params = JComponentHelper::getParams( 'com_jdownloads' );
 	$root_dir = $jdownloads_params->get( 'root_dir' );
@@ -315,12 +315,12 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
     $cat        = $categories->get($cat_id);
 	
 	if ($cat->cat_dir_parent<>''){
-		$cat_parents = '/' . $cat->cat_dir_parent;	
+		$cat_parents = '. DS.' . $cat->cat_dir_parent;
 	}
 	
-	
+
 	//Full file link
-	$filelink = $root_dir . $cat_parents . '/'. $cat->title. '/' . $filename;
+	$filelink = $root_dir . $cat_parents . DS . $cat->title. DS . $filename;
 
 
 	// Imagick starts with page 0
@@ -365,7 +365,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 		
 		$height = ' height='. $height . 'px;' ;
 		
-		// If width is numeric then px else asume there is a %
+		// If width is numeric then px else assume there is a %
 		if (is_numeric($width)) {
 				$width = ' width=' . $width . '';
 		}	else {
@@ -380,7 +380,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	
 		JHTML::_('behavior.modal');
 		
-		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="data:image/jpg;base64,'.  base64_encode($img) . '">'. $linktext .'</a>';
+		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" href="data:image/jpg;base64,'.  base64_encode($img) . '">'. $linktext .'</a>';
 	}
 	// New window
 	IF ($style=='new')  {
