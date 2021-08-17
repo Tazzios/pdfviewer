@@ -315,7 +315,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
     $cat        = $categories->get($cat_id);
 	
 	if ($cat->cat_dir_parent<>''){
-		$cat_parents = '. DS.' . $cat->cat_dir_parent;
+		$cat_parents = DS . $cat->cat_dir_parent;
 	}
 	
 

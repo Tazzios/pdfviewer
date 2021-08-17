@@ -2184,10 +2184,10 @@ let validateFileURL;
         origin,
         protocol
       } = new URL(file, window.location.href);
-
-      if (origin !== viewerOrigin && protocol !== "blob:") {
+    /*  if (origin !== viewerOrigin && protocol !== "blob:") {
         throw new Error("file origin does not match viewer's");
-      }
+      }*/
+
     } catch (ex) {
       PDFViewerApplication.l10n.get("loading_error").then(msg => {
         PDFViewerApplication._documentError(msg, {
