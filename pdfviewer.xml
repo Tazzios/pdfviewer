@@ -2,7 +2,7 @@
 <extension version="1.0" type="plugin" group="content" method="upgrade">
 	<name>pdfviewer</name>
 	<author>Tazzios</author>
-	<creationDate>april 2021</creationDate>
+	<creationDate>august 2021</creationDate>
 	<copyright></copyright>
 	<license>GNU/GPLv3 www.gnu.org/licenses/gpl-3.0.html</license>
 	<authorEmail></authorEmail>
