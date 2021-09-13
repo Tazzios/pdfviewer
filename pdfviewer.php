@@ -178,49 +178,41 @@ class PlgContentpdfviewer extends JPlugin
 					$jdownloadsid = '';
 					// check if there is a jdownloadsid or file tag parameters
 					if ( isset($tagparameters['jdownloadsid']) ) {
-						$path= JPATH_ROOT . 'administrator/components/com_jdownloads';
-						if (file_exists( $path )) {
-							$jdownloadsid = $tagparameters['jdownloadsid'];
-							$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $jdownloadsid ;
-						} else {
-							$showpdfpreview ='no';
-							$output = "jdownloads is not installed (anymore)";
-						}
+						$jdownloadsid = $tagparameters['jdownloadsid'];
+						$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $jdownloadsid ;
 					} elseif ( isset($tagparameters['file']) ) {
 						$filelink = $tagparameters['file'];
 					}
 					
-					IF  ($showpdfpreview=='yes') {
-						switch  ($viewer) {
-							case "pdfimage":
-									
-								if ( $jdownloadsid<>'' ) {
-									$output = Createpdfimage($jdownloadsid,$pagenumber,$height,$width,$style,$linktext);
-								} else {
-									$output = 'Only jdownloads pdf files can beconverted to image';
-								}
-								break;
-							/*case "pdfimages":								
-								if ( $jdownloadsid<>'' ) {
-									
-									 multipage
-									 https://stackoverflow.com/questions/45720472/converting-a-multi-page-pdf-to-multiple-jpg-images-with-imagick-and-php
+					switch  ($viewer) {
+						case "pdfimage":
+								
+							if ( $jdownloadsid<>'' ) {
+								$output = Createpdfimage($jdownloadsid,$pagenumber,$height,$width,$style,$linktext);
+							} else {
+								$output = 'Only jdownloads pdf files can beconverted to image';
+							}
+							break;
+						/*case "pdfimages":								
+							if ( $jdownloadsid<>'' ) {
+								
+								 multipage
+								 https://stackoverflow.com/questions/45720472/converting-a-multi-page-pdf-to-multiple-jpg-images-with-imagick-and-php
 
-									$output = Createpdfimages($jdownloadsid,$pagenumber,$height,$width,$style,$linktext);
-								} else {
-									$output = 'Only jdownloads pdf files can beconverted to image';
+								$output = Createpdfimages($jdownloadsid,$pagenumber,$height,$width,$style,$linktext);
+							} else {
+								$output = 'Only jdownloads pdf files can beconverted to image';
 
-								}
-								break;*/
-							default:
-								// Default pdfjs
-								$output = CreatePdfviewer($filelink,$search,$pagenumber,$height,$width,$style,$linktext);
-								break;
-						}
-
-						//cleanup before next loop
-						unset($tagparameters);
+							}
+							break;*/
+						default:
+							// Default pdfjs
+							$output = CreatePdfviewer($filelink,$search,$pagenumber,$height,$width,$style,$linktext);
+							break;
 					}
+
+					//cleanup before next loop
+					unset($tagparameters);
 				}
 				
 				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
@@ -295,7 +287,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 
 	// get root dir from jdownloads
 	$jdownloads_params = JComponentHelper::getParams( 'com_jdownloads' );
-	$files_uploaddir = $jdownloads_params->get( 'files_uploaddir' );
+	$root_dir = $jdownloads_params->get( 'root_dir' );
 
 	// get categorie ID and file name
 	$db = JFactory::getDbo();
@@ -328,7 +320,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	
 
 	//Full file link
-	$filelink = $files_uploaddir . $cat_parents . DS . $cat->title. DS . $filename;
+	$filelink = $root_dir . $cat_parents . DS . $cat->title. DS . $filename;
 
 
 	// Imagick starts with page 0
