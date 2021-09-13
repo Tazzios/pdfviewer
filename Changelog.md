@@ -1,9 +1,9 @@
 
-V1.2.0
-New: We have an editor button!
-Improved: check if jdownloads exist.
-Improved: get the file path from jdownloads from other parameter.
-
+V1.2.0  
+New: We have an editor button!  
+Improved: check if jdownloads exist.  
+Improved: get the file path from jdownloads from other parameter.  
+  
 V1.1.1  
 Fix: long filenames in jDownloads do not work #6  
 Improved: small codes changes.
