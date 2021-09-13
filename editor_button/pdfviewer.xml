@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="editors-xtd" method="upgrade" version="3.1">
+	<name>plg_editors-xtd_pdfviewer</name>
+	<creationDate>september2021</creationDate>
+    <author>Tazzios</author>
+    <authorEmail></authorEmail>
+    <authorUrl>https://github.com/Tazzios</authorUrl>
+    <copyright></copyright>
+    <license>GNU/GPLv3 www.gnu.org/licenses/gpl-3.0.html</license>
+	<version>1.0.0</version>
+	<description>pdfviewer button</description>
+	<files>
+		<filename plugin="pdfviewer">pdfviewer.php</filename>
+        <folder>assets</folder>
+		 <folder>tmpl</folder>
+	</files>
+
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+								
+			</fieldset>
+		</fields>
+	</config>				
+</extension>
