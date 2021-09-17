@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <updates>
 	<update>
-		<name>pdfviewer plugin</name>
+		<name>pdfviewer</name>
 		<description></description>
 		<element>pdfviewer</element>
 		<type>plugin</type>
@@ -21,7 +21,7 @@
 		<targetplatform name="joomla" version="3.9"/>
 	</update>
 	<update>
-		<name>pdfviewer button</name>
+		<name>pdfviewer</name>
 		<description>Editor Button</description>
 		<element>pdfviewer</element>
 		<type>plugin</type>
