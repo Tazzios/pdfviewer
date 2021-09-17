@@ -21,5 +21,8 @@
 								
 			</fieldset>
 		</fields>
-	</config>				
+	</config>
+	    <updateservers>
+      <server type="extension" priority="2" name="pdfviewer">https://raw.githubusercontent.com/tazzios/pdfviewer/master/updates_button.xml</server>
+    </updateservers>	
 </extension>

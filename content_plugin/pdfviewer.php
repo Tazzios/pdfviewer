@@ -178,7 +178,7 @@ class PlgContentpdfviewer extends JPlugin
 					$jdownloadsid = '';
 					// check if there is a jdownloadsid or file tag parameters
 					if ( isset($tagparameters['jdownloadsid']) ) {
-						$path= JPATH_ROOT . 'administrator/components/com_jdownloads';
+						$path= JPATH_ROOT . '/administrator/components/com_jdownloads';
 						if (file_exists( $path )) {
 							$jdownloadsid = $tagparameters['jdownloadsid'];
 							$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $jdownloadsid ;
