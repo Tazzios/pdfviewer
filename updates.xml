@@ -2,7 +2,7 @@
 <updates>
 	<update>
 		<name>pdfviewer</name>
-		<description>New: Show one page as an image! (viewer=[pdfjs|pdfimage] ) and pdfjs override</description>
+		<description></description>
 		<element>pdfviewer</element>
 		<type>plugin</type>
 		<folder>content</folder>
@@ -11,6 +11,26 @@
 		<infourl title="Release notes">https://github.com/Tazzios/pdfviewer/releases</infourl>
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/Tazzios/pdfviewer/releases/download/V1.1.1/pdfviewer-1.1.1.zip</downloadurl>
+		</downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<client>0</client>
+		<maintainer>Tazzios</maintainer>
+		<maintainerurl>https://github.com/Tazzios/</maintainerurl>
+		<targetplatform name="joomla" version="3.9"/>
+	</update>
+		<update>
+		<name>pdfviewer</name>
+		<description>Editor Button</description>
+		<element>pdfviewer</element>
+		<type>plugin</type>
+		<folder>editors-xtd</folder>
+		<element>pdfviewer</element>
+		<version>1.0.0</version>
+		<infourl title="Release notes">https://github.com/Tazzios/pdfviewer/releases</infourl>
+		<downloads>
+			<downloadurl type="full" format="zip">https://github.com/Tazzios/pdfviewer/releases/download/untagged-cf9526c9b60f9a42183c/pdfviewer_button_1.0.0.zip</downloadurl>
 		</downloads>
 		<tags>
 			<tag>stable</tag>

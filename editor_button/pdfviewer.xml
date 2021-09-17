@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="plugin" group="editors-xtd" method="upgrade" version="3.1">
-	<name>plg_editors-xtd_pdfviewer</name>
-	<creationDate>september2021</creationDate>
+	<name>Button - pdfviewer</name>
+	<creationDate>september 2021</creationDate>
     <author>Tazzios</author>
     <authorEmail></authorEmail>
     <authorUrl>https://github.com/Tazzios</authorUrl>
