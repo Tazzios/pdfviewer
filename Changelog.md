@@ -1,4 +1,14 @@
+V1.2.4  
+editor button  
+Fix: linktext is not shown when popup is chosen. #12
+New: default values in the config.(save it once after upgrade) 
+Improved: filename as default linktext.  #11  
 
+Content plugin    
+New: url parameters for page. #10  
+New: url parameters for search. #10
+Update: PDFjs to 2.10.337   
+  
 V1.2.0  
 New: We have an editor button!  
 Improved: check if jdownloads exist.  

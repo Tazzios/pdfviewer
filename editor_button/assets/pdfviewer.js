@@ -34,7 +34,7 @@
 			var page = document.getElementById("page").value;
 		}
 		
-		if (style =='embed' || style =='new' ) {
+		if (style =='default' || style =='new' || style =='popup' ) {
 			var linktext = document.getElementById("linktext").value;
 		}
 

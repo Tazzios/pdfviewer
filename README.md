@@ -58,7 +58,7 @@ You also can use custom fields from articles in a article. Set 'Show label' to h
 
 You can create this custom field for in article or jdownloads. Note, You can not use the jdownloads custom field for in an article. Set 'Show label' to hide when creating a custom field for article. 
 
-### Optional parameters
+### Optional tagparameters
 
 Select viewer. Show the full pdf or only one page as an image.
 >viewer=[pdfjs|pdfimage]
@@ -90,6 +90,16 @@ Use double qoutes around the linktext if it contains a space.
 With embed you can also use % for width
 >width=80%
 
+### Optional urlparameters  
+  
+If you want to link to an page with a pdf embedded you can set give following parameters to open a specific page.  
+  
+>?page=[integer]  
+  
+>?search=[keyword1]%20[keyword2]  
+  
+These do not work with the pdfimage viewer else everone cloud access avery page of the pdf file.  
+  
 ## Make pdf 'searchable'
 Create a custom text field (with large pdfs you maybe need multiple fields) copy the text from the pdf in the textfield you can now search for the text with smart search.
 

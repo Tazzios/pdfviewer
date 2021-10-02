@@ -1,0 +1,15 @@
+
+
+add to viewer:
+
+class hidden to 
+open and bookmarks buttons
+
+
+remove form viewer.js:
+
+"      
+if (origin !== viewerOrigin && protocol !== "blob:") {
+        throw new Error("file origin does not match viewer's");
+     }
+"

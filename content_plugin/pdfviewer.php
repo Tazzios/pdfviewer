@@ -97,8 +97,31 @@ class PlgContentpdfviewer extends JPlugin
 				// should we show the preview?
 				IF  ($showpdfpreview=='yes') {
 					
+					
+					//Get viewer type
+					$viewer = $this->params->get('viewer');
+					if (isset($tagparameters['viewer']) ) {
+						$viewer =  $tagparameters['viewer'];
+					}
+					$viewer = strtolower($viewer); // to lower to avoid mis match
+					
+										
+					/*page and search priority
+					1 highlight search 
+					2 url search
+					3 url page
+					4 param search
+					5 param page
+					*/
+					
 					// get the smartsearch from the url if exist
 					$search ='';
+					
+					if (isset($_GET["search"]) ) {
+						$search = '#search=' . $_GET["search"];
+						$search= str_replace('%22', '' , $search);
+					}
+					
 					if (isset($_GET["highlight"])) {
 						$search= base64_decode(htmlspecialchars($_GET["highlight"]));
 						$search= str_replace('[', '' , $search);
@@ -108,7 +131,7 @@ class PlgContentpdfviewer extends JPlugin
 						$search = '#search=' . $search ;
 					}
 		
-					
+
 					//get searchterm from tagparameters if exist
 					if (isset($tagparameters['search']) and $search =='') {
 						$search = str_replace('%20', ' ' ,$tagparameters['search']); //replace dummy space
@@ -117,11 +140,16 @@ class PlgContentpdfviewer extends JPlugin
 						$search = '#search=' . $search ;
 					}
 
-					
+									
 					//Page
-					// If there is a search term ignore the goto page
+					// If there is a highlight search term ignore the goto page
 					$pagenumber= '';
-					if (isset($tagparameters['page']) and $search =='' and $tagparameters['page']<>0) {
+					
+					if (isset($_GET["page"]) and $search =='' and $viewer<>'pdfimage') {
+						$pagenumber= $_GET["page"];
+					}
+					
+					if (isset($tagparameters['page']) and $pagenumber =='' and $search =='' and $tagparameters['page']<>0) {
 						$pagenumber = $tagparameters['page'];
 					}
 					
@@ -141,14 +169,7 @@ class PlgContentpdfviewer extends JPlugin
 						$linktext = trim($linktext,'"'); // any combination of ' and "
 					}
 					
-					
-					//determine viewer with a case statement
-					$viewer = $this->params->get('viewer');
-					if (isset($tagparameters['viewer']) ) {
-						$viewer =  $tagparameters['viewer'];
-					}
-					$viewer = strtolower($viewer); // to lower to avoid mis match
-					
+									
 					//PDF viewer size settings:
 					$height = '' ;
 					$width = '';
