@@ -76,9 +76,6 @@ Highlight keywords
 
 double qoutes are only needed with multiple keywords. Each keyword will be highlighted separately.
 
-Parameter for use with jdownloads and a customfield, see advanced section.
->showpdfpreview=[Yes] 
-
 Override default preview style  
 >style=[embed|popup|new]
 
@@ -92,13 +89,21 @@ With embed you can also use % for width
 
 ### Optional urlparameters  
   
-If you want to link to an page with a pdf embedded you can set give following parameters to open a specific page.  
+If you want to link to a webpage with a pdffile embedded you can set following parameters to open a specific page.  
   
 >?page=[integer]  
   
 >?search=[keyword1]%20[keyword2]  
   
-These do not work with the pdfimage viewer else everone cloud access avery page of the pdf file.  
+These url parameters do not work with the pdfimage viewer else everone could access every page of the pdf file.  
+
+page and search priority order
+1 highlight search  
+2 url search  
+3 url page  
+4 param search  
+5 param page  
+				
   
 ## Make pdf 'searchable'
 Create a custom text field (with large pdfs you maybe need multiple fields) copy the text from the pdf in the textfield you can now search for the text with smart search.

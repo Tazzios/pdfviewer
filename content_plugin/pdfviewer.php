@@ -116,39 +116,41 @@ class PlgContentpdfviewer extends JPlugin
 					
 					// get the smartsearch from the url if exist
 					$search ='';
-					
-					if (isset($_GET["search"]) ) {
-						$search = '#search=' . $_GET["search"];
-						$search= str_replace('%22', '' , $search);
-					}
-					
-					if (isset($_GET["highlight"])) {
-						$search= base64_decode(htmlspecialchars($_GET["highlight"]));
-						$search= str_replace('[', '' , $search);
-						$search= str_replace(']', '' , $search);
-						$search= str_replace('"', '' , $search);
-						$search= str_replace(',', ' ' , $search);
-						$search = '#search=' . $search ;
-					}
-		
-
-					//get searchterm from tagparameters if exist
-					if (isset($tagparameters['search']) and $search =='') {
-						$search = str_replace('%20', ' ' ,$tagparameters['search']); //replace dummy space
-						$search = trim($search);
-						$search = trim($search,'"'); // any combination of ' and "
-						$search = '#search=' . $search ;
-					}
-
-									
-					//Page
-					// If there is a highlight search term ignore the goto page
 					$pagenumber= '';
 					
-					if (isset($_GET["page"]) and $search =='' and $viewer<>'pdfimage') {
-						$pagenumber= $_GET["page"];
+					// do not process search when pdfimage
+					if ($viewer<>'pdfimage') {
+						
+						// get search from url
+						if (isset($_GET["search"]) ) {
+							$search = '#search=' . $_GET["search"];
+						}
+						
+						// GEt search from joomla smart search 
+						if (isset($_GET["highlight"])) {
+							$search= base64_decode(htmlspecialchars($_GET["highlight"]));
+							$search= str_replace('[', '' , $search);
+							$search= str_replace(']', '' , $search);
+							$search= str_replace('"', '' , $search);
+							$search= str_replace(',', ' ' , $search);
+							$search = '#search=' . $search ;
+						}
+			
+						//get searchterm from tagparameters if not set yet and no page by url is given
+						if (isset($tagparameters['search']) and $search =='' and isset($_GET["page"])==false) {
+							$search = str_replace('%20', ' ' ,$tagparameters['search']); //replace dummy space
+							$search = trim($search);
+							$search = trim($search,'"'); // any combination of ' and "
+							$search = '#search=' . $search ;
+						}
+						
+						// get page from url
+						if (isset($_GET["page"]) and $search =='' ) {
+							$pagenumber= $_GET["page"];
+						}
 					}
-					
+
+					//get page from tagparameters if not set yet
 					if (isset($tagparameters['page']) and $pagenumber =='' and $search =='' and $tagparameters['page']<>0) {
 						$pagenumber = $tagparameters['page'];
 					}
