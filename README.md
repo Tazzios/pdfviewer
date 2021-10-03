@@ -86,7 +86,10 @@ Use double qoutes around the linktext if it contains a space.
 
 With embed you can also use % for width
 >width=80%
-
+  
+Parameter for use with jdownloads and a customfield, see advanced section.  
+>showpdfpreview=[Yes]  
+  
 ### Optional urlparameters  
   
 If you want to link to a webpage with a pdffile embedded you can set following parameters to open a specific page.  
