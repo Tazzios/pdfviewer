@@ -97,7 +97,7 @@ If you want to link to a webpage with a pdffile embedded you can set following p
   
 These url parameters do not work with the pdfimage viewer else everone could access every page of the pdf file.  
 
-page and search priority order
+page and search parameters priority order:  
 1 highlight search  
 2 url search  
 3 url page  
