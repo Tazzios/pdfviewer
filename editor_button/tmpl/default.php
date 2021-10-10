@@ -19,22 +19,34 @@ $this->eName = preg_replace('#[^A-Z0-9\-\_\[\]]#i', '', $this->eName);
 
 $document->addScript( JUri::root() .'/plugins/editors-xtd/pdfviewer/assets/pdfviewer.js');
 
-//$document->setTitle('pdf viewer');
 
-
-// get all published jdownloads files
-$db = JFactory::getDbo();
-$query = "SELECT id, title FROM #__jdownloads_files WHERE published = 1 ORDER BY publish_up desc";
-$db->setQuery($query);
-$fields = $db->loadAssocList();
-
-// create an one row array with paramtofind to use for the while check
+//check if jdownloads is installed
+$path= JPATH_ROOT . '/administrator/components/com_jdownloads';
 $dropdown = '';
-foreach ($fields as $field) {
+$radiojdownload = '';
+$radioexternalpdf = '';
+if (file_exists( $path )) {
+	// get all published jdownloads files
+	$db = JFactory::getDbo();
+	$query = "SELECT id, title FROM #__jdownloads_files WHERE published = 1 ORDER BY publish_up desc";
+	$db->setQuery($query);
+	$fields = $db->loadAssocList();
+
+	// create dropdown with jdownloads files
+	$dropdown = '						<div id="jdownloadsid_div">
+						<label for="jdownloadsid">jDownloadsid</label>
+						<select id="jdownloadsid" name="jdownloadsid" onchange="filesettings()">';
+	foreach ($fields as $field) {
+		$dropdown .= '<option value="' . $field['id'] . '">' . $field['title'] . '</option>';  
+	}
 	
-	$dropdown .= '<option value="' . $field['id'] . '">' . $field['title'] . '</option>';  
+	$dropdown .= '</select>  </div>';
+	$radiojdownload = 'checked';
+	
+} else {
+	$radioexternalpdf = 'checked';
+	$radiojdownload = 'disabled' ;
 }
-$dropdown .= '</select>';
 
 
 // Get plugin 'my_plugin' of plugin type 'my_plugin_type'
@@ -46,7 +58,6 @@ if ($plugin)
 {
     // Get plugin params
     $pluginParams = new JRegistry($plugin->params);
-
 
 	//select default in viewer dropdown
 	 $paramviewer = $pluginParams->get('viewer');
@@ -68,7 +79,7 @@ if ($plugin)
 	}
 		
 	
-	//select default in style dropdown
+	//set default from config in style dropdown
 	$paramstyle = $pluginParams->get('style');
 	$selectembed = '';
 	$selectpopup = '';	
@@ -82,49 +93,43 @@ if ($plugin)
 			$selectembed = 'selected';
 			$setwidth = 'value="'. $pluginParams->get('embedwidth') .'"';
 			$setheight = 'value="'. $pluginParams->get('embedheight') .'"';
-		break;
-	
+			break;	
 		case "popup":
 			$selectpopup = 'selected';
 			$setwidth = 'value="'. $pluginParams->get('popupwidth') .'"';
 			$setheight = 'value="'. $pluginParams->get('popupheight') .'"';
-		break;
-		
+			break;
+	
 		case "new":
 			$selectnew = 'selected';
-		break;
-		
-		default:
-			
+			break;		
+		default:			
 			$selectpopup = 'selected';	
-		break;
+			break;
 	}
 		
 
 }
 ?>
 
+<body onload="filesettings();">
 
 <div class="container-popup">
 	<form class="form-horizontal">
 			<div class="form-check form-check-inline">
-			<input type="radio" id="jdownloadsid_radio" name="filetype" value="jdownloadsid" onchange="filesettings()"><label for="jdownloads">Jdownloads</label>
+			<input type="radio" id="jdownloadsid_radio" name="filetype" value="jdownloadsid" onchange="filesettings()" <?php echo $radiojdownload; ?>><label for="jdownloads">Jdownloads</label>
 			</div>
 			<div class="form-check form-check-inline">
-			<input type="radio" id="file_radio" name="filetype" value="file" onchange="filesettings()"><label for="file">external pdf</label>
+			<input type="radio" id="file_radio" name="filetype" value="file" onchange="filesettings()" <?php echo $radioexternalpdf; ?> ><label for="file">external pdf</label>
 						
 		<div id="form_div" style="display: none;">
-		<table style="width:100%" >
+			<table style="width:100%" >
 
-			<tr>
-				<td valign=top>
-				
-		
-						<div id="jdownloadsid_div">
-						<label for="jdownloadsid">jDownloadsid</label>
-						<select id="jdownloadsid" name="jdownloadsid" onchange="filesettings()">
-							<?php	echo $dropdown;					?>
-						 </div>
+				<tr>
+					<td valign=top>
+					
+						<!--jdownloads dropdown -->
+						<?php	echo $dropdown;	?>			
 						
 						<div id="file_div">
 						<label for="file">file</label>	 <input label="Link to external pdf" type="text" id="file" name="file" min="1" onchange="filesettings()">
@@ -133,72 +138,77 @@ if ($plugin)
 						<div id="viewer_div">
 						<label for="viewer">Viewer</label>	
 						<select id="viewer" name="viewer" onchange="viewersettings()">
-							<!--  <option value="default">default</option> -->
 							  <option value="pdfjs" <?php echo $selectpdfjs ; ?>>pdfjs</option>
 							  <option value="pdfimage" <?php echo $selectpdfimage ; ?>>pdfimage</option>
 							</select>
 						<br><br>
 						</div>
-
-						
 						
 						<label for="style">Style</label>
 						<select id="style" name="style" onchange="stylesettings()"  >
-							 <!-- <option value="default">default</option> -->
 							<option value="embed" <?php echo $selectembed ; ?>>embed</option>
 							<option value="popup" <?php echo $selectpopup ; ?>>popup</option>
 							<option value="new" <?php echo $selectnew ; ?>>new</option>
-							</select>
+						</select>
 						<br><br>
 						
-						<div id="sizesettings_div" >
-													
-						<label for="width">Width</label> 
+						<div id="sizesettings_div" >				
+							<label for="width">Width</label> 
 							<input label="width" type="text" id="width" name="width" style="width:40px" <?php echo $setwidth; ?>  >
 							<br>
-						<label for="height">Height</label>	
+							<label for="height">Height</label>	
 							<input label="height" type="text" id="height" name="height" min="0" style="width:40px" <?php echo $setheight; ?> >							
 						</div>
-						
 
 					</td>
-					
+						
 					<td valign=top>
 						<div id="search_div">
-							<label for="search">Search</label>		<input label="search" type="text" id="search" name="search" onchange="searchsettings()"  >
+							<label for="search">Search</label>		
+							<input label="search" type="text" id="search" name="search" onchange="searchsettings()"  >
 						</div>
 						<div id="pagenumber_div">
-							<label for="pagenumber">Pagenumber</label>	 <input label="page" type="number" id="page" name="page" min="0" style="width:60px" >
+							<label for="pagenumber">Pagenumber</label>	 
+							<input label="page" type="number" id="page" name="page" min="0" style="width:60px" >
 							
 						</div>
 						<br>
 						<div id="linktext_div">
-						<label for="Linktext">Linktext</label>	 <input label="linktext" type="text" id="linktext" name="search" >
+							<label for="Linktext">Linktext</label>	
+							<input label="linktext" type="text" id="linktext" name="search" >
 						</div>
+						
 					</td>
-			  </tr>
+				</tr>
 
+			</table>
+		</div>					
 
-		</table>
-		</div>
-		
-									
-
-	<button onclick="insertPagebreak('<?php echo $this->eName; ?>');" class="btn btn-success pull-right">
-		Insert
-	</button>
+	<button onclick="insertPagebreak('<?php echo $this->eName; ?>');" class="btn btn-success pull-right">Insert</button>
 
 	</form>
 </div>
 
+<body>
+
 <script>
 
+
+
 	function filesettings() {
-		var file = document.getElementById("jdownloadsid_radio").checked; 
+		var file = document.getElementById("jdownloadsid_radio").checked;
+		
+		if(!document.getElementById("jdownloadsid_div")){
+			document.getElementById("jdownloadsid_radio").disabled=true;
+		}
+		
+
 
 		if (file ==true ) { //jdownloads file
 			document.getElementById("file_div").style.display = "none";
-			document.getElementById("jdownloadsid_div").style.display = "block";
+			if(document.getElementById("jdownloadsid_div")){
+				document.getElementById("jdownloadsid_div").style.display = "block";
+			}
 			document.getElementById("viewer_div").style.display = "block";
 					
 			document.getElementById("form_div").style.display = "block";
@@ -210,7 +220,11 @@ if ($plugin)
 							
 
 		} else { // external file
-			document.getElementById("jdownloadsid_div").style.display = "none";
+			
+			if(document.getElementById("jdownloadsid_div")){
+				document.getElementById("jdownloadsid_div").style.display = "none";
+			}
+			
 			document.getElementById("file_div").style.display = "block";
 			document.getElementById("viewer_div").style.display = "none";
 			
