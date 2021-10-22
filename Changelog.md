@@ -1,3 +1,8 @@
+V1.2.5 oct 2021  
+editor button  
+Fix: Check if jdownloads is installed #13  
+Improved: set default a checked radio option by default  
+  
 V1.2.4  
 editor button  
 Fix: linktext is not shown when popup is chosen. #12
