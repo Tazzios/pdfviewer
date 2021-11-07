@@ -1,12 +1,12 @@
 V1.2.5 oct 2021  
 editor button  
 Fix: Check if jdownloads is installed #13  
-Improved: set default a checked radio option by default  
+Improved: set default a checked radio option by default.  
   
 V1.2.4  
 editor button  
-Fix: linktext is not shown when popup is chosen. #12
-New: default values in the config.(save it once after upgrade) 
+Fix: linktext is not shown when popup is chosen. #12  
+New: default values in the config.(save it once after upgrade)  
 Improved: filename as default linktext.  #11  
 
 Content plugin    
@@ -36,7 +36,7 @@ Improved: allow spaces between { and pdfviewer
 Improved: Open files from other domains  
   
 v0.9.0    
-Fix: extension check for private files did not work. You need to put in the filename tag for this in hte jdownloads template  
+Fix: extension check for private files did not work. You need to put in the filename tag for this in hte jdownloads template.  
   
 v0.8.0 first public release    
 PDFJS version:  prerelease v2.7.570  
