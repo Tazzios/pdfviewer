@@ -2,12 +2,12 @@
 <extension version="1.0" type="plugin" group="content" method="upgrade">
 	<name>pdfviewer</name>
 	<author>Tazzios</author>
-	<creationDate>october 2021</creationDate>
+	<creationDate>augustus 2022</creationDate>
 	<copyright></copyright>
 	<license>GNU/GPLv3 www.gnu.org/licenses/gpl-3.0.html</license>
 	<authorEmail></authorEmail>
 	<authorUrl>https://github.com/Tazzios</authorUrl>
-	<version>1.2.4</version>
+	<version>1.2.5</version>
 	<description>content plugin for PDF</description>
 	<files>
 		<filename plugin="pdfviewer">pdfviewer.php</filename>

@@ -1,3 +1,8 @@
+
+V1.2.5 agustus 2022
+Content plugin 
+Update: PDFjs to v2.15.349
+
 V1.2.5 oct 2021  
 editor button  
 Fix: Check if jdownloads is installed #13  
