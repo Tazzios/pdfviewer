@@ -8,10 +8,10 @@
 		<type>plugin</type>
 		<folder>content</folder>
 		<element>pdfviewer</element>
-		<version>1.2.5</version>
+		<version>1.2.4</version>
 		<infourl title="Release notes">https://github.com/Tazzios/pdfviewer/releases</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://github.com/Tazzios/pdfviewer/releases/download/v1.2.5/pdfviewer_content_1.2.5.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://github.com/Tazzios/pdfviewer/releases/download/v1.2.4/pdfviewer_content_1.2.4.zip</downloadurl>
 		</downloads>
 		<tags>
 			<tag>stable</tag>
