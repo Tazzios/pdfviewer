@@ -4,10 +4,16 @@ Compared to other existing pdfviewer for joomla this one is focused on integrati
 
 ## Features
 
-- Set pagenumber
+- Uses the pdf.js webviewer
+- Set pagenumber to open by tag or url.
 - Joomla Highlight smartsearch integration
+- Set search by url.
+- Show the PDF file as Embedded, popup or in a new window
+- Customize height and width for each PDF embedding.
 - Advanced jDownloads integration
-- Show a page as a image
+- Show one page as an image
+- Editor button
+
 
 ## Examples
 
