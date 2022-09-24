@@ -17,7 +17,7 @@ Compared to other existing pdfviewer for joomla this one is focused on integrati
 
 ## Examples
 
-Demo website: http://marijqg132.132.axc.nl/demo/
+Demo website: https://marijqg132.132.axc.nl/demo/
 
 ### basic article examples
 
