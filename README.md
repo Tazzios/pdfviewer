@@ -1,17 +1,25 @@
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?business=SAT23GPU7F6AS&no_recurring=1&currency_code=EUR)
+
 # Pdfviewer
 PDFviewer is a joomla content plugin which make it possible to show pdf files in content based on https://github.com/mozilla/pdf.js.
 Compared to other existing pdfviewer for joomla this one is focused on integration with jDownloads and searching.
 
 ## Features
 
-- Set pagenumber
+- Uses the pdf.js webviewer
+- Set pagenumber to open by tag or url.
 - Joomla Highlight smartsearch integration
+- Set search by url.
+- Show the PDF file as Embedded, popup or in a new window
+- Customize height and width for each PDF embedding.
 - Advanced jDownloads integration
-- Show a page as a image
+- Show one page as an image
+- Editor button
+
 
 ## Examples
 
-Demo website: http://marijqg132.132.axc.nl/demopdfviewer/
+[Demo website](https://marijqg132.132.axc.nl/demo/)
 
 ### basic article examples
 

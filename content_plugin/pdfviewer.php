@@ -137,7 +137,7 @@ class PlgContentpdfviewer extends JPlugin
 						}
 			
 						//get searchterm from tagparameters if not set yet and no page by url is given
-						if (isset($tagparameters['search']) and $search =='' and isset($_GET["page"])==false) {
+						if ( $search =='' and isset($tagparameters['search']) and trim($tagparameters['search'],'"') <>''  and isset($_GET["page"])==false) {
 							$search = str_replace('%20', ' ' ,$tagparameters['search']); //replace dummy space
 							$search = trim($search);
 							$search = trim($search,'"'); // any combination of ' and "
