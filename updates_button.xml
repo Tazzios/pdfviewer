@@ -2,7 +2,7 @@
 <updates>
 
 		<update>
-		<name>pdfviewer</name>
+		<name>Button - pdfviewer</name>
 		<description>Editor Button</description>
 		<element>pdfviewer</element>
 		<type>plugin</type>
@@ -19,6 +19,6 @@
 		<client>0</client>
 		<maintainer>Tazzios</maintainer>
 		<maintainerurl>https://github.com/Tazzios/</maintainerurl>
-		<targetplatform name="joomla" version="3.([6789]|10)"/>
+		<targetplatform name="joomla" version="3.([6789]|10)||(4.*)"/>
 	</update>
 </updates>

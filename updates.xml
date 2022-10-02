@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <updates>
 	<update>
-		<name>pdfviewer</name>
-		<description>New: editor button!</description>
+		<name>Package - pdfviewer</name>
+		<description></description>
 		<element>pdfviewer</element>
 		<type>plugin</type>
 		<folder>content</folder>
@@ -18,7 +18,7 @@
 		<client>0</client>
 		<maintainer>Tazzios</maintainer>
 		<maintainerurl>https://github.com/Tazzios/</maintainerurl>
-		<targetplatform name="joomla" version="3.([6789]|10)"/>
+		<targetplatform name="joomla" version="3.([6789]|10)||(4.*)"/>
 	</update>
 
 </updates>

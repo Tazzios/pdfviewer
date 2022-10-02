@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="1.0" type="plugin" group="content" method="upgrade">
-	<name>pdfviewer</name>
+	<name>Content - pdfviewer</name>
 	<author>Tazzios</author>
 	<creationDate>augustus 2022</creationDate>
 	<copyright></copyright>
