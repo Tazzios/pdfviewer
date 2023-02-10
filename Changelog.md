@@ -1,3 +1,11 @@
+V1.2.6 febrauri 2023  
+PDFjs has now some mark and comments options.  
+  
+Content plugin  
+Update: PDFjs to v3.3.122  
+
+editor button  
+No changes  
 
 V1.2.5 agustus 2022  
 Content plugin  
