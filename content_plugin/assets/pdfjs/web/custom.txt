@@ -1,9 +1,8 @@
 
 
-add to viewer:
-
-class hidden to 
-open and bookmarks buttons
+add to viewer.html
+class hidden to :
+open, current page and bookmarks buttons
 
 
 remove form viewer.js:

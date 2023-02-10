@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="plugin" group="editors-xtd" method="upgrade" version="3.1">
 	<name>Button - pdfviewer</name>
-	<creationDate>october 2021</creationDate>
+	<creationDate>februari 2023</creationDate>
     <author>Tazzios</author>
     <authorEmail></authorEmail>
     <authorUrl>https://github.com/Tazzios</authorUrl>
     <copyright></copyright>
     <license>GNU/GPLv3 www.gnu.org/licenses/gpl-3.0.html</license>
-	<version>1.2.5</version>
+	<version>1.2.3</version>
 	<description>Set the default settings for the button. </description>
 	<files>
 		<filename plugin="pdfviewer">pdfviewer.php</filename>
