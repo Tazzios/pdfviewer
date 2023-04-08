@@ -210,7 +210,12 @@ class PlgContentpdfviewer extends JPlugin
 							$output = "jdownloads is not installed (anymore)";
 						}
 					} elseif ( isset($tagparameters['file']) ) {
-						$filelink = $tagparameters['file'];
+						if (substr($tagparameters['file'], 0,1)=='/'){
+							$filelink = JUri::base().$tagparameters['file'];
+						}
+						else{
+							$filelink = $tagparameters['file'];
+						}
 					}
 					
 					IF  ($showpdfpreview=='yes') {
