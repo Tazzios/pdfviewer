@@ -105,61 +105,143 @@ class PlgContentpdfviewer extends JPlugin
 					}
 					$viewer = strtolower($viewer); // to lower to avoid mis match
 					
-										
-					/*page and search priority
-					1 highlight search 
-					2 url search
-					3 url page
-					4 param search
-					5 param page
-					*/
-					
-					// get the smartsearch from the url if exist
-					$search ='';
+					$pagereference = ''; //value that returns the pageref at the end off this if
+					$pdfjsviewsettings = ''; //returns pdfjs viewer settings					
 					$pagenumber= '';
 					
-					// do not process search when pdfimage
-					if ($viewer<>'pdfimage') {
+					// only needed when pdfjs
+					if ($viewer=='pdfjs') {
 						
-						// get search from url
-						if (isset($_GET["search"]) ) {
-							$search = '#search=' . $_GET["search"];
-						}
+
+					
+					// get the parameters from the url if exist
+					$search ='';
+					$nameddest ='';
+					
+					
+						/*page, search and nameddest order priority
+						1 highlight search 
+						2 url search
+						3 url namedest
+						4 url page 
+						5 param search
+						6 param nameddest
+						7 param page					
+						*/
+							
 						
-						// GEt search from joomla smart search 
+						// 1. Get search from joomla smart search 
 						if (isset($_GET["highlight"])) {
 							$search= base64_decode(htmlspecialchars($_GET["highlight"]));
 							$search= str_replace('[', '' , $search);
 							$search= str_replace(']', '' , $search);
 							$search= str_replace('"', '' , $search);
 							$search= str_replace(',', ' ' , $search);
-							$search = '#search=' . $search ;
-						}
-			
-						//get searchterm from tagparameters if not set yet and no page by url is given
-						if ( $search =='' and isset($tagparameters['search']) and trim($tagparameters['search'],'"') <>''  and isset($_GET["page"])==false) {
+							$pagereference = '#search=' . $search ;
+						}						
+						//2. get search from url
+						elseif (isset($_GET["search"]) ) {
+							$pagereference = '#search=' . $_GET["search"];
+						}				
+						//3. get nameddest from url
+						elseif (isset($_GET["nameddest"]) ) {
+							$pagereference= $_GET["nameddest"];
+						}			
+						//4. get page from url
+						elseif (isset($_GET["page"]) ) {
+							$pagereference= '#page='.$_GET["page"];
+						}	
+						//5. get searchterm from tagparameters if not set yet  by url
+						elseif (isset($tagparameters['search']) and trim($tagparameters['search'],'"') <>'' ) {
 							$search = str_replace('%20', ' ' ,$tagparameters['search']); //replace dummy space
 							$search = trim($search);
 							$search = trim($search,'"'); // any combination of ' and "
-							$search = '#search=' . $search ;
+							$pagereference = '#search=' . $search ;
+						}												
+						//6. tagparameters nameddest
+						elseif (isset($tagparameters['nameddest']) ) {
+							$pagereference =  '#nameddest='.trim($tagparameters['nameddest']);
+						}
+						//7.get page from tagparameters if no other page redirect is set
+						elseif (isset($tagparameters['page'])  and $tagparameters['page']<>0) {
+							$pagereference = '#page='.trim($tagparameters['page']);
+						}
+					
+						// get search phrase or seperate words: true/false(default)
+						// only usefull if search was used
+						if 	($search<>''){
+							$phrase = $this->params->get('phrase');						
+							if (isset($_GET["phrase"])  ) {
+								$phrase= '#phrase='.$_GET["phrase"];
+							}
+							elseif (isset($tagparameters['phrase']) ) {
+								$phrase =  '#phrase='.trim($tagparameters['phrase']);
+							}
+							$pagereference .= $phrase;
 						}
 						
-						// get page from url
-						if (isset($_GET["page"]) and $search =='' ) {
-							$pagenumber= $_GET["page"];
+						
+						// get zoom url: page-width,page-height,page-fit,auto(default)						
+						if (isset($_GET["zoom"])  ) {
+							if ($pagereference=='') {
+								$pdfjsviewsettings = '#zoom='.$_GET["zoom"];
+							}
+							else {
+								$pdfjsviewsettings = '&zoom='.$_GET["zoom"];
+							}
+						}
+						// get zoom tagparameter: page-width,page-height,page-fit,auto(default)	
+						if (isset($tagparameters['zoom']) ) {
+							if ($pagereference=='') {
+								$pdfjsviewsettings .= '#zoom='.trim($tagparameters['zoom']);
+							}
+							else {
+								$pdfjsviewsettings .= '&zoom='.trim($tagparameters['zoom']);
+							}							
+						}
+												
+						// get Pagemode, left sidebar: thumbs,bookmarks,attachments, none (default)
+						if (isset($_GET["pagemode"])  ) {
+							if ($pagereference=='' and $pdfjsviewsettings=='' ) {
+								$pdfjsviewsettings .= '#pagemode='.$_GET["pagemode"];
+							}
+							else {
+								$pdfjsviewsettings .= '&pagemode='.$_GET["pagemode"];
+							}								
+						}
+						elseif (isset($tagparameters['pagemode']) ) {							
+							if ($pagereference=='' and $pdfjsviewsettings=='' ) {
+								$pdfjsviewsettings .=  '#pagemode='.trim($tagparameters['pagemode']);
+							}
+							else {
+								$pdfjsviewsettings .=  '&pagemode='.trim($tagparameters['pagemode']);
+							}
+						}
+						else{		
+							//prevents that a following viewer on the same page grabs the pagemode from the prvious one.
+							if ($pagereference=='' and $pdfjsviewsettings=='' ) {
+								$pdfjsviewsettings .=  '#pagemode=none';
+							}
+							else {
+								$pdfjsviewsettings .=  '&pagemode=none';
+							}
+						}				
+
+						
+					}
+					elseif ($viewer=='pdfimage') {
+						//set page to create an image from
+						if ( $pagenumber =='' and isset($tagparameters['page'])  and $tagparameters['page']<>0) {
+							$pagenumber = trim($tagparameters['page']);
 						}
 					}
-
-					//get page from tagparameters if not set yet
-					if (isset($tagparameters['page']) and $pagenumber =='' and $search =='' and $tagparameters['page']<>0) {
-						$pagenumber = $tagparameters['page'];
-					}
 					
-					
+										
+	
 					//style 
 					$style = $this->params->get('style');
 					if (isset($tagparameters['style']) ) {
-						$style =  $tagparameters['style'];
+						$style =  trim($tagparameters['style']);
 					}
 					$style = strtolower($style); // to lower to avoid mis match
 					
@@ -170,8 +252,7 @@ class PlgContentpdfviewer extends JPlugin
 						$linktext =  str_replace('%20',' ', $tagparameters['linktext']); //replace dummy space back to space
 						$linktext = trim($linktext,'"'); // any combination of ' and "
 					}
-					
-									
+													
 					//PDF viewer size settings:
 					$height = '' ;
 					$width = '';
@@ -190,10 +271,10 @@ class PlgContentpdfviewer extends JPlugin
 					
 					// get settings from tag if present
 					if (isset($tagparameters['height']) ) {
-						$height =  $tagparameters['height'];
+						$height =  trim($tagparameters['height']);
 					}
 					if (isset($tagparameters['width']) ) {
-						$width =  $tagparameters['width'];
+						$width =  trim($tagparameters['width']);
 					}
 					
 					
@@ -203,19 +284,14 @@ class PlgContentpdfviewer extends JPlugin
 					if ( isset($tagparameters['jdownloadsid']) ) {
 						$path= JPATH_ROOT . '/administrator/components/com_jdownloads';
 						if (file_exists( $path )) {
-							$jdownloadsid = $tagparameters['jdownloadsid'];
+							$jdownloadsid = trim($tagparameters['jdownloadsid']);
 							$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $jdownloadsid ;
 						} else {
 							$showpdfpreview ='no';
 							$output = "jdownloads is not installed (anymore)";
 						}
 					} elseif ( isset($tagparameters['file']) ) {
-						if (substr($tagparameters['file'], 0,1)=='/'){
-							$filelink = JUri::base().$tagparameters['file'];
-						}
-						else{
-							$filelink = $tagparameters['file'];
-						}
+						$filelink = trim($tagparameters['file']);
 					}
 					
 					IF  ($showpdfpreview=='yes') {
@@ -242,17 +318,19 @@ class PlgContentpdfviewer extends JPlugin
 								break;*/
 							default:
 								// Default pdfjs
-								$output = CreatePdfviewer($filelink,$search,$pagenumber,$height,$width,$style,$linktext);
+								$output = CreatePdfviewer($filelink,$pagereference,$pagenumber,$pdfjsviewsettings,$height,$width,$style,$linktext);
 								break;
 						}
 
-						//cleanup before next loop
-						unset($tagparameters);
+
 					}
 				}
 				
 				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
 				$article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
+			
+				//cleanup before next loop
+				unset($tagparameters,$jdownloadsid,$filelink,$search,$pagenumber,$pdfjsviewsettings,$height,$width,$style,$linktext);
 			
 			} // end foreach matches
 			
@@ -260,7 +338,7 @@ class PlgContentpdfviewer extends JPlugin
 	} // end onContentPrepare
 }// end class
 
-function CreatePdfviewer($filelink,$search,$pagenumber,$height,$width,$style,$linktext) {
+function CreatePdfviewer($filelink,$pagereference,$pagenumber,$pdfjsviewsettings,$height,$width,$style,$linktext) {
 	// set Path to pdfjs viewer.html file and check if there is an override
 	
 	//Set default path
@@ -283,11 +361,6 @@ function CreatePdfviewer($filelink,$search,$pagenumber,$height,$width,$style,$li
 	$filelink = urlencode($filelink);
 	
 	
-	if ($pagenumber<>''){
-		$pagenumber = '#page=' . (int) $pagenumber;
-	}
-	
-	
 	//PDF viewer embed settings:
 	IF ($style=='embed')  {
 		
@@ -299,18 +372,18 @@ function CreatePdfviewer($filelink,$search,$pagenumber,$height,$width,$style,$li
 		}	else {
 			$width = 'width:' .$width. ';';
 		}
-		return '<iframe src="' . $Path_pdfjs . '?file=' . $filelink . $search . $pagenumber . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
+		return '<iframe src="' . $Path_pdfjs . '?file=' . $filelink . $pagereference . $pdfjsviewsettings . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
 	}	
 	// Popup
 	IF ($style=='popup')  {
 	
 		JHTML::_('behavior.modal');
 		
-		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $search . $pagenumber .'">'. $linktext .'</a>';
+		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pdfjsviewsettings .'">'. $linktext .'</a>';
 	}
 	// New window
 	IF ($style=='new')  {
-		return	'<a class="pdfviewer_button" target=_blank href="'. $Path_pdfjs .'?file='. $filelink . $search . $pagenumber .'">'. $linktext .'</a>';  
+		return	'<a class="pdfviewer_button" target=_blank href="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pdfjsviewsettings .'">'. $linktext .'</a>';  
 	}
 
 }
@@ -370,7 +443,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	
 	//this must be called before reading the image, otherwise has no effect - &quot;-density {$x_resolution}x{$y_resolution}&quot;
 	//this is important to give good quality output, otherwise text might be unclear
-	$imgk->setResolution(200,200);
+	$imgk->setResolution(150,150);
 	
 	//read the pdf
 	try {
@@ -382,7 +455,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 
 	//reduce the dimensions - scaling will lead to black color in transparent regions
 	IF ($style=='popup')  {
-		$imgk->scaleImage($width-18,0); // -18 to prevent vertical scroll when zoomed in.
+		$imgk->scaleImage($width-40,0); // -40 to prevent vertical scroll when zoomed in.
 	} else {
 		$imgk->scaleImage(1000,0); //only testes with a4 pfds
 	}
