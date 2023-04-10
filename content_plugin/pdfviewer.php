@@ -172,10 +172,10 @@ class PlgContentpdfviewer extends JPlugin
 						if 	($search<>''){
 							$phrase = $this->params->get('phrase');						
 							if (isset($_GET["phrase"])  ) {
-								$phrase= '#phrase='.$_GET["phrase"];
+								$phrase= '&phrase='.$_GET["phrase"];
 							}
 							elseif (isset($tagparameters['phrase']) ) {
-								$phrase =  '#phrase='.trim($tagparameters['phrase']);
+								$phrase =  '&phrase='.trim($tagparameters['phrase']);
 							}
 							$pagereference .= $phrase;
 						}

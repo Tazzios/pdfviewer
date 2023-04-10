@@ -93,9 +93,11 @@ Link to a page can also with named destination (not a bookmark) but is untested
 >nameddest=[destination name]
 
 Highlight keywords
->Search="[keyword1] [keyword2]" 
+>search="[keyword1] [keyword2]" 
+keyword will be highlighted separately. If you want to search a combination enable phrase.
 
-double qoutes are only needed with multiple keywords. Each keyword will be highlighted separately.
+Enable phrase to search for a combination of words.
+>phrase=true 
 
 Override default preview style  
 >style=[embed|popup|new]
@@ -118,11 +120,12 @@ If you want to link to a webpage with a pdffile embedded you can set following p
 >?page=[integer]  
   
 >?search=[keyword1]%20[keyword2]  
+>?search=[keyword1]%20[keyword2]&phrase=true
   
 These url parameters do not work with the pdfimage viewer else everone could access every page of the pdf file.  
 
 page and search parameters priority order:  
-1 highlight search 
+1 highlight search (joomla smartsearch)
 2 url search
 3 url namedest
 4 url page 
