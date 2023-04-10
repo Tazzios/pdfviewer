@@ -1,68 +1,103 @@
 /**
- * @copyright  (C) 2017 Open Source Matters, Inc. <https://www.joomla.org>
- * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ * @copyright  (C) 2023 Tazzios
+ * @license    GNU General Public License version 3 or later
  */
 (function() {
 	"use strict";
 
 	window.insertPagebreak = function(editor) {
-		/** Get the pagebreak title **/
 
-		var file = document.getElementById("jdownloadsid_radio").checked;
-		if (file ==true ) { //jdownloads file
-			var jdownloadsid = document.getElementById("jdownloadsid").value;
-			var file = '';
-			var viewer = document.getElementById("viewer").value;
-		} else {
-			var jdownloadsid = '';
-			var file = document.getElementById("file").value;
-			var viewer = 'pdfjs';
+
+		
+		
+		//file_link
+		var file_link = '';
+		var viewer = document.getElementById("viewer").value;
+		if (document.getElementById("jdownloadsid_radio").checked ==true ) { 
+			//jdownloads file
+			file_link = 'jdownloadsid=' + document.getElementById("jdownloadsid").value + ' ';
+			if (viewer != 'default'  ) {
+				viewer = 'viewer=' + viewer + ' ' ;			
+			}  else{
+				viewer = '';
+			}
+		} else { 
+			// exernal file
+			file_link = 'file=' + document.getElementById("file").value + ' ';
+			viewer = 'pdfjs'; // external pdf can only be shown with pdfjs
 		}
-		
-		
+	
+
+		//Get form values for next if`s
+		var height = document.getElementById("height").value;
+		var width = document.getElementById("width").value;
 		var style = document.getElementById("style").value;
-
-		if (style =='embed' || style =='popup' ) {
-			var height = document.getElementById("height").value;
-			var width = document.getElementById("width").value;	
+		
+		//height
+		if ( style != 'new'  || (style == 'default' && document.getElementById("plugindefault_viewer").value != 'new') ) {
+			if (height != '' && !isNaN(height) && height != null){ //height only in number
+				 height = 'height=' + height + ' ';
+			}
+		//width			
+			if (width != '' && width != null){ //width can also be in %
+				width = 'width=' + document.getElementById("width").value + ' ';
+			}
+		}
+		// Linktext
+		var linktext = '';
+		if (style != 'embed' && document.getElementById("plugindefault_style").value != 'embed' ) {
+			linktext = 'linktext="' + document.getElementById("linktext").value + '" ';
+		}
+		//style
+		if (style != 'default'){
+		   style = 'style=' + style + ' ';
+		} else {
+			style ='';
 		}
 		
-		
-		var search = document.getElementById("search").value;
-		
-		if (search =='') {
-			var page = document.getElementById("page").value;
+		//search
+		var search = '';
+		var searchphrase = '';
+		var page = '';
+		if (document.getElementById("search").value !='') {
+			search = 'search="' + document.getElementById("search").value + '" ';
+			if (document.getElementById("searchphrase").checked ==true) {
+				searchphrase = 'phrase=true ';
+			}
+		}
+		else if (document.getElementById("page").value !='') {
+		//page
+			var page = 'page=' + document.getElementById("page").value + ' ';
 		}
 		
-		if (style =='default' || style =='new' || style =='popup' ) {
-			var linktext = document.getElementById("linktext").value;
+		//zoom
+		var zoom = '';
+		if (document.getElementById("zoom").value != 'default' ) {
+			zoom = 'zoom=' + document.getElementById("zoom").value + ' ';
 		}
-
 		
-		jdownloadsid  = (!isNaN(jdownloadsid) ) ? 'jdownloadsid=' + jdownloadsid + ' ' : '';
-		file  = (file != '' ) ? 'file=' + file + ' ' : '';
+		//pagemode
+		var pagemode = '';
+		if (document.getElementById("pagemode").value != 'default'  ) {
+			pagemode = 'pagemode=' + document.getElementById("pagemode").value + ' ';
+		}
 		
-		viewer    = (viewer != '' && viewer!='default' && viewer != null) ? 'viewer=' + viewer + ' ' : '';		
-		style    = (style != '' && style!='default') ? 'style=' + style + ' ' : '';
-
-		height    = (height != '' && !isNaN(height) && height != null) ? 'height=' + height + ' ' : '';
-		width    = (width != '' && width != null) ? 'width=' + width + ' ' : ''; // n numeric 80% is also allowed
-		page    = (page != '' && !isNaN(page) && page != null) ? 'page=' + page + ' ' : '';
-		search    = (search != '' ) ? 'search="' + search + '" ' : '';
-		linktext    = (linktext != '' && linktext != null) ? 'linktext="' + linktext + '" ' : '';
-		
-
+		//build complete tag
 		var tag = '{pdfviewer ' + 
-			jdownloadsid + 
-			file + 
+			file_link +  
 			viewer + 
 			style + 
 			height + 
-			width + 
+			width +
+			linktext +			
+			search +
+			searchphrase +			
 			page + 
-			search + 
-			linktext + 
-			' }';
+			zoom + 
+			pagemode + 			
+			'}';
+		
+			
 
 		/** Use the API, if editor supports it **/
 		if (window.parent.Joomla && window.parent.Joomla.editors && window.parent.Joomla.editors.instances && window.parent.Joomla.editors.instances.hasOwnProperty(editor)) {

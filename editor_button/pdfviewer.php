@@ -73,7 +73,7 @@ class  PlgEditorsXtdpdfviewer extends JPlugin
 		$button->link    = $link;
 		$button->text    = 'pdf viewer';
 		$button->name    = 'copy';
-		$button->options = "{handler: 'iframe', size: {x: 600, y: 400}}";
+		$button->options = "{handler: 'iframe', size: {x: 600, y: 600}}";
 
 		return $button;
 	}

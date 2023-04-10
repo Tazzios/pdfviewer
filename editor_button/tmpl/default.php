@@ -34,7 +34,7 @@ if (file_exists( $path )) {
 
 	// create dropdown with jdownloads files
 	$dropdown = '						<div id="jdownloadsid_div">
-						<label for="jdownloadsid">jDownloadsid</label>
+						<label for="jdownloadsid">jDownloads file</label>
 						<select id="jdownloadsid" name="jdownloadsid" onchange="filesettings()">';
 	foreach ($fields as $field) {
 		$dropdown .= '<option value="' . $field['id'] . '">' . $field['title'] . '</option>';  
@@ -59,9 +59,10 @@ if ($plugin)
     // Get plugin params
     $pluginParams = new JRegistry($plugin->params);
 
+
 	//select default in viewer dropdown
-	 $paramviewer = $pluginParams->get('viewer');
-	$selectpdfjs = '';
+	 $plugindefault_viewer = $pluginParams->get('viewer');
+/*	$selectpdfjs = '';
 	$selectpdfimage = '';	
 	switch  ($paramviewer) {
 		case "pdfjs":
@@ -77,11 +78,13 @@ if ($plugin)
 		break;
 
 	}
+	*/
+
 		
-	
+
 	//set default from config in style dropdown
-	$paramstyle = $pluginParams->get('style');
-	$selectembed = '';
+	$plugindefault_style = $pluginParams->get('style');
+/*	$selectembed = '';
 	$selectpopup = '';	
 	$selectnew = '';
 
@@ -107,6 +110,7 @@ if ($plugin)
 			$selectpopup = 'selected';	
 			break;
 	}
+	*/
 		
 
 }
@@ -128,36 +132,62 @@ if ($plugin)
 				<tr>
 					<td valign=top>
 					
+						<input label="plugindefault_viewer" type="hidden" id="plugindefault_viewer" name="plugindefault_viewer" value="<?php echo $plugindefault_viewer; ?>" >
+						<input label="plugindefault_style" type="hidden" id="plugindefault_style" name="plugindefault_style" value="<?php echo $plugindefault_style; ?>"   >
+						
 						<!--jdownloads dropdown -->
 						<?php	echo $dropdown;	?>			
 						
-						<div id="file_div">
-						<label for="file">file</label>	 <input label="Link to external pdf" type="text" id="file" name="file" min="1" onchange="filesettings()">
+						<div id="file_div" title="Insert full link (https://) or relative link (/)">
+						<label for="file">url file link</label>	 <input label="Link to external pdf" type="text" id="file" name="file" min="1" onchange="filesettings()">
 						</div>
 						
 						<div id="viewer_div">
 						<label for="viewer">Viewer</label>	
 						<select id="viewer" name="viewer" onchange="viewersettings()">
-							  <option value="pdfjs" <?php echo $selectpdfjs ; ?>>pdfjs</option>
-							  <option value="pdfimage" <?php echo $selectpdfimage ; ?>>pdfimage</option>
+							  <option value="default" selected >default (<?php echo $plugindefault_viewer; ?>)</option>
+							  <option value="pdfjs" >pdfjs</option>
+							  <option value="pdfimage" >pdfimage</option>
 							</select>
 						<br><br>
 						</div>
 						
-						<label for="style">Style</label>
+						<label for="style">Display Style</label>
 						<select id="style" name="style" onchange="stylesettings()"  >
-							<option value="embed" <?php echo $selectembed ; ?>>embed</option>
-							<option value="popup" <?php echo $selectpopup ; ?>>popup</option>
-							<option value="new" <?php echo $selectnew ; ?>>new</option>
+							<option value="default" selected >default (<?php echo $plugindefault_style; ?>)</option>
+							<option value="embed" >embed</option>
+							<option value="popup" >popup</option>
+							<option value="new" >new</option>
 						</select>
 						<br><br>
 						
+						<div id="pdfjssettings_div">
+							<b>Advanced PDF.js options</b> <br>
+							<label for="zoom">Page zoom</label>
+							<select id="zoom" name="zoom"   >
+								<option value="default" >default (auto)</option>
+								<option value="auto-fit" >auto</option>
+								<option value="page-width" >fit width</option>
+								<option value="page-height" >fit height</option>
+								<option value="page-fit" >fit page</option>
+							</select>
+							
+							<label for="pagemode">Sidebar pagemode</label>
+							<select id="pagemode" name="pagemode"   >
+								<option value="default" >default (None)</option>
+								<option value="none" >none</option>
+								<option value="bookmarks" >bookmarks</option>
+								<option value="thumbs" >thumbs</option>
+								<option value="attachments" >attachments</option>
+							</select>	  
+						</div>
+						
 						<div id="sizesettings_div" >				
 							<label for="width">Width</label> 
-							<input label="width" type="text" id="width" name="width" style="width:40px" <?php echo $setwidth; ?>  >
+							<input label="width" type="text" id="width" name="width" style="width:40px" > <div id="width_info" > </div>
 							<br>
 							<label for="height">Height</label>	
-							<input label="height" type="text" id="height" name="height" min="0" style="width:40px" <?php echo $setheight; ?> >							
+							<input label="height" type="text" id="height" name="height" min="0" style="width:40px" >	<div id="height_info" > </div>						
 						</div>
 
 					</td>
@@ -167,13 +197,16 @@ if ($plugin)
 							<label for="search">Search</label>		
 							<input label="search" type="text" id="search" name="search" onchange="searchsettings()"  >
 						</div>
+						<div id="searchphrase_div">
+							<label for="searchphrase">phrase</label>		
+							<input label="searchphrase" type="checkbox" id="searchphrase" name="searchphrase" >
+						</div>
 						<div id="pagenumber_div">
 							<label for="pagenumber">Pagenumber</label>	 
 							<input label="page" type="number" id="page" name="page" min="0" style="width:60px" >
-							
 						</div>
-						<br>
 						<div id="linktext_div">
+							<br>
 							<label for="Linktext">Linktext</label>	
 							<input label="linktext" type="text" id="linktext" name="search" >
 						</div>
@@ -189,7 +222,7 @@ if ($plugin)
 	</form>
 </div>
 
-<body>
+</body>
 
 <script>
 
@@ -233,6 +266,8 @@ if ($plugin)
 			document.getElementById("linktext").value = "";
 
 		}
+		
+		stylesettings()
 	
 	}
 
@@ -244,33 +279,44 @@ if ($plugin)
 		if (viewer == 'pdfimage' ) {
 			document.getElementById("sizesettings_div").style.display = "none";
 			//document.getElementById("file_div").style.display = "none";	
-			document.getElementById("linktext_div").style.display = "none";
-			document.getElementById("search_div").style.display = "none";		
+			//document.getElementById("linktext_div").style.display = "none";
+			document.getElementById("search_div").style.display = "none";
+			document.getElementById("searchphrase_div").style.display = "none";
+
+			document.getElementById("pdfjssettings_div").style.display = "none";	
+
 
 		} else {
 			document.getElementById("sizesettings_div").style.display = "block";
-			document.getElementById("linktext_div").style.display = "block";
-			document.getElementById("search_div").style.display = "block";	
+			//document.getElementById("linktext_div").style.display = "block";
+			document.getElementById("search_div").style.display = "block";
+			document.getElementById("searchphrase_div").style.display = "block";
+
+			document.getElementById("pdfjssettings_div").style.display = "block";	
+			
 		}
 	 
 	}
 
 
 	function stylesettings() {
+		
+		// options depending on style
 		var style = document.getElementById("style").value;
 		
-		
+		// reset width and height after change
 		document.getElementById("width").value = ""; 
 		document.getElementById("height").value = ""; 
 		 
-		if (style == 'embed' || style == 'popup') {
-			document.getElementById("sizesettings_div").style.display = "block";
-
+		// width and height settings shown when embed or popup.
+		if (style == 'embed' || style == 'popup' || (style == 'default' && document.getElementById("plugindefault_style").value!='embed') ) {
+			document.getElementById("sizesettings_div").style.display = "block";	
 		} else {
 			document.getElementById("sizesettings_div").style.display = "none";
 		}
 		
-		if (style == 'embed' ) {	
+		// link text option not shown when style is embed
+		if (style == 'embed' || (style == 'default' && document.getElementById("plugindefault_style").value)=='embed') {	
 			document.getElementById("linktext_div").style.display = "none";
 
 		} else {
@@ -279,19 +325,21 @@ if ($plugin)
 	 
 	}
 	
-		function searchsettings() {
+	function searchsettings() {
 		var search = document.getElementById("search").value;
 		 
 
 		if (search != '' ) {
 			document.getElementById("pagenumber_div").style.display = "none";
+			document.getElementById("searchphrase_div").style.display = "block";
 		
 
 		} else {
 			document.getElementById("pagenumber_div").style.display = "block";
+			document.getElementById("searchphrase_div").style.display = "none";
 
 		}
-		}
+	}
 	 
 	
 </script>

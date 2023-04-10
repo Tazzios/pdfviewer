@@ -1,3 +1,14 @@
+V1.3.0Beta april 2023  
+A lot of code it rewritten to add the additional parameters. Thats why there is a beta release first.
+  
+Content plugin  
+New: additional parameters (zoom ,pagemode, Search as phrase, nameddest)  
+Update: PDFjs to v3.5.141  
+
+editor button  
+New: additional parameters
+New: default option.  
+  
 V1.2.6 febrauri 2023  
 PDFjs has now some mark and comments options.  
   

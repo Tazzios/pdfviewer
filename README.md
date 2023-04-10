@@ -26,8 +26,12 @@ Compared to other existing pdfviewer for joomla this one is focused on integrati
 Show jdownloads file with ID 4.  
 >{pdfviewer jdownloadsid=4 }
 
-Link to a pdf file  
->{pdfviewer file=https://domain.com/file.pdf }  
+Link to a pdf file on other domain 
+>{pdfviewer file=https://domain.com/documents/file.pdf }  
+
+Link to a pdf file relative to domain name 
+>{pdfviewer file=/documents/file.pdf }  
+
 
 ### Basic Jdownloads example
 
@@ -73,16 +77,27 @@ Select viewer. Show the full pdf or only one page as an image.
 
 Only jdownloads pdf files can be shown as image. When set to pdfimage by default the first page will beshown set page= to show an other page. Warning; Images will be created with imagick each time the page is loaded. 
 
+PDfjs show the page on default with auto size but you can change that with the following parameter
+>zoom=[page-width|page-height|page-fit|auto] (default) 
+
+PDfjs show nothing by default on the left side but it can be usefull to show the bookmarks for example
+>pagemode=[thumbs|bookmarks|attachments|none] (default) )
+
 Open on specific page
 >page=[integer]
 
 Page will be ignore if there is a smartsearch highlight present in the url.  
 Use ctrl+f5 to test it, else it will remember the old pagenumber.
 
-Highlight keywords
->Search="[keyword1] [keyword2]" 
+Link to a page can also with named destination (not a bookmark) but is untested
+>nameddest=[destination name]
 
-double qoutes are only needed with multiple keywords. Each keyword will be highlighted separately.
+Highlight keywords
+>search="[keyword1] [keyword2]" 
+keyword will be highlighted separately. If you want to search a combination enable phrase.
+
+Enable phrase to search for a combination of words.
+>phrase=true 
 
 Override default preview style  
 >style=[embed|popup|new]
@@ -105,15 +120,21 @@ If you want to link to a webpage with a pdffile embedded you can set following p
 >?page=[integer]  
   
 >?search=[keyword1]%20[keyword2]  
+>?search=[keyword1]%20[keyword2]&phrase=true
   
 These url parameters do not work with the pdfimage viewer else everone could access every page of the pdf file.  
 
 page and search parameters priority order:  
-1 highlight search  
-2 url search  
-3 url page  
-4 param search  
-5 param page  
+1 highlight search (joomla smartsearch)
+2 url search
+3 url namedest
+4 url page 
+5 param search
+6 param namedest
+7 param page	 
+				
+zoom, pagemode and nameddest parameters can also be used. if you add multiple urlparameters think about the syntacs '?' (for the first) en '&' for the others.
+>?page=10&pagemode=bookmarks&zoom=page-height
 				
   
 ## Make pdf 'searchable'
