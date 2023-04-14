@@ -7,7 +7,7 @@
 	<license>GNU/GPLv3 www.gnu.org/licenses/gpl-3.0.html</license>
 	<authorEmail></authorEmail>
 	<authorUrl>https://github.com/Tazzios</authorUrl>
-	<version>1.3.0Beta</version>
+	<version>1.3.0</version>
 	<description>content plugin for PDF</description>
 	<files>
 		<filename plugin="pdfviewer">pdfviewer.php</filename>

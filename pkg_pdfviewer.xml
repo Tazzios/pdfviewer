@@ -2,9 +2,9 @@
 <extension type="package" version="3" method="upgrade">
 	<name>PDF viewer</name>
 	<packagename>pdfviewer</packagename>
-	<version>1.2.5</version>
+	<version>1.3.0</version>
 	<url>https://github.com/Tazzios/pdfviewer</url>
-	<creationDate>augustus 2022</creationDate>
+	<creationDate>April 2023</creationDate>
 	<copyright></copyright>
 	<author>Tazzios</author>
 	<packager>Tazzios</packager>
@@ -14,8 +14,8 @@
 
 	 <files folder="\">
 	 
-	   <filename type="plugin" id="pdfviewer" group="system">pdfviewer_content_1.2.5.zip</filename>
-	   <filename type="plugin" id="pdfviewer" group="system">pdfviewer_button_1.2.5.zip</filename>
+	   <filename type="plugin" id="pdfviewer" group="system">pdfviewer_content_1.3.0.zip</filename>
+	   <filename type="plugin" id="pdfviewer" group="system">pdfviewer_button_1.3.0.zip</filename>
 			
 
 	 </files>
