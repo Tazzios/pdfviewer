@@ -3,8 +3,8 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Categories\CategoryNode;
-use Joomla\CMS\Categories\Categories; // needed for retrieving full file pathfor pdfimage
+use Joomla\CMS\HTML\HTMLHelper;
+
 
 /**
  * Plug-in to enable loading pdf files into content (e.g. articles)
@@ -377,9 +377,32 @@ function CreatePdfviewer($filelink,$pagereference,$pagenumber,$pdfjsviewsettings
 	// Popup
 	IF ($style=='popup')  {
 	
-		JHTML::_('behavior.modal');
+		$randomId = rand(0, 1000); // important when there are multiple popup pdfs on one page with different settings
+
+		HTMLHelper::_('bootstrap.modal', '.selector', []);
 		
-		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pdfjsviewsettings .'">'. $linktext .'</a>';
+		return '<p><a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a></p>
+				<div id="exampleModal'. (string)$randomId .'" class="modal fade" tabindex="-1" >
+					<div class="modal-dialog" style="transform: translateX(-50%); left: 0px;" >
+						<div class="modal-content" style="height:'.$height.'px;width:'.$width.'px;">
+							<div class="modal-header">
+								'. $linktext .'
+								<button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body" >
+								        <iframe
+										width="100%"
+										height="100%"
+										src="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pagenumber .'"
+										title="'. $linktext .'"
+										frameborder="0"
+										allowfullscreen
+									></iframe>
+							</div>
+						</div>
+					</div>
+				</div>';
+
 	}
 	// New window
 	IF ($style=='new')  {
@@ -398,39 +421,30 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	$jdownloads_params = JComponentHelper::getParams( 'com_jdownloads' );
 	$files_uploaddir = $jdownloads_params->get( 'files_uploaddir' );
 
-	// get categorie ID and file name
+	// get categorie path
 	$db = JFactory::getDbo();
-	$query = $db->getQuery(true)
-	->select(' cat.id, url_download ')	
-	->from('#__jdownloads_files as file')
-	->join('INNER',' #__jdownloads_categories as cat ON file.catid=cat.id' )
-	->where('file.id = '. $file_id );
-	//	->order('ordering ASC');
-	$db->setQuery($query);
+	$db->setQuery("WITH RECURSIVE n AS 
+		( SELECT id, parent_id, concat('/', title ,'/') AS path  
+		FROM josmf_jdownloads_categories 
+		WHERE parent_id = 0 
+		union all 
+		SELECT c.id, c.parent_id, concat(n.path, c.title, '/') 
+		FROM n 
+		join josmf_jdownloads_categories c on c.parent_id = n.id 
+		WHERE n.path not like concat('%/', c.id, '/%') -- cycle pruning here! 
+		) 
+		SELECT REPLACE(path,'/ROOT','') AS path, file.url_download AS filename 
+		FROM n 
+		INNER JOIN josmf_jdownloads_files AS file ON n.id=file.catid WHERE file.id=". $file_id );
 	
 	$fileDB = $db->loadAssocList();
 	
-	$cat_id = ''; 
-	$cat_path = '';
-	$filename = '' ;
+	//Full local file link
+	$filelink = '' ;
 	foreach ($fileDB as $file) {
-		$filename  =  $file['url_download'];
-		$cat_id = $file['id'];
+		$filelink = $files_uploaddir . $file['path'] . $file['filename'];
 	}
 	
-	//Retrieve categories file path with the help of category ID
-	$cat_parents = '';
-	$categories = \Joomla\CMS\Categories\Categories::getInstance('jdownloads');
-    $cat        = $categories->get($cat_id);
-	
-	if ($cat->cat_dir_parent<>''){
-		$cat_parents = DS . $cat->cat_dir_parent;
-	}
-	
-
-	//Full file link
-	$filelink = $files_uploaddir . $cat_parents . DS . $cat->title. DS . $filename;
-
 
 	// Imagick starts with page 0
 	if ($pagenumber <>'') {
@@ -472,13 +486,13 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	//PDF viewer embed settings:
 	IF ($style=='embed')  {
 		
-		$height = ' height='. $height . 'px;' ;
+		$height = ' height:'. $height . 'px;' ;
 		
 		// If width is numeric then px else assume there is a %
 		if (is_numeric($width)) {
-				$width = ' width=' . $width . '';
+				$width = ' width:' . $width . '';
 		}	else {
-			$width = ' width=' . $width . '%';
+			$width = ' width:' . $width . '%';
 		}
 		//return 'test'; 
 		return '<img src=data:image/jpg;base64,'.base64_encode($img) . $width . $height . ' class=pdfimage_embed_image>'; 
@@ -486,10 +500,26 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	}	
 	// Popup
 	IF ($style=='popup')  {
-	
-		JHTML::_('behavior.modal');
 		
-		return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" href="data:image/jpg;base64,'.  base64_encode($img) . '">'. $linktext .'</a>';
+		$randomId = rand(0, 1000); // important when there are multiple popup pdfs on one page with different settings
+	
+		HTMLHelper::_('bootstrap.modal', '.selector', []);
+		
+		return '<p><a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a></p>
+				<div id="exampleModal'. (string)$randomId .'" class="modal fade" tabindex="-1" >
+					<div class="modal-dialog" style="transform: translateX(-50%); left: 0px;" >
+						<div class="modal-content" style="max-height:'.$height.'px;max-width:'.$width.'px;">
+							<div class="modal-header">
+								'. $linktext .'
+								<button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body" >
+								<img src="data:image/jpg;base64,'.  base64_encode($img) . '" >
+							</div>
+						</div>
+					</div>
+				</div>';
+
 	}
 	// New window
 	IF ($style=='new')  {
