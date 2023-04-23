@@ -141,6 +141,7 @@ class PlgContentpdfviewer extends JPlugin
 						}						
 						//2. get search from url
 						elseif (isset($_GET["search"]) ) {
+							$search = $_GET["search"]; 
 							$pagereference = '#search=' . $_GET["search"];
 						}				
 						//3. get nameddest from url
