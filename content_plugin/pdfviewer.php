@@ -4,6 +4,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Version;
 
 
 /**
@@ -377,7 +378,14 @@ function CreatePdfviewer($filelink,$pagereference,$pagenumber,$pdfjsviewsettings
 	}	
 	// Popup
 	IF ($style=='popup')  {
-	
+		
+		
+		if (str_starts_with(JVersion::MAJOR_VERSION, 3)) {
+			
+				JHTML::_('behavior.modal');		
+				return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $search . $pagenumber .'">'. $linktext .'</a>';
+
+		} else {
 		$randomId = rand(0, 1000); // important when there are multiple popup pdfs on one page with different settings
 
 		HTMLHelper::_('bootstrap.modal', '.selector', []);
@@ -403,6 +411,8 @@ function CreatePdfviewer($filelink,$pagereference,$pagenumber,$pdfjsviewsettings
 						</div>
 					</div>
 				</div>';
+		}
+	
 
 	}
 	// New window
@@ -502,24 +512,33 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	// Popup
 	IF ($style=='popup')  {
 		
-		$randomId = rand(0, 1000); // important when there are multiple popup pdfs on one page with different settings
 	
-		HTMLHelper::_('bootstrap.modal', '.selector', []);
+		if (str_starts_with(JVersion::MAJOR_VERSION, 3)) {
+			
+			JHTML::_('behavior.modal');
+			return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" href="data:image/jpg;base64,'.  base64_encode($img) . '">'. $linktext .'</a>';
+			
+		}ELSE {
+					
+			$randomId = rand(0, 1000); // important when there are multiple popup pdfs on one page with different settings
 		
-		return '<p><a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a></p>
-				<div id="exampleModal'. (string)$randomId .'" class="modal fade" tabindex="-1" >
-					<div class="modal-dialog" style="transform: translateX(-50%); left: 0px;" >
-						<div class="modal-content" style="max-height:'.$height.'px;max-width:'.$width.'px;">
-							<div class="modal-header">
-								'. $linktext .'
-								<button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-							</div>
-							<div class="modal-body" >
-								<img src="data:image/jpg;base64,'.  base64_encode($img) . '" >
+			HTMLHelper::_('bootstrap.modal', '.selector', []);
+			
+			return '<p><a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a></p>
+					<div id="exampleModal'. (string)$randomId .'" class="modal fade" tabindex="-1" >
+						<div class="modal-dialog" style="transform: translateX(-50%); left: 0px;" >
+							<div class="modal-content" style="max-height:'.$height.'px;max-width:'.$width.'px;">
+								<div class="modal-header">
+									'. $linktext .'
+									<button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								<div class="modal-body" >
+									<img src="data:image/jpg;base64,'.  base64_encode($img) . '" >
+								</div>
 							</div>
 						</div>
-					</div>
-				</div>';
+					</div>';
+		}
 
 	}
 	// New window
