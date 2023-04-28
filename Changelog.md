@@ -1,7 +1,13 @@
-V1.3.0Beta april 2023  
-A lot of code it rewritten to add the additional parameters. Thats why there is a beta release first.
+
+V1.3.1 april 2023  
   
 Content plugin  
+Fixed: Popup #25  
+Fixed: PDFimage viewer #26  
+  
+V1.3.0 april 2023  
+A lot of code it rewritten to add the additional parameters. Thats why there is a beta release first.
+  
 New: additional parameters (zoom ,pagemode, Search as phrase, nameddest)  
 Update: PDFjs to v3.5.141  
 
