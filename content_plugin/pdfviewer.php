@@ -320,7 +320,7 @@ class PlgContentpdfviewer extends JPlugin
 								break;*/
 							default:
 								// Default pdfjs
-								$output = CreatePdfviewer($filelink,$pagereference,$pagenumber,$pdfjsviewsettings,$height,$width,$style,$linktext);
+								$output = CreatePdfviewer($filelink,$pagereference,$pdfjsviewsettings,$height,$width,$style,$linktext);
 								break;
 						}
 
@@ -340,7 +340,7 @@ class PlgContentpdfviewer extends JPlugin
 	} // end onContentPrepare
 }// end class
 
-function CreatePdfviewer($filelink,$pagereference,$pagenumber,$pdfjsviewsettings,$height,$width,$style,$linktext) {
+function CreatePdfviewer($filelink,$pagereference,$pdfjsviewsettings,$height,$width,$style,$linktext) {
 	// set Path to pdfjs viewer.html file and check if there is an override
 	
 	//Set default path
@@ -383,7 +383,7 @@ function CreatePdfviewer($filelink,$pagereference,$pagenumber,$pdfjsviewsettings
 		if (str_starts_with(JVersion::MAJOR_VERSION, 3)) {
 			
 				JHTML::_('behavior.modal');		
-				return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $search . $pagenumber .'">'. $linktext .'</a>';
+				return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pdfjsviewsettings .'">'. $linktext .'</a>';
 
 		} else {
 		$randomId = rand(0, 1000); // important when there are multiple popup pdfs on one page with different settings
@@ -402,7 +402,7 @@ function CreatePdfviewer($filelink,$pagereference,$pagenumber,$pdfjsviewsettings
 								        <iframe
 										width="100%"
 										height="100%"
-										src="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pagenumber .'"
+										src="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pdfjsviewsettings .'"
 										title="'. $linktext .'"
 										frameborder="0"
 										allowfullscreen
