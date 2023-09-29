@@ -1,4 +1,11 @@
 
+V1.3.2 september 2023  
+  
+Content plugin  
+Fixed: PDFimage viewer did not work for jdownloads files #30 
+Fixed: search in popup only worked for pagenumber  
+Update: PDFjs to 3.11.174  
+  
 V1.3.1 april 2023  
   
 Content plugin  
