@@ -436,17 +436,17 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	$db = JFactory::getDbo();
 	$db->setQuery("WITH RECURSIVE n AS 
 		( SELECT id, parent_id, concat('/', title ,'/') AS path  
-		FROM josmf_jdownloads_categories 
+		FROM #__jdownloads_categories 
 		WHERE parent_id = 0 
 		union all 
 		SELECT c.id, c.parent_id, concat(n.path, c.title, '/') 
 		FROM n 
-		join josmf_jdownloads_categories c on c.parent_id = n.id 
+		join #__jdownloads_categories c on c.parent_id = n.id 
 		WHERE n.path not like concat('%/', c.id, '/%') -- cycle pruning here! 
 		) 
 		SELECT REPLACE(path,'/ROOT','') AS path, file.url_download AS filename 
 		FROM n 
-		INNER JOIN josmf_jdownloads_files AS file ON n.id=file.catid WHERE file.id=". $file_id );
+		INNER JOIN #__jdownloads_files AS file ON n.id=file.catid WHERE file.id=". $file_id );
 	
 	$fileDB = $db->loadAssocList();
 	
