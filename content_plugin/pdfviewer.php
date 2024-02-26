@@ -6,6 +6,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Version;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Uri\Uri;
 
 
 /**
@@ -13,6 +14,8 @@ use Joomla\CMS\Plugin\CMSPlugin;
  * This uses the {pdfviewer} syntax
  * Licensed under the GNU General Public License version 2 or later; see LICENSE.txt
  */
+// class PlgContentpdfviewer extends JPlugin
+
 class PlgContentpdfviewer extends CMSPlugin
 {
 	protected static $modules = array();
@@ -288,7 +291,7 @@ class PlgContentpdfviewer extends CMSPlugin
 						$path= JPATH_ROOT . '/administrator/components/com_jdownloads';
 						if (file_exists( $path )) {
 							$jdownloadsid = trim($tagparameters['jdownloadsid']);
-							$filelink = JUri::base().'index.php?option=com_jdownloads&task=download.send&id='. $jdownloadsid ;
+							$filelink = Uri::base().'index.php?option=com_jdownloads&task=download.send&id='. $jdownloadsid ;
 						} else {
 							$showpdfpreview ='no';
 							$output = "jdownloads is not installed (anymore)";
@@ -345,18 +348,18 @@ function CreatePdfviewer($filelink,$pagereference,$pdfjsviewsettings,$height,$wi
 	// set Path to pdfjs viewer.html file and check if there is an override
 	
 	//Set default path
-	$Path_pdfjs = JUri::base().'plugins/content/pdfviewer/assets/pdfjs/web/viewer.html' ;
+	$Path_pdfjs = Uri::base().'plugins/content/pdfviewer/assets/pdfjs/web/viewer.html' ;
 	
 	// Get active template path from Joomla: 
-	$app    = JFactory::getApplication();
-	$path   = JURI::base(true).'templates/'.$app->getTemplate().'/';
+	$app    = Factory::getApplication();
+	$path   = URI::base(true).'templates/'.$app->getTemplate().'/';
 	
 	// determine override patch
 	$pdfjs_override =  JPATH_ROOT  .'/templates/'.$app->getTemplate().   '/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html'; 
 	
 	//Check for override
 	if (file_exists($pdfjs_override)) {
-		$Path_pdfjs = JUri::base().'templates/'.$app->getTemplate().  '/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html';
+		$Path_pdfjs = Uri::base().'templates/'.$app->getTemplate().  '/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html';
 	}
 		
 		
@@ -434,7 +437,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 	$files_uploaddir = $jdownloads_params->get( 'files_uploaddir' );
 
 	// get categorie path
-	$db = JFactory::getDbo();
+	$db = Factory::getDbo();
 	$db->setQuery("WITH RECURSIVE n AS 
 		( SELECT id, parent_id, concat('/', title ,'/') AS path  
 		FROM #__jdownloads_categories 
@@ -549,7 +552,3 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 
 	
 }
-
-
-
-
