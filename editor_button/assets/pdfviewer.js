@@ -24,7 +24,7 @@
 		} else { 
 			// exernal file
 			file_link = 'file=' + document.getElementById("file").value + ' ';
-			viewer = 'pdfjs'; // external pdf can only be shown with pdfjs
+			viewer = ' viewer=pdfjs '; // external pdf can only be shown with pdfjs
 		}
 	
 
