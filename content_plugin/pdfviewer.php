@@ -393,7 +393,7 @@ function CreatePdfviewer($filelink,$pagereference,$pdfjsviewsettings,$height,$wi
 
 		HTMLHelper::_('bootstrap.modal', '.selector', []);
 		
-		return '<p><a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a></p>
+		return '<a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a>
 				<div id="exampleModal'. (string)$randomId .'" class="modal fade" tabindex="-1" >
 					<div class="modal-dialog" style="transform: translateX(-50%); left: 0px;" >
 						<div class="modal-content" style="height:'.$height.'px;width:'.$width.'px;">
@@ -527,7 +527,7 @@ function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
 		
 			HTMLHelper::_('bootstrap.modal', '.selector', []);
 			
-			return '<p><a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a></p>
+			return '<a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a>
 					<div id="exampleModal'. (string)$randomId .'" class="modal fade" tabindex="-1" >
 						<div class="modal-dialog" style="transform: translateX(-50%); left: 0px;" >
 							<div class="modal-content" style="max-height:'.$height.'px;max-width:'.$width.'px;">
