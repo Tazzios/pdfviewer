@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * @package     Joomla.Plugin
+ * @subpackage  Content.pdfviewer
+ * @copyright   (C) Your Name / Company
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+//namespace Tazzios\Plugin\Content\pdfviewer;
+
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
@@ -7,547 +16,330 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Version;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Uri\Uri;
-
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\Database\DatabaseInterface;
 
 /**
- * Plug-in to enable loading pdf files into content (e.g. articles)
- * This uses the {pdfviewer} syntax
- * Licensed under the GNU General Public License version 2 or later; see LICENSE.txt
+ * Plugin to embed PDF files into Joomla articles using {pdfviewer ...}
  */
-
-class PlgContentpdfviewer extends CMSPlugin
+class PlgContentPdfviewer extends CMSPlugin 
 {
-	protected static $modules = array();
+    /**
+     * Event: onContentPrepare
+     */
+    public function onContentPrepare($context, &$article, &$params, $page = 0)
+    {
+        // Don't process when indexing for smart search
+        if ($context === 'com_finder.indexer') {
+            return true;
+        }
 
-	protected static $mods = array();
+        if (strpos($article->text, 'pdfviewer') === false) {
+            return true;
+        }
 
-	public function onContentPrepare($context, &$article, &$params, $page = 0)
-	{
-		// Don't run this plugin when the content is being indexed
-		if ($context == 'com_finder.indexer')
-		{
-			return true;
-		}
+        $regex = '/{\s*pdfviewer\s*(.*?)}/i';
+
+        preg_match_all($regex, $article->text, $matches, PREG_SET_ORDER);
+
+        if (!$matches) {
+            return true;
+        }
+
+        $app = Factory::getApplication();
+        $input = $app->input;
+
+        foreach ($matches as $match) {
+            $output = ''; // Ensure no double placement
+
+            $tagparameters = $this->parseTagParameters($match[1]);
+
+            // Debug (optional, replace with logging if needed)
+             if ($this->params->get('debug')) { Factory::getApplication()->enqueueMessage(print_r($tagparameters, true)); }
+
+            $showpdfpreview = isset($tagparameters['showpdfpreview']) ? strtolower($tagparameters['showpdfpreview']) : 'yes';
+
+
+            // Check filename is PDF
+            if (isset($tagparameters['filename'])) {
+                $ext = strtolower(trim(pathinfo($tagparameters['filename'], PATHINFO_EXTENSION), '\'"'));
+                if ($ext !== 'pdf') {
+                    $showpdfpreview = 'no';
+                }
+            }
+
+            if ($showpdfpreview === 'yes') {
+                $viewer = strtolower($tagparameters['viewer'] ?? $this->params->get('viewer', 'pdfjs'));
+                $style = strtolower($tagparameters['style'] ?? $this->params->get('style', 'embed'));
+                $linktext = isset($tagparameters['linktext']) ? str_replace('%20', ' ', trim($tagparameters['linktext'], '"')) : $this->params->get('linktext');
+                $height = $tagparameters['height'] ?? ($style === 'embed' ? $this->params->get('embedheight') : ($style === 'popup' ? $this->params->get('popupheight') : ''));
+                $width = $tagparameters['width'] ?? ($style === 'embed' ? $this->params->get('embedwidth') : ($style === 'popup' ? $this->params->get('popupwidth') : ''));
+
+                // Build file link for jdownloads or direct
+                $filelink = '';
+                $jdownloadsid = '';
+                if (isset($tagparameters['jdownloadsid'])) {
+                    $jdownloadsPath = JPATH_ADMINISTRATOR . '/components/com_jdownloads';
+                    if (file_exists($jdownloadsPath)) {
+                        $jdownloadsid = trim($tagparameters['jdownloadsid']);
+                        $filelink = Uri::base() . 'index.php?option=com_jdownloads&task=download.send&id=' . $jdownloadsid;
+                    } else {
+                        $showpdfpreview = 'no';
+                        $output = "jdownloads is not installed";
+                    }
+                } elseif (isset($tagparameters['file'])) {
+                    $filelink = trim($tagparameters['file']);
+                }
+
+                if ($showpdfpreview === 'yes') {
+                    switch ($viewer) {
+                        case 'pdfimage':
+                            if ($jdownloadsid !== '') {
+                                $output = static::createPdfImage($jdownloadsid, $tagparameters['page'] ?? '', $height, $width, $style, $linktext);
+                            } else {
+                                $output = 'Only jdownloads PDF files can be converted to image';
+                            }
+                            break;
+                        default:
+                            // pdfjs or default
+                            $pagereference = static::buildPageReference($input, $tagparameters);
+                            $pdfjsviewsettings = static::buildPdfJsSettings($input, $tagparameters, $pagereference);
+                            $output = static::createPdfViewer($filelink, $pagereference, $pdfjsviewsettings, $height, $width, $style, $linktext);
+                            break;
+                    }
+                }
+            }
+
+            // Replace only first occurrence
+            $article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
+        }
+    }
+
+    /**
+     * Parse and normalize tag parameters from the {pdfviewer ...} tag
+     */
+    private function parseTagParameters(string $raw): array
+    {
+        $tagparams = preg_replace('/^\p{Z}+|\p{Z}+$/u', '', $raw);
+        $tagparams = strip_tags($tagparams);
+        $tagparams = str_replace(' =', '=', $tagparams);
+        $tagparams = preg_replace('~\s+(?=([^"]*"[^"]*")*[^"]*$)~', ',', $tagparams);
+        $tagparams = str_replace(' ', '%20', $tagparams);
+
+        preg_match_all("/([^,= ]+)=([^,= ]+)/", $tagparams, $r);
+        $tagparameters = array_combine($r[1], $r[2]);
+        return is_array($tagparameters) ? array_change_key_case($tagparameters, CASE_LOWER) : [];
+    }
+
+    /**
+     * Build the #search, #page, etc. part for PDF.js viewer
+     */
+    private static function buildPageReference($input, array $tagparameters): string
+    {
+				
+        $search = '';
+        $pagereference = '';
 		
-		// Simple performance check to determine whether bot should process further
-		if (strpos($article->text, 'loadposition') === false && strpos($article->text, 'pdfviewer') === false)
-		{
-			return true;
-		}
+		/*page, search and nameddest order priority
+		1 highlight search 
+		2 url search
+		3 url namedest
+		4 url page 
+		5 param search
+		6 param nameddest
+		7 param page					
+		*/
 
-		// Expression to search for (positions)
-		$regex		= '/{\s*pdfviewer\s*(.*?)}/i';
+        if ($input->get('highlight', '', 'BASE64')) {
+            $search = base64_decode(htmlspecialchars($input->get('highlight', '', 'BASE64')));
+            $search = str_replace(['[', ']', '"', ','], ['', '', '', ' '], $search);
+            $pagereference = '#search=' . $search;
+        } elseif ($input->getString('search')) {
+            $search = $input->getString('search');
+            $pagereference = '#search=' . $search;
+        } elseif ($input->getString('nameddest')) {
+            $pagereference = $input->getString('nameddest');
+        } elseif ($input->getInt('page')) {
+            $pagereference = '#page=' . $input->getInt('page');
+        } elseif (!empty($tagparameters['search'])) {
+            $search = str_replace('%20', ' ', trim($tagparameters['search'], '"'));
+            $pagereference = '#search=' . $search;
+        } elseif (!empty($tagparameters['nameddest'])) {
+            $pagereference = '#nameddest=' . trim($tagparameters['nameddest']);
+        } elseif (!empty($tagparameters['page']) && $tagparameters['page'] != 0) {
+            $pagereference = '#page=' . trim($tagparameters['page']);
+        }
 
-		// Expression to search for(modules)
-		$regexmod	= '/{\s*pdfviewer\s*(.*?)}/i';
-		//$stylemod	= $this->params->def('style', 'none');
+        if ($search !== '') {
+            $phrase = $input->getString('phrase', $tagparameters['phrase'] ?? '');
+            if ($phrase) {
+                $pagereference .= '&phrase=' . trim($phrase);
+            }
+        }
 
-		// Find all instances of plugin and put in $matches 
-		// $matches[0] is full pattern match, $matches[1] is the id
-		preg_match_all($regex, $article->text, $matches, PREG_SET_ORDER);
+        return $pagereference;
+    }
 
-		// No matches, skip this
-		if ($matches) {
-					
-			foreach ($matches as $match) {
-				
-				$output= ''; //clear to avoid placing a pdfviewer double if the tag parameter are incorrect after first loop
-				
-				$matcheslist = explode(',', trim($match[1]));
-				
-				//Transform  the keys and values from the tag to an array
-				
-				//Delete space around the = and replace others by , to put then in an array
-				$tagparams = preg_replace('/^\p{Z}+|\p{Z}+$/u', '', $match[1]); // remove blank
-				$tagparams = strip_tags($tagparams); //Remove htmlcode see: https://github.com/Tazzios/pdfviewer/issues/6
-				$tagparams = str_replace(' =','=', $tagparams); //avoid that key and value are seprated
-				
-				
-				// replace space for , if the text is not between qoutes. Special for the linktext
-				$tagparams = preg_replace('~\s+(?=([^"]*"[^"]*")*[^"]*$)~',',', $tagparams); 
-				
-				// replace existing spaces which should only exist between qoutes for %20. Before output it will be changed back
-				$tagparams = str_replace(' ','%20', $tagparams); //replace space for dummy space
-																
-				// create named array for key and values , key to lower case
-				preg_match_all("/([^,= ]+)=([^,= ]+)/", $tagparams, $r); 
-				$tagparameters = array_combine($r[1], $r[2]);
-				$tagparameters = array_change_key_case($tagparameters, CASE_LOWER); //keys to lower to avoid mismatch
-							
-				//var_dump( $tagparameters); 
-				
-				// debug option
-				if ( $this->params->get('debug')==1) {
-						var_dump($tagparameters);
-				}
-				
-				$showpdfpreview = 'yes';
-				if (isset($tagparameters['showpdfpreview'])) {
-						$showpdfpreview = strtolower($tagparameters['showpdfpreview']);
-				}
-				
-				// check if filename is given, if it is given it should be pdf.
-				if (isset($tagparameters['filename']) ) {
-								
-					$fileext = explode(".", $tagparameters['filename']);
-					$fileext = strtolower(end($fileext));
-					$fileext =trim($fileext,'\'"');
-					if($fileext <> 'pdf') {
-						$showpdfpreview= 'no';							
-					}
-				}
-				
-				
-				// should we show the preview?
-				IF  ($showpdfpreview=='yes') {
-					
-					
-					//Get viewer type
-					$viewer = $this->params->get('viewer');
-					if (isset($tagparameters['viewer']) ) {
-						$viewer =  $tagparameters['viewer'];
-					}
-					$viewer = strtolower($viewer); // to lower to avoid mis match
-					
-					$pagereference = ''; //value that returns the pageref at the end off this if
-					$pdfjsviewsettings = ''; //returns pdfjs viewer settings					
-					$pagenumber= '';
-					
-					// only needed when pdfjs
-					if ($viewer=='pdfjs') {
-						
+    /*
+     * Build PDF.js viewer options (zoom, pagemode, etc)
+     */
+    private static function buildPdfJsSettings($input, array $tagparameters, string $pagereference): string
+    {
+        $settings = '';
 
-					
-					// get the parameters from the url if exist
-					$search ='';
-					$nameddest ='';
-					
-					
-						/*page, search and nameddest order priority
-						1 highlight search 
-						2 url search
-						3 url namedest
-						4 url page 
-						5 param search
-						6 param nameddest
-						7 param page					
-						*/
-							
-						
-						// 1. Get search from joomla smart search 
-						if (isset($_GET["highlight"])) {
-							$search= base64_decode(htmlspecialchars($_GET["highlight"]));
-							$search= str_replace('[', '' , $search);
-							$search= str_replace(']', '' , $search);
-							$search= str_replace('"', '' , $search);
-							$search= str_replace(',', ' ' , $search);
-							$pagereference = '#search=' . $search ;
-						}						
-						//2. get search from url
-						elseif (isset($_GET["search"]) ) {
-							$search = $_GET["search"]; 
-							$pagereference = '#search=' . $_GET["search"];
-						}				
-						//3. get nameddest from url
-						elseif (isset($_GET["nameddest"]) ) {
-							$pagereference= $_GET["nameddest"];
-						}			
-						//4. get page from url
-						elseif (isset($_GET["page"]) ) {
-							$pagereference= '#page='.$_GET["page"];
-						}	
-						//5. get searchterm from tagparameters if not set yet  by url
-						elseif (isset($tagparameters['search']) and trim($tagparameters['search'],'"') <>'' ) {
-							$search = str_replace('%20', ' ' ,$tagparameters['search']); //replace dummy space
-							$search = trim($search);
-							$search = trim($search,'"'); // any combination of ' and "
-							$pagereference = '#search=' . $search ;
-						}												
-						//6. tagparameters nameddest
-						elseif (isset($tagparameters['nameddest']) ) {
-							$pagereference =  '#nameddest='.trim($tagparameters['nameddest']);
-						}
-						//7.get page from tagparameters if no other page redirect is set
-						elseif (isset($tagparameters['page'])  and $tagparameters['page']<>0) {
-							$pagereference = '#page='.trim($tagparameters['page']);
-						}
-					
-						// get search phrase or seperate words: true/false(default)
-						// only usefull if search was used
-						if 	($search<>''){
-							$phrase = $this->params->get('phrase');						
-							if (isset($_GET["phrase"])  ) {
-								$phrase= '&phrase='.$_GET["phrase"];
-							}
-							elseif (isset($tagparameters['phrase']) ) {
-								$phrase =  '&phrase='.trim($tagparameters['phrase']);
-							}
-							$pagereference .= $phrase;
-						}
-						
-						
-						// get zoom url: page-width,page-height,page-fit,auto(default)						
-						if (isset($_GET["zoom"])  ) {
-							if ($pagereference=='') {
-								$pdfjsviewsettings = '#zoom='.$_GET["zoom"];
-							}
-							else {
-								$pdfjsviewsettings = '&zoom='.$_GET["zoom"];
-							}
-						}
-						// get zoom tagparameter: page-width,page-height,page-fit,auto(default)	
-						if (isset($tagparameters['zoom']) ) {
-							if ($pagereference=='') {
-								$pdfjsviewsettings .= '#zoom='.trim($tagparameters['zoom']);
-							}
-							else {
-								$pdfjsviewsettings .= '&zoom='.trim($tagparameters['zoom']);
-							}							
-						}
-												
-						// get Pagemode, left sidebar: thumbs,bookmarks,attachments, none (default)
-						if (isset($_GET["pagemode"])  ) {
-							if ($pagereference=='' and $pdfjsviewsettings=='' ) {
-								$pdfjsviewsettings .= '#pagemode='.$_GET["pagemode"];
-							}
-							else {
-								$pdfjsviewsettings .= '&pagemode='.$_GET["pagemode"];
-							}								
-						}
-						elseif (isset($tagparameters['pagemode']) ) {							
-							if ($pagereference=='' and $pdfjsviewsettings=='' ) {
-								$pdfjsviewsettings .=  '#pagemode='.trim($tagparameters['pagemode']);
-							}
-							else {
-								$pdfjsviewsettings .=  '&pagemode='.trim($tagparameters['pagemode']);
-							}
-						}
-						else{		
-							//prevents that a following viewer on the same page grabs the pagemode from the prvious one.
-							if ($pagereference=='' and $pdfjsviewsettings=='' ) {
-								$pdfjsviewsettings .=  '#pagemode=none';
-							}
-							else {
-								$pdfjsviewsettings .=  '&pagemode=none';
-							}
-						}				
+        // Zoom
+        $zoom = $input->getString('zoom', $tagparameters['zoom'] ?? '');
+        if ($zoom) {
+            $settings .= ($pagereference === '' ? '#zoom=' : '&zoom=') . trim($zoom);
+        }
 
-						
-					}
-					elseif ($viewer=='pdfimage') {
-						//set page to create an image from
-						if ( $pagenumber =='' and isset($tagparameters['page'])  and $tagparameters['page']<>0) {
-							$pagenumber = trim($tagparameters['page']);
-						}
-					}
-					
-										
+        // Pagemode
+        $pagemode = $input->getString('pagemode', $tagparameters['pagemode'] ?? '');
+        if ($pagemode) {
+            $settings .= ($pagereference === '' && $settings === '' ? '#pagemode=' : '&pagemode=') . trim($pagemode);
+        } elseif ($pagereference === '' && $settings === '') {
+            $settings .= '#pagemode=none';
+        } else {
+            $settings .= '&pagemode=none';
+        }
+
+        return $settings;
+    }
+
+    /*
+     * Render the PDF viewer (iframe, popup, new window)
+     */
+    private static function createPdfViewer(string $filelink, string $pagereference, string $pdfjsviewsettings, $height, $width, $style, $linktext): string
+    {
+        $app = Factory::getApplication();
+        $template = $app->getTemplate();
+        $base = Uri::base();
+
+        // Path to PDF.js viewer (allow template override)
+        $pdfjsOverride = JPATH_ROOT . "/templates/$template/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html";
+        $viewerPath = file_exists($pdfjsOverride)
+            ? $base . "templates/$template/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html"
+            : $base . "plugins/content/pdfviewer/assets/pdfjs/web/viewer.html";
+
+        $filelink = urlencode($filelink);
+
+        if ($style === 'embed') {
+            $heightStyle = 'height:' . (int)$height . 'px;';
+            $widthStyle = is_numeric($width) ? 'width:' . (int)$width . 'px;' : 'width:' . $width . ';';
+            return '<iframe src="' . $viewerPath . '?file=' . $filelink . $pagereference . $pdfjsviewsettings . '" style="' . $widthStyle . $heightStyle . '" frameborder="0"></iframe>';
+        }
+
+        if ($style === 'popup') {
+            $randomId = rand(0, 1000);
+            HTMLHelper::_('bootstrap.modal', '.selector', []);
+            return '<a data-bs-toggle="modal" data-bs-target="#pdfModal' . $randomId . '">' . $linktext . '</a>
+                <div id="pdfModal' . $randomId . '" class="modal fade" tabindex="-1">
+                    <div class="modal-dialog" style="transform: translateX(-50%); left: 0px;">
+                        <div class="modal-content" style="height:' . (int)$height . 'px;width:' . (int)$width . 'px;">
+                            <div class="modal-header">
+                                ' . $linktext . '
+                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <iframe width="100%" height="100%" src="' . $viewerPath . '?file=' . $filelink . $pagereference . $pdfjsviewsettings . '" title="' . $linktext . '" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>';
+        }
+
+        if ($style === 'new') {
+            return '<a class="pdfviewer_button" target="_blank" href="' . $viewerPath . '?file=' . $filelink . $pagereference . $pdfjsviewsettings . '">' . $linktext . '</a>';
+        }
+
+        return '';
+    }
+
+    /**
+     * Render a PDF page as an image (requires Imagick and jDownloads)
+     */
+    private static function createPdfImage($file_id, $pagenumber, $height, $width, $style, $linktext): string
+    {
+        // Get jDownloads upload dir
+        $params = ComponentHelper::getParams('com_jdownloads');
+        $files_uploaddir = $params->get('files_uploaddir');
+
+		// get categorie path
+		$db = Factory::getDbo();
+		$db->setQuery("WITH RECURSIVE n AS 
+			( SELECT id, parent_id, concat('/', title ,'/') AS path  
+			FROM #__jdownloads_categories 
+			WHERE parent_id = 0 
+			union all 
+			SELECT c.id, c.parent_id, concat(n.path, c.title, '/') 
+			FROM n 
+			join #__jdownloads_categories c on c.parent_id = n.id 
+			WHERE n.path not like concat('%/', c.id, '/%') -- cycle pruning here! 
+			) 
+			SELECT REPLACE(path,'/ROOT','') AS path, file.url_download AS filename 
+			FROM n 
+			INNER JOIN #__jdownloads_files AS file ON n.id=file.catid WHERE file.id=". $file_id );
 	
-					//style 
-					$style = $this->params->get('style');
-					if (isset($tagparameters['style']) ) {
-						$style =  trim($tagparameters['style']);
-					}
-					$style = strtolower($style); // to lower to avoid mis match
-					
-					
-					//linktext
-					$linktext = $this->params->get('linktext');
-					if (isset($tagparameters['linktext']) ) {
-						$linktext =  str_replace('%20',' ', $tagparameters['linktext']); //replace dummy space back to space
-						$linktext = trim($linktext,'"'); // any combination of ' and "
-					}
-													
-					//PDF viewer size settings:
-					$height = '' ;
-					$width = '';
-				
-					// set plugin default for embed
-					if ($style=='embed') {	
-						$height =  $this->params->get('embedheight');
-						$width =  $this->params->get('embedwidth');
-					}
-					
-					// set plugin default for popup
-					if ($style=='popup') {
-						$height =  $this->params->get('popupheight');
-						$width =  $this->params->get('popupwidth');
-					}
-					
-					// get settings from tag if present
-					if (isset($tagparameters['height']) ) {
-						$height =  trim($tagparameters['height']);
-					}
-					if (isset($tagparameters['width']) ) {
-						$width =  trim($tagparameters['width']);
-					}
-					
-					
-					$filelink = '' ;
-					$jdownloadsid = '';
-					// check if there is a jdownloadsid or file tag parameters
-					if ( isset($tagparameters['jdownloadsid']) ) {
-						$path= JPATH_ROOT . '/administrator/components/com_jdownloads';
-						if (file_exists( $path )) {
-							$jdownloadsid = trim($tagparameters['jdownloadsid']);
-							$filelink = Uri::base().'index.php?option=com_jdownloads&task=download.send&id='. $jdownloadsid ;
-						} else {
-							$showpdfpreview ='no';
-							$output = "jdownloads is not installed (anymore)";
-						}
-					} elseif ( isset($tagparameters['file']) ) {
-						$filelink = trim($tagparameters['file']);
-					}
-					
-					IF  ($showpdfpreview=='yes') {
-						switch  ($viewer) {
-							case "pdfimage":
-									
-								if ( $jdownloadsid<>'' ) {
-									$output = Createpdfimage($jdownloadsid,$pagenumber,$height,$width,$style,$linktext);
-								} else {
-									$output = 'Only jdownloads pdf files can beconverted to image';
-								}
-								break;
-							/*case "pdfimages":								
-								if ( $jdownloadsid<>'' ) {
-									
-									 multipage
-									 https://stackoverflow.com/questions/45720472/converting-a-multi-page-pdf-to-multiple-jpg-images-with-imagick-and-php
-
-									$output = Createpdfimages($jdownloadsid,$pagenumber,$height,$width,$style,$linktext);
-								} else {
-									$output = 'Only jdownloads pdf files can beconverted to image';
-
-								}
-								break;*/
-							default:
-								// Default pdfjs
-								$output = CreatePdfviewer($filelink,$pagereference,$pdfjsviewsettings,$height,$width,$style,$linktext);
-								break;
-						}
-
-
-					}
-				}
-				
-				// We should replace only first occurrence in order to allow positions with the same name to regenerate their content:
-				$article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
-			
-				//cleanup before next loop
-				unset($tagparameters,$jdownloadsid,$filelink,$search,$pagenumber,$pdfjsviewsettings,$height,$width,$style,$linktext);
-			
-			} // end foreach matches
-			
-		} // end matches
-	} // end onContentPrepare
-}// end class
-
-function CreatePdfviewer($filelink,$pagereference,$pdfjsviewsettings,$height,$width,$style,$linktext) {
-	// set Path to pdfjs viewer.html file and check if there is an override
-	
-	//Set default path
-	$Path_pdfjs = Uri::base().'plugins/content/pdfviewer/assets/pdfjs/web/viewer.html' ;
-	
-	// Get active template path from Joomla: 
-	$app    = Factory::getApplication();
-	$path   = URI::base(true).'templates/'.$app->getTemplate().'/';
-	
-	// determine override patch
-	$pdfjs_override =  JPATH_ROOT  .'/templates/'.$app->getTemplate().   '/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html'; 
-	
-	//Check for override
-	if (file_exists($pdfjs_override)) {
-		$Path_pdfjs = Uri::base().'templates/'.$app->getTemplate().  '/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html';
-	}
-		
-		
-	// the pdfjs needs encode url
-	$filelink = urlencode($filelink);
-	
-	
-	//PDF viewer embed settings:
-	IF ($style=='embed')  {
-		
-		$height = 'height:'. $height . 'px;' ;
-		
-		// If width is numeric then px else assume there is a %
-		if (is_numeric($width)) {
-				$width = 'width:' .$width. 'px;';
-		}	else {
-			$width = 'width:' .$width. ';';
-		}
-		return '<iframe src="' . $Path_pdfjs . '?file=' . $filelink . $pagereference . $pdfjsviewsettings . '" style="'.$width.$height.'" frameborder=0> </iframe>'; 
-	}	
-	// Popup
-	IF ($style=='popup')  {
-		
-		
-		if (str_starts_with(JVersion::MAJOR_VERSION, 3)) {
-			
-				JHTML::_('behavior.modal');		
-				return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" /*x is width */ href="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pdfjsviewsettings .'">'. $linktext .'</a>';
-
-		} else {
-		$randomId = rand(0, 1000); // important when there are multiple popup pdfs on one page with different settings
-
-		HTMLHelper::_('bootstrap.modal', '.selector', []);
-		
-		return '<p><a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a></p>
-				<div id="exampleModal'. (string)$randomId .'" class="modal fade" tabindex="-1" >
-					<div class="modal-dialog" style="transform: translateX(-50%); left: 0px;" >
-						<div class="modal-content" style="height:'.$height.'px;width:'.$width.'px;">
-							<div class="modal-header">
-								'. $linktext .'
-								<button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-							</div>
-							<div class="modal-body" >
-								        <iframe
-										width="100%"
-										height="100%"
-										src="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pdfjsviewsettings .'"
-										title="'. $linktext .'"
-										frameborder="0"
-										allowfullscreen
-									></iframe>
-							</div>
-						</div>
-					</div>
-				</div>';
-		}
+		$fileDB = $db->loadAssocList();
 	
 
-	}
-	// New window
-	IF ($style=='new')  {
-		return	'<a class="pdfviewer_button" target=_blank href="'. $Path_pdfjs .'?file='. $filelink . $pagereference . $pdfjsviewsettings .'">'. $linktext .'</a>';  
-	}
+        $filelink = '';
+        foreach ($fileDB as $file) {
+            $filelink = $files_uploaddir . $file['path'] . $file['filename'];
+        }
 
-}
+        $pagenumber = $pagenumber !== '' ? (int)$pagenumber - 1 : 0;
 
-function Createpdfimage($file_id,$pagenumber,$height,$width,$style,$linktext) {
-	
-	// code based on https://www.binarytides.com/convert-pdf-image-imagemagick-php/
+        $imgk = new \Imagick();
+        $imgk->setResolution(150, 150);
 
-	//imagick needs a local path 
+        try {
+            $imgk->readImage("{$filelink}[{$pagenumber}]");
+        } catch (\Exception $ex) {
+            return 'cannot convert file to image. Make sure  page ' . ($pagenumber + 1) . ' exists. <br> and the filelink is correct: ' . $filelink;
+        }
 
-	// get root dir from jdownloads
-	$jdownloads_params = JComponentHelper::getParams( 'com_jdownloads' );
-	$files_uploaddir = $jdownloads_params->get( 'files_uploaddir' );
+        if ($style === 'popup') {
+            $imgk->scaleImage($width - 40, 0);
+        } else {
+            $imgk->scaleImage(1000, 0);
+        }
 
-	// get categorie path
-	$db = Factory::getDbo();
-	$db->setQuery("WITH RECURSIVE n AS 
-		( SELECT id, parent_id, concat('/', title ,'/') AS path  
-		FROM #__jdownloads_categories 
-		WHERE parent_id = 0 
-		union all 
-		SELECT c.id, c.parent_id, concat(n.path, c.title, '/') 
-		FROM n 
-		join #__jdownloads_categories c on c.parent_id = n.id 
-		WHERE n.path not like concat('%/', c.id, '/%') -- cycle pruning here! 
-		) 
-		SELECT REPLACE(path,'/ROOT','') AS path, file.url_download AS filename 
-		FROM n 
-		INNER JOIN #__jdownloads_files AS file ON n.id=file.catid WHERE file.id=". $file_id );
-	
-	$fileDB = $db->loadAssocList();
-	
-	//Full local file link
-	$filelink = '' ;
-	foreach ($fileDB as $file) {
-		$filelink = $files_uploaddir . $file['path'] . $file['filename'];
-	}
-	
+        $imgk->setImageFormat('jpeg');
+        $img = $imgk->mergeImageLayers(\Imagick::LAYERMETHOD_FLATTEN);
+        $imgk->clear();
 
-	// Imagick starts with page 0
-	if ($pagenumber <>'') {
-		$pagenumber =  (int) $pagenumber-1;
-	} else {
-		$pagenumber =0;
-	}	
+        $imgBase64 = base64_encode($img);
 
-	$imgk = new imagick();
-	
-	//this must be called before reading the image, otherwise has no effect - &quot;-density {$x_resolution}x{$y_resolution}&quot;
-	//this is important to give good quality output, otherwise text might be unclear
-	$imgk->setResolution(150,150);
-	
-	//read the pdf
-	try {
-	$imgk->readImage("{$filelink}[$pagenumber]");
-	} catch (Exception $ex) {
-		// if an exception occurred
-		return 'cannot convert file to image. Make sure  page '. $pagenumber. ' exists. <br> and the filelink is correct: ' . $filelink ;
-	}
+        if ($style === 'embed') {
+            $heightStyle = 'height:' . (int)$height . 'px;';
+            $widthStyle = is_numeric($width) ? 'width:' . (int)$width . 'px;' : 'width:' . $width . '%;';
+            return '<img src="data:image/jpg;base64,' . $imgBase64 . '" style="' . $widthStyle . $heightStyle . '" class="pdfimage_embed_image">';
+        }
 
-	//reduce the dimensions - scaling will lead to black color in transparent regions
-	IF ($style=='popup')  {
-		$imgk->scaleImage($width-40,0); // -40 to prevent vertical scroll when zoomed in.
-	} else {
-		$imgk->scaleImage(1000,0); //only testes with a4 pfds
-	}
+        if ($style === 'popup') {
+            $randomId = rand(0, 1000);
+            HTMLHelper::_('bootstrap.modal', '.selector', []);
+            return '<a data-bs-toggle="modal" data-bs-target="#imgModal' . $randomId . '">' . $linktext . '</a>
+                <div id="imgModal' . $randomId . '" class="modal fade" tabindex="-1">
+                    <div class="modal-dialog" style="transform: translateX(-50%); left: 0px;">
+                        <div class="modal-content" style="max-height:' . (int)$height . 'px;max-width:' . (int)$width . 'px;">
+                            <div class="modal-header">
+                                ' . $linktext . '
+                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <img src="data:image/jpg;base64,' . $imgBase64 . '" >
+                            </div>
+                        </div>
+                    </div>
+                </div>';
+        }
 
-	//set new format
-	$imgk->setImageFormat('jpeg');
+        if ($style === 'new') {
+            return '<a class="pdfviewer_button" target="_blank" href="data:image/jpg;base64,' . $imgBase64 . '">' . $linktext . '</a>';
+        }
 
-	// flatten option, this is necessary for images with transparency, it will produce white background for transparent regions
-	$img = '' ; 
-	$img = $imgk->mergeImageLayers(imagick::LAYERMETHOD_FLATTEN);
-	$imgk->clear();
-
-	
-	//PDF viewer embed settings:
-	IF ($style=='embed')  {
-		
-		$height = ' height:'. $height . 'px;' ;
-		
-		// If width is numeric then px else assume there is a %
-		if (is_numeric($width)) {
-				$width = ' width:' . $width . '';
-		}	else {
-			$width = ' width:' . $width . '%';
-		}
-		//return 'test'; 
-		return '<img src=data:image/jpg;base64,'.base64_encode($img) . $width . $height . ' class=pdfimage_embed_image>'; 
-		//return   "<img src=data:image/jpg;base64,".base64_encode($img). ">"; 
-	}	
-	// Popup
-	IF ($style=='popup')  {
-		
-	
-		if (str_starts_with(JVersion::MAJOR_VERSION, 3)) {
-			
-			JHTML::_('behavior.modal');
-			return '<a class="modal" rel="{handler: \'iframe\', size: {x:'. $width .', y:'. $height .'}}" href="data:image/jpg;base64,'.  base64_encode($img) . '">'. $linktext .'</a>';
-			
-		}ELSE {
-					
-			$randomId = rand(0, 1000); // important when there are multiple popup pdfs on one page with different settings
-		
-			HTMLHelper::_('bootstrap.modal', '.selector', []);
-			
-			return '<p><a data-bs-toggle="modal" data-bs-target="#exampleModal'. (string)$randomId .'" > '. $linktext .' </a></p>
-					<div id="exampleModal'. (string)$randomId .'" class="modal fade" tabindex="-1" >
-						<div class="modal-dialog" style="transform: translateX(-50%); left: 0px;" >
-							<div class="modal-content" style="max-height:'.$height.'px;max-width:'.$width.'px;">
-								<div class="modal-header">
-									'. $linktext .'
-									<button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-								</div>
-								<div class="modal-body" >
-									<img src="data:image/jpg;base64,'.  base64_encode($img) . '" >
-								</div>
-							</div>
-						</div>
-					</div>';
-		}
-
-	}
-	// New window
-	IF ($style=='new')  {
-		return	'<a class="pdfviewer_button" target=_blank href="data:image/jpg;base64,' . base64_encode($img) . '">'. $linktext .'</a>';  
-	}
-
-	
+        return '';
+    }
 }
