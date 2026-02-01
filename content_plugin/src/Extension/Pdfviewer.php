@@ -7,28 +7,33 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-//namespace Tazzios\Plugin\Content\pdfviewer;
+namespace Tazzios\Plugin\Content\Pdfviewer\Extension;
 
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\CMS\Version;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\Database\DatabaseInterface;
 
-/**
- * Plugin to embed PDF files into Joomla articles using {pdfviewer ...}
- */
-class PlgContentPdfviewer extends CMSPlugin 
+class Pdfviewer extends CMSPlugin
 {
+  
+
+/*    public function __construct($dispatcher, array $config)
+    {
+        parent::__construct($dispatcher, $config);
+        $this->db = \Joomla\CMS\Factory::getDbo();
+    }
+*/
     /**
      * Event: onContentPrepare
      */
     public function onContentPrepare($context, &$article, &$params, $page = 0)
     {
+    
         // Don't process when indexing for smart search
         if ($context === 'com_finder.indexer') {
             return true;
@@ -265,7 +270,7 @@ class PlgContentPdfviewer extends CMSPlugin
         $files_uploaddir = $params->get('files_uploaddir');
 
 		// get categorie path
-		$db = Factory::getDbo();
+		$db = \Joomla\CMS\Factory::getDbo();
 		$db->setQuery("WITH RECURSIVE n AS 
 			( SELECT id, parent_id, concat('/', title ,'/') AS path  
 			FROM #__jdownloads_categories 

@@ -2,17 +2,17 @@
 <extension version="1.0" type="plugin" group="content" method="upgrade">
 	<name>Content - pdfviewer</name>
 	<author>Tazzios</author>
-	<creationDate>March 2024</creationDate>
+	<creationDate>Februari 2026</creationDate>
 	<copyright></copyright>
 	<license>GNU/GPLv3 www.gnu.org/licenses/gpl-3.0.html</license>
 	<authorEmail></authorEmail>
 	<authorUrl>https://github.com/Tazzios</authorUrl>
-	<version>1.4.1</version>
+	<version>1.5.0</version>
+	<namespace path="src">Tazzios\Plugin\Content\Pdfviewer</namespace>
 	<description>content plugin for PDF</description>
 	<files>
-		<filename plugin="pdfviewer">pdfviewer.php</filename>
-		<filename>index.html</filename>
-		<filename>pdfviewer.xml</filename>
+        <folder plugin="pdfviewer">services</folder>
+        <folder>src</folder>
 		<folder>assets</folder>
 	</files>
 
