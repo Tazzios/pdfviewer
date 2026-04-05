@@ -19,7 +19,7 @@ Compared to other existing pdfviewer for joomla this one is focused on integrati
 
 ## Examples
 
-[Demo website](famrodenburg.net/demo/)
+[Demo website](https://famrodenburg.net/demo/)
 
 ### basic article examples
 
