@@ -1,10 +1,13 @@
+V1.6.0 September 2026  
+  
+New: Joomla 6 compatible
 
 V1.4.1 october 2025
 Long overdue
 
-Content plugin 
-Update: PDFjs to5.4.149
-Improved: do not place paragraph arounf textlink #37
+Content plugin  
+Update: PDFjs to5.4.149  
+Improved: do not place paragraph around textlink #37  
 Improved: code
 
 V1.4.0 march 2024
