@@ -88,7 +88,7 @@ class PlgContentPdfviewer extends CMSPlugin
                         $output = "jdownloads is not installed";
                     }
                 } elseif (isset($tagparameters['file'])) {
-                    $filelink = trim($tagparameters['file']);
+                    $filelink = static::buildFileLink($tagparameters['file']);
                 }
 
                 if ($showpdfpreview === 'yes') {
@@ -111,7 +111,11 @@ class PlgContentPdfviewer extends CMSPlugin
             }
 
             // Replace only first occurrence
-            $article->text = preg_replace("|$match[0]|", addcslashes($output, '\\$'), $article->text, 1);
+            $pos = strpos($article->text, $match[0]);
+
+			if ($pos !== false) {
+				$article->text = substr_replace($article->text, $output, $pos, strlen($match[0]));
+			}
         }
     }
 
@@ -130,6 +134,36 @@ class PlgContentPdfviewer extends CMSPlugin
         $tagparameters = array_combine($r[1], $r[2]);
         return is_array($tagparameters) ? array_change_key_case($tagparameters, CASE_LOWER) : [];
     }
+	
+	
+	private static function buildFileLink(string $file): string
+	{
+		$file = trim(trim($file), '"\'');
+		$file = str_replace('%20', ' ', $file);
+
+		if ($file === '') {
+			return '';
+		}
+
+		// Absolute or protocol relative URL: leave untouched
+		if (preg_match('#^(?:[a-z][a-z0-9+.-]*:)?//#i', $file) || strpos($file, 'data:') === 0) {
+			return $file;
+		}
+
+		$basepath = rtrim(Uri::root(true), '/');
+
+		if (strpos($file, '/') === 0) {
+			if ($basepath !== '' && strpos($file, $basepath . '/') !== 0) {
+				$file = $basepath . $file;
+			}
+
+			return $file;
+		}
+
+		return $basepath . '/' . ltrim($file, '/');
+	}
+	
+	
 
     /**
      * Build the #search, #page, etc. part for PDF.js viewer
@@ -149,6 +183,7 @@ class PlgContentPdfviewer extends CMSPlugin
 		6 param nameddest
 		7 param page					
 		*/
+		
 
         if ($input->get('highlight', '', 'BASE64')) {
             $search = base64_decode(htmlspecialchars($input->get('highlight', '', 'BASE64')));
@@ -221,7 +256,7 @@ class PlgContentPdfviewer extends CMSPlugin
             ? $base . "templates/$template/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html"
             : $base . "plugins/content/pdfviewer/assets/pdfjs/web/viewer.html";
 
-        $filelink = urlencode($filelink);
+        $filelink = strtr(rawurlencode($filelink), ['%2F' => '/', '%3A' => ':']);
 
         if ($style === 'embed') {
             $heightStyle = 'height:' . (int)$height . 'px;';
