@@ -14,8 +14,8 @@ Compared to other existing pdfviewer for joomla this one is focused on integrati
 - Customize height and width for each PDF embedding.
 - Advanced jDownloads integration
 - Show one page as an image
-- Editor button
 
+The Editor button is gone. :(
 
 ## Examples
 
@@ -26,8 +26,8 @@ Compared to other existing pdfviewer for joomla this one is focused on integrati
 Show jdownloads file with ID 4.  
 >{pdfviewer jdownloadsid=4 }
 
-Link to a pdf file on other domain 
->{pdfviewer file=https://domain.com/documents/file.pdf }  
+Link to a pdf file on other domain (does not work when CORS is active on that domain)
+>{pdfviewer file=https://raw.githubusercontent.com/mozilla/pdf.js/master/examples/learning/helloworld.pdf }  
 
 Link to a pdf file relative to domain name 
 >{pdfviewer file=/documents/file.pdf }  
