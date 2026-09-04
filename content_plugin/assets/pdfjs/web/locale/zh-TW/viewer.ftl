@@ -112,14 +112,6 @@ pdfjs-document-properties-size-kb = { NUMBER($kb, maximumSignificantDigits: 3) }
 #   $mb (Number) - the PDF file size in megabytes
 #   $b (Number) - the PDF file size in bytes
 pdfjs-document-properties-size-mb = { NUMBER($mb, maximumSignificantDigits: 3) } MB（{ $b } 位元組）
-# Variables:
-#   $size_kb (Number) - the PDF file size in kilobytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-kb = { $size_kb } KB（{ $size_b } 位元組）
-# Variables:
-#   $size_mb (Number) - the PDF file size in megabytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-mb = { $size_mb } MB（{ $size_b } 位元組）
 pdfjs-document-properties-title = 標題：
 pdfjs-document-properties-author = 作者：
 pdfjs-document-properties-subject = 主旨：
@@ -129,10 +121,6 @@ pdfjs-document-properties-modification-date = 修改日期：
 # Variables:
 #   $dateObj (Date) - the creation/modification date and time of the PDF file
 pdfjs-document-properties-date-time-string = { DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
-# Variables:
-#   $date (Date) - the creation/modification date of the PDF file
-#   $time (Time) - the creation/modification time of the PDF file
-pdfjs-document-properties-date-string = { $date } { $time }
 pdfjs-document-properties-creator = 建立者：
 pdfjs-document-properties-producer = PDF 產生器：
 pdfjs-document-properties-version = PDF 版本：
@@ -165,6 +153,23 @@ pdfjs-document-properties-linearized = 快速 Web 檢視：
 pdfjs-document-properties-linearized-yes = 是
 pdfjs-document-properties-linearized-no = 否
 pdfjs-document-properties-close-button = 關閉
+pdfjs-digital-signature-properties-view-certificate = 檢視憑證
+# Shown beneath an invalid signature card to explain why verification
+# failed. The text comes from NSS (e.g. "Signature integrity has been
+# compromised", "PKCS#7 signature could not be parsed") and is not
+# itself localized — it is the underlying error message produced by
+# the verification backend.
+# Variables:
+#   $reason (String) - error message describing why the signature
+#                      could not be verified.
+pdfjs-digital-signature-properties-reason = 原因：{ $reason }
+# Variables:
+#   $dateObj (Date) - the signing time from the /Sig dict's /M entry.
+pdfjs-digital-signature-properties-timestamp = 時間戳記：{ DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
+# Variables:
+#   $count (Number) - number of nested sub-signatures (one per earlier
+#                     incremental revision of the document).
+pdfjs-digital-signature-properties-sub-signatures = 子簽章（{ $count }）
 
 ## Print
 
@@ -213,6 +218,15 @@ pdfjs-thumb-page-title =
 #   $page (Number) - the page number
 pdfjs-thumb-page-canvas =
     .aria-label = 第 { $page } 頁的縮圖
+# Variables:
+#   $page (Number) - the page number
+pdfjs-thumb-page-checkbox1 =
+    .title = 選擇第 { $page } 頁
+# Variables:
+#   $page (Number) - the page number
+#   $total (Number) - the number of pages
+pdfjs-thumb-page-title1 =
+    .title = 第 { $page } 頁，共 { $total } 頁
 
 ## Find panel button title and messages
 
@@ -267,10 +281,6 @@ pdfjs-rendering-error = 描繪頁面時發生錯誤。
 
 ## Annotations
 
-# Variables:
-#   $date (Date) - the modification date of the annotation
-#   $time (Time) - the modification time of the annotation
-pdfjs-annotation-date-string = { $date } { $time }
 # .alt: This is used as a tooltip.
 # Variables:
 #   $type (String) - an annotation type from a list defined in the PDF spec
@@ -316,6 +326,10 @@ pdfjs-comment-floating-button =
     .title = 註解
     .aria-label = 註解
 pdfjs-comment-floating-button-label = 註解
+pdfjs-editor-comment-button =
+    .title = 註解
+    .aria-label = 註解
+pdfjs-editor-comment-button-label = 註解
 pdfjs-editor-signature-button =
     .title = 加入簽章
 pdfjs-editor-signature-button-label = 加入簽章
@@ -378,20 +392,23 @@ pdfjs-editor-add-saved-signature-button =
 pdfjs-free-text2 =
     .aria-label = 文字編輯器
     .default-content = 請打字…
-pdfjs-free-text =
-    .aria-label = 文本編輯器
-pdfjs-free-text-default-content = 在此打字…
-pdfjs-ink =
-    .aria-label = 圖形編輯器
-pdfjs-ink-canvas =
-    .aria-label = 使用者建立的圖片
+# Used to show how many comments are present in the pdf file.
+# Variables:
+#   $count (Number) - the number of comments.
+pdfjs-editor-comments-sidebar-title = 註解
+pdfjs-editor-comments-sidebar-close-button =
+    .title = 關閉側邊欄
+    .aria-label = 關閉側邊欄
+pdfjs-editor-comments-sidebar-close-button-label = 關閉側邊欄
+# Instructional copy to add a comment by selecting text or an annotations.
+pdfjs-editor-comments-sidebar-no-comments1 = 想把哪個部分記下來？可以畫螢光強調，並且留下註解。
+pdfjs-editor-comments-sidebar-no-comments-link = 更多資訊
 
 ## Alt-text dialog
 
 pdfjs-editor-alt-text-button-label = 替代文字
 pdfjs-editor-alt-text-edit-button =
     .aria-label = 編輯替代文字
-pdfjs-editor-alt-text-edit-button-label = 編輯替代文字
 pdfjs-editor-alt-text-dialog-label = 挑選一種
 pdfjs-editor-alt-text-dialog-description = 替代文字可協助盲人，或於圖片無法載入時提供說明。
 pdfjs-editor-alt-text-add-description-label = 新增描述
@@ -411,14 +428,6 @@ pdfjs-editor-alt-text-button =
 ## Editor resizers
 ## This is used in an aria label to help to understand the role of the resizer.
 
-pdfjs-editor-resizer-label-top-left = 左上角 — 調整大小
-pdfjs-editor-resizer-label-top-middle = 頂部中間 — 調整大小
-pdfjs-editor-resizer-label-top-right = 右上角 — 調整大小
-pdfjs-editor-resizer-label-middle-right = 中間右方 — 調整大小
-pdfjs-editor-resizer-label-bottom-right = 右下角 — 調整大小
-pdfjs-editor-resizer-label-bottom-middle = 底部中間 — 調整大小
-pdfjs-editor-resizer-label-bottom-left = 左下角 — 調整大小
-pdfjs-editor-resizer-label-middle-left = 中間左方 — 調整大小
 pdfjs-editor-resizer-top-left =
     .aria-label = 左上角 — 調整大小
 pdfjs-editor-resizer-top-middle =
@@ -539,6 +548,7 @@ pdfjs-editor-undo-bar-message-freetext = 已移除文字
 pdfjs-editor-undo-bar-message-ink = 已移除繪圖
 pdfjs-editor-undo-bar-message-stamp = 已移除圖片
 pdfjs-editor-undo-bar-message-signature = 已移除簽章
+pdfjs-editor-undo-bar-message-comment = 已移除註解
 # Variables:
 #   $count (Number) - the number of removed annotations.
 pdfjs-editor-undo-bar-message-multiple = 已移除 { $count } 筆註解
@@ -606,25 +616,154 @@ pdfjs-editor-add-signature-cancel-button = 取消
 pdfjs-editor-add-signature-add-button = 新增
 pdfjs-editor-edit-signature-update-button = 更新
 
+## Comment popup
+
+pdfjs-editor-edit-comment-popup-button-label = 編輯註解
+pdfjs-editor-edit-comment-popup-button =
+    .title = 編輯註解
+pdfjs-editor-delete-comment-popup-button-label = 移除註解
+pdfjs-editor-delete-comment-popup-button =
+    .title = 移除註解
+pdfjs-show-comment-button =
+    .title = 顯示註解
+
 ##  Edit a comment dialog
 
-pdfjs-editor-edit-comment-actions-button-label = 動作
-pdfjs-editor-edit-comment-actions-button =
-    .title = 動作
-pdfjs-editor-edit-comment-close-button-label = 關閉
-pdfjs-editor-edit-comment-close-button =
-    .title = 關閉
-pdfjs-editor-edit-comment-actions-edit-button-label = 編輯
-pdfjs-editor-edit-comment-actions-delete-button-label = 刪除
-pdfjs-editor-edit-comment-manager-text-input =
-    .placeholder = 輸入您的註解
-pdfjs-editor-edit-comment-manager-cancel-button = 取消
-pdfjs-editor-edit-comment-manager-save-button = 儲存
+# An existing comment is edited
+pdfjs-editor-edit-comment-dialog-title-when-editing = 編輯註解
+pdfjs-editor-edit-comment-dialog-save-button-when-editing = 更新
+# No existing comment
+pdfjs-editor-edit-comment-dialog-title-when-adding = 新增註解
+pdfjs-editor-edit-comment-dialog-save-button-when-adding = 新增
+pdfjs-editor-edit-comment-dialog-text-input =
+    .placeholder = 在此打字…
+pdfjs-editor-edit-comment-dialog-cancel-button = 取消
 
 ## Edit a comment button in the editor toolbar
 
-pdfjs-editor-edit-comment-button =
-    .title = 編輯註解
+pdfjs-editor-add-comment-button =
+    .title = 新增註解
+
+## The view manager is a sidebar displaying different views:
+##  - thumbnails;
+##  - outline;
+##  - attachments;
+##  - layers.
+## The thumbnails view is used to edit the pdf: remove/insert pages, ...
+
+pdfjs-toggle-views-manager-notification-button =
+    .title = 切換側邊欄（包含縮圖、大綱、附件、圖層的文件）
+pdfjs-toggle-views-manager-button1-label = 管理頁面
+pdfjs-views-manager-sidebar =
+    .aria-label = 側邊欄
+pdfjs-views-manager-sidebar-resizer =
+    .aria-label = 調整側邊欄大小
+pdfjs-views-manager-view-selector-button =
+    .title = 畫面
+pdfjs-views-manager-view-selector-button-label = 畫面
+pdfjs-views-manager-pages-title = 頁面
+pdfjs-views-manager-outlines-title1 = 文件大綱
+    .title = 文件大綱（點兩下即可展開/摺疊所有項目）
+pdfjs-views-manager-attachments-title = 附件
+pdfjs-views-manager-layers-title1 = 圖層
+    .title = 圖層（點兩下即可將所有圖層重設回預設狀態）
+pdfjs-views-manager-pages-option-label = 頁面
+pdfjs-views-manager-outlines-option-label = 文件大綱
+pdfjs-views-manager-attachments-option-label = 附件
+pdfjs-views-manager-layers-option-label = 圖層
+pdfjs-views-manager-add-file-button =
+    .title = 新增檔案
+pdfjs-views-manager-add-file-button-label = 新增檔案
+# Variables:
+#   $count (Number) - the number of selected pages.
+pdfjs-views-manager-pages-status-action-label = 已選擇 { $count } 頁
+pdfjs-views-manager-pages-status-none-action-label = 選擇頁面
+pdfjs-views-manager-pages-status-action-button-label = 管理
+pdfjs-views-manager-pages-status-copy-button-label = 複製
+pdfjs-views-manager-pages-status-cut-button-label = 剪下
+pdfjs-views-manager-pages-status-delete-button-label = 刪除
+pdfjs-views-manager-pages-status-export-selected-button-label = 匯出選擇項目…
+# Variables:
+#   $count (Number) - the number of selected pages to be cut.
+pdfjs-views-manager-status-undo-cut-label = 已剪下 { $count } 頁
+# Variables:
+#   $count (Number) - the number of selected pages to be copied.
+pdfjs-views-manager-pages-status-undo-copy-label = 已複製 { $count } 頁
+# Variables:
+#   $count (Number) - the number of selected pages to be deleted.
+pdfjs-views-manager-pages-status-undo-delete-label = 已刪除 { $count } 頁
+pdfjs-views-manager-pages-status-waiting-ready-label = 正在準備您的檔案…
+pdfjs-views-manager-pages-status-waiting-uploading-label = 正在上傳檔案…
+pdfjs-views-manager-status-warning-cut-label = 無法剪下頁面，請重新整理頁面後再試一次。
+pdfjs-views-manager-status-warning-copy-label = 無法複製頁面，請重新整理頁面後再試一次。
+pdfjs-views-manager-status-warning-delete-label = 無法刪除頁面，請重新整理頁面後再試一次。
+pdfjs-views-manager-status-warning-save-label = 無法儲存頁面，請重新整理頁面後再試一次。
+pdfjs-views-manager-status-undo-button-label = 還原
+pdfjs-views-manager-status-done-button-label = 完成
+pdfjs-views-manager-status-close-button =
+    .title = 關閉
+pdfjs-views-manager-status-close-button-label = 關閉
+pdfjs-views-manager-paste-button-label = 貼上
+pdfjs-views-manager-paste-button-before =
+    .title = 貼到第一頁前
+# Variables:
+#   $page (Number) - the page number after which the paste button is.
+pdfjs-views-manager-paste-button-after =
+    .title = 貼到第 { $page } 頁後
+# Badge used to promote a new feature in the UI, keep it as short as possible.
+# It's spelled uppercase for English, but it can be translated as usual.
+pdfjs-new-badge-content = 新功能
+pdfjs-views-manager-waiting-for-file = 正在上傳檔案…
+pdfjs-toggle-views-manager-button1 =
+    .title = 管理頁面
+
+## Digital signature properties (signature verification panel)
+
+pdfjs-digital-signature-properties-button =
+    .title = 數位簽章屬性
+    .aria-label = 數位簽章屬性
+pdfjs-digital-signature-properties-button-label = 數位簽章屬性
+
+## Banner shown above the signature list summarising the overall
+## verification state of the document. Each variant is selected by the
+## viewer based on the worst per-signature status; one signature is
+## enough to lower the banner.
+##
+## Variables:
+##   $count (Number) - number of signatures at the worst level.
+
+pdfjs-digital-signature-properties-banner-verified = 文件使用有效的數位簽章進行簽署
+pdfjs-digital-signature-properties-banner-unknown = 文件已進行簽署，但無法驗證當中的 { $count } 筆數位簽章
+pdfjs-digital-signature-properties-banner-untrusted = 文件已進行簽署，但當中的 { $count } 筆數位簽章不受信任
+pdfjs-digital-signature-properties-banner-expired = 文件已進行簽署，但當中的 { $count } 筆數位簽章已過期
+pdfjs-digital-signature-properties-banner-invalid = 文件中有 { $count } 筆無效的數位簽章
+pdfjs-digital-signature-properties-banner-revoked = 文件已進行簽署，但當中的 { $count } 筆數位簽章已廢止
+
+## Per-signature status row. Only three distinct strings are needed:
+## the signature crypto either verified (the cert chain may still be
+## untrusted/expired/revoked, but that's surfaced on the cert row
+## below), or it failed, or its sub-format isn't supported.
+
+pdfjs-digital-signature-properties-status-verified = 狀態：已驗證簽章
+pdfjs-digital-signature-properties-status-invalid = 狀態：簽章無效
+pdfjs-digital-signature-properties-status-unknown = 狀態：無法驗證（不支援）
+
+## Per-signature certificate row. The variants with an issuer / date in
+## parentheses embed fully-localized context — no English fall-through.
+##
+## Variables:
+##   $issuer (String) - issuer or subject common name from the cert.
+##   $dateObj (Date)  - notAfter date for the expired-with-date form.
+
+pdfjs-digital-signature-properties-certificate-trusted = 憑證：受信任（{ $issuer }）
+pdfjs-digital-signature-properties-certificate-unknown = 憑證：無法使用
+pdfjs-digital-signature-properties-certificate-untrusted = 憑證：未受信任
+pdfjs-digital-signature-properties-certificate-untrusted-unknown-issuer = 憑證：未知的簽發者（{ $issuer }）
+pdfjs-digital-signature-properties-certificate-untrusted-self-signed = 憑證：自行簽署（{ $issuer }）
+pdfjs-digital-signature-properties-certificate-untrusted-untrusted-issuer = 憑證：未受信任的簽發者（{ $issuer }）
+pdfjs-digital-signature-properties-certificate-expired = 憑證：已過期
+pdfjs-digital-signature-properties-certificate-expired-with-date = 憑證：已過期（{ DATETIME($dateObj, dateStyle: "medium") }）
+pdfjs-digital-signature-properties-certificate-revoked = 憑證：已廢止
 
 ## Main menu for adding/removing signatures
 

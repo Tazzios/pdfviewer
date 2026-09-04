@@ -112,14 +112,6 @@ pdfjs-document-properties-size-kb = { NUMBER($kb, maximumSignificantDigits: 3) }
 #   $mb (Number) - the PDF file size in megabytes
 #   $b (Number) - the PDF file size in bytes
 pdfjs-document-properties-size-mb = { NUMBER($mb, maximumSignificantDigits: 3) } MB ({ $b } bayt)
-# Variables:
-#   $size_kb (Number) - the PDF file size in kilobytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-kb = { $size_kb } KB ({ $size_b } bayt)
-# Variables:
-#   $size_mb (Number) - the PDF file size in megabytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-mb = { $size_mb } MB ({ $size_b } bayt)
 pdfjs-document-properties-title = Başlık:
 pdfjs-document-properties-author = Yazar:
 pdfjs-document-properties-subject = Konu:
@@ -129,10 +121,6 @@ pdfjs-document-properties-modification-date = Değiştirme tarihi:
 # Variables:
 #   $dateObj (Date) - the creation/modification date and time of the PDF file
 pdfjs-document-properties-date-time-string = { DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
-# Variables:
-#   $date (Date) - the creation/modification date of the PDF file
-#   $time (Time) - the creation/modification time of the PDF file
-pdfjs-document-properties-date-string = { $date } { $time }
 pdfjs-document-properties-creator = Oluşturan:
 pdfjs-document-properties-producer = PDF üreticisi:
 pdfjs-document-properties-version = PDF sürümü:
@@ -165,6 +153,27 @@ pdfjs-document-properties-linearized = Hızlı web görünümü:
 pdfjs-document-properties-linearized-yes = Evet
 pdfjs-document-properties-linearized-no = Hayır
 pdfjs-document-properties-close-button = Kapat
+pdfjs-digital-signature-properties-view-certificate = Sertifikayı göster
+# Shown beneath an invalid signature card to explain why verification
+# failed. The text comes from NSS (e.g. "Signature integrity has been
+# compromised", "PKCS#7 signature could not be parsed") and is not
+# itself localized — it is the underlying error message produced by
+# the verification backend.
+# Variables:
+#   $reason (String) - error message describing why the signature
+#                      could not be verified.
+pdfjs-digital-signature-properties-reason = Neden: { $reason }
+# Variables:
+#   $dateObj (Date) - the signing time from the /Sig dict's /M entry.
+pdfjs-digital-signature-properties-timestamp = Zaman damgası: { DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
+# Variables:
+#   $count (Number) - number of nested sub-signatures (one per earlier
+#                     incremental revision of the document).
+pdfjs-digital-signature-properties-sub-signatures =
+    { $count ->
+        [one] Alt imza ({ $count })
+       *[other] Alt imzalar ({ $count })
+    }
 
 ## Print
 
@@ -213,6 +222,15 @@ pdfjs-thumb-page-title =
 #   $page (Number) - the page number
 pdfjs-thumb-page-canvas =
     .aria-label = { $page }. sayfanın küçük hâli
+# Variables:
+#   $page (Number) - the page number
+pdfjs-thumb-page-checkbox1 =
+    .title = { $page }. sayfayı seç
+# Variables:
+#   $page (Number) - the page number
+#   $total (Number) - the number of pages
+pdfjs-thumb-page-title1 =
+    .title = Sayfa { $page }/{ $total }
 
 ## Find panel button title and messages
 
@@ -275,10 +293,6 @@ pdfjs-rendering-error = Sayfa yorumlanırken bir hata oluştu.
 
 ## Annotations
 
-# Variables:
-#   $date (Date) - the modification date of the annotation
-#   $time (Time) - the modification time of the annotation
-pdfjs-annotation-date-string = { $date } { $time }
 # .alt: This is used as a tooltip.
 # Variables:
 #   $type (String) - an annotation type from a list defined in the PDF spec
@@ -324,6 +338,10 @@ pdfjs-comment-floating-button =
     .title = Yorum ekle
     .aria-label = Yorum ekle
 pdfjs-comment-floating-button-label = Yorum ekle
+pdfjs-editor-comment-button =
+    .title = Yorum ekle
+    .aria-label = Yorum ekle
+pdfjs-editor-comment-button-label = Yorum ekle
 pdfjs-editor-signature-button =
     .title = İmza ekle
 pdfjs-editor-signature-button-label = İmza ekle
@@ -386,20 +404,27 @@ pdfjs-editor-add-saved-signature-button =
 pdfjs-free-text2 =
     .aria-label = Metin düzenleyicisi
     .default-content = Yazmaya başlayın…
-pdfjs-free-text =
-    .aria-label = Metin düzenleyicisi
-pdfjs-free-text-default-content = Yazmaya başlayın…
-pdfjs-ink =
-    .aria-label = Çizim düzenleyicisi
-pdfjs-ink-canvas =
-    .aria-label = Kullanıcı tarafından oluşturulan resim
+# Used to show how many comments are present in the pdf file.
+# Variables:
+#   $count (Number) - the number of comments.
+pdfjs-editor-comments-sidebar-title =
+    { $count ->
+        [one] Yorum
+       *[other] Yorumlar
+    }
+pdfjs-editor-comments-sidebar-close-button =
+    .title = Kenar çubuğunu kapat
+    .aria-label = Kenar çubuğunu kapat
+pdfjs-editor-comments-sidebar-close-button-label = Kenar çubuğunu kapat
+# Instructional copy to add a comment by selecting text or an annotations.
+pdfjs-editor-comments-sidebar-no-comments1 = Not almaya değer bir şey mi gördünüz? Onu işaretleyip yorum yazabilirsiniz.
+pdfjs-editor-comments-sidebar-no-comments-link = Daha fazla bilgi alın
 
 ## Alt-text dialog
 
 pdfjs-editor-alt-text-button-label = Alternatif metin
 pdfjs-editor-alt-text-edit-button =
     .aria-label = Alternatif metni düzenle
-pdfjs-editor-alt-text-edit-button-label = Alternatif metni düzenle
 pdfjs-editor-alt-text-dialog-label = Bir seçenek seçin
 pdfjs-editor-alt-text-dialog-description = Alternatif metin, insanlar resmi göremediğinde veya resim yüklenmediğinde işe yarar.
 pdfjs-editor-alt-text-add-description-label = Açıklama ekle
@@ -419,14 +444,6 @@ pdfjs-editor-alt-text-button =
 ## Editor resizers
 ## This is used in an aria label to help to understand the role of the resizer.
 
-pdfjs-editor-resizer-label-top-left = Sol üst köşe — yeniden boyutlandır
-pdfjs-editor-resizer-label-top-middle = Üst orta — yeniden boyutlandır
-pdfjs-editor-resizer-label-top-right = Sağ üst köşe — yeniden boyutlandır
-pdfjs-editor-resizer-label-middle-right = Orta sağ — yeniden boyutlandır
-pdfjs-editor-resizer-label-bottom-right = Sağ alt köşe — yeniden boyutlandır
-pdfjs-editor-resizer-label-bottom-middle = Alt orta — yeniden boyutlandır
-pdfjs-editor-resizer-label-bottom-left = Sol alt köşe — yeniden boyutlandır
-pdfjs-editor-resizer-label-middle-left = Orta sol — yeniden boyutlandır
 pdfjs-editor-resizer-top-left =
     .aria-label = Sol üst köşe — yeniden boyutlandır
 pdfjs-editor-resizer-top-middle =
@@ -500,11 +517,11 @@ pdfjs-editor-new-alt-text-added-button =
 pdfjs-editor-new-alt-text-added-button-label = Alt metin eklendi
 # This is a button that users can click to open the alt text editor and add alt text when it is not present.
 pdfjs-editor-new-alt-text-missing-button =
-    .aria-label = Alternatif metin eksik
+    .aria-label = Alt metin eksik
 pdfjs-editor-new-alt-text-missing-button-label = Alt metin eksik
 # This is a button that opens up the alt text modal where users should review the alt text that was automatically generated.
 pdfjs-editor-new-alt-text-to-review-button =
-    .aria-label = Alternatif metni incele
+    .aria-label = Alt metni incele
 pdfjs-editor-new-alt-text-to-review-button-label = Alt metni incele
 # "Created automatically" is a prefix that will be added to the beginning of any alt text that has been automatically generated. After the colon, the user will see/hear the actual alt text description. If the alt text has been edited by a human, this prefix will not appear.
 # Variables:
@@ -547,6 +564,7 @@ pdfjs-editor-undo-bar-message-freetext = Metin silindi
 pdfjs-editor-undo-bar-message-ink = Çizim silindi
 pdfjs-editor-undo-bar-message-stamp = Görsel silindi
 pdfjs-editor-undo-bar-message-signature = İmza kaldırıldı
+pdfjs-editor-undo-bar-message-comment = Yorum silindi
 # Variables:
 #   $count (Number) - the number of removed annotations.
 pdfjs-editor-undo-bar-message-multiple =
@@ -618,25 +636,190 @@ pdfjs-editor-add-signature-cancel-button = Vazgeç
 pdfjs-editor-add-signature-add-button = Ekle
 pdfjs-editor-edit-signature-update-button = Güncelle
 
+## Comment popup
+
+pdfjs-editor-edit-comment-popup-button-label = Yorumu düzenle
+pdfjs-editor-edit-comment-popup-button =
+    .title = Yorumu düzenle
+pdfjs-editor-delete-comment-popup-button-label = Yorumu sil
+pdfjs-editor-delete-comment-popup-button =
+    .title = Yorumu sil
+pdfjs-show-comment-button =
+    .title = Yorumu göster
+
 ##  Edit a comment dialog
 
-pdfjs-editor-edit-comment-actions-button-label = Eylemler
-pdfjs-editor-edit-comment-actions-button =
-    .title = Eylemler
-pdfjs-editor-edit-comment-close-button-label = Kapat
-pdfjs-editor-edit-comment-close-button =
-    .title = Kapat
-pdfjs-editor-edit-comment-actions-edit-button-label = Düzenle
-pdfjs-editor-edit-comment-actions-delete-button-label = Sil
-pdfjs-editor-edit-comment-manager-text-input =
-    .placeholder = Yorumunuzu yazın
-pdfjs-editor-edit-comment-manager-cancel-button = Vazgeç
-pdfjs-editor-edit-comment-manager-save-button = Kaydet
+# An existing comment is edited
+pdfjs-editor-edit-comment-dialog-title-when-editing = Yorumu düzenle
+pdfjs-editor-edit-comment-dialog-save-button-when-editing = Güncelle
+# No existing comment
+pdfjs-editor-edit-comment-dialog-title-when-adding = Yorum ekle
+pdfjs-editor-edit-comment-dialog-save-button-when-adding = Ekle
+pdfjs-editor-edit-comment-dialog-text-input =
+    .placeholder = Yazmaya başlayın…
+pdfjs-editor-edit-comment-dialog-cancel-button = Vazgeç
 
 ## Edit a comment button in the editor toolbar
 
-pdfjs-editor-edit-comment-button =
-    .title = Yorumu düzenle
+pdfjs-editor-add-comment-button =
+    .title = Yorum ekle
+
+## The view manager is a sidebar displaying different views:
+##  - thumbnails;
+##  - outline;
+##  - attachments;
+##  - layers.
+## The thumbnails view is used to edit the pdf: remove/insert pages, ...
+
+pdfjs-toggle-views-manager-notification-button =
+    .title = Kenar çubuğunu aç/kapat (Belge, küçük resimler/ana hat/ekler/katmanlar içeriyor)
+pdfjs-toggle-views-manager-button1-label = Sayfaları yönet
+pdfjs-views-manager-sidebar =
+    .aria-label = Kenar çubuğu
+pdfjs-views-manager-sidebar-resizer =
+    .aria-label = Kenar çubuğu boyutlandırıcı
+pdfjs-views-manager-view-selector-button =
+    .title = Görünümler
+pdfjs-views-manager-view-selector-button-label = Görünümler
+pdfjs-views-manager-pages-title = Sayfalar
+pdfjs-views-manager-outlines-title1 = Belge ana hatları
+    .title = Belge ana hatları (Tüm öğeleri genişletmek/daraltmak için çift tıklayın)
+pdfjs-views-manager-attachments-title = Ekler
+pdfjs-views-manager-layers-title1 = Katmanlar
+    .title = Katmanlar (Tüm katmanları varsayılan duruma sıfırlamak için çift tıklayın)
+pdfjs-views-manager-pages-option-label = Sayfalar
+pdfjs-views-manager-outlines-option-label = Belge ana hatları
+pdfjs-views-manager-attachments-option-label = Ekler
+pdfjs-views-manager-layers-option-label = Katmanlar
+pdfjs-views-manager-add-file-button =
+    .title = Dosya ekle
+pdfjs-views-manager-add-file-button-label = Dosya ekle
+# Variables:
+#   $count (Number) - the number of selected pages.
+pdfjs-views-manager-pages-status-action-label =
+    { $count ->
+        [one] { $count } seçili
+       *[other] { $count } seçili
+    }
+pdfjs-views-manager-pages-status-none-action-label = Sayfaları seç
+pdfjs-views-manager-pages-status-action-button-label = Yönet
+pdfjs-views-manager-pages-status-copy-button-label = Kopyala
+pdfjs-views-manager-pages-status-cut-button-label = Kes
+pdfjs-views-manager-pages-status-delete-button-label = Sil
+pdfjs-views-manager-pages-status-export-selected-button-label = Seçilenleri dışa aktar…
+# Variables:
+#   $count (Number) - the number of selected pages to be cut.
+pdfjs-views-manager-status-undo-cut-label =
+    { $count ->
+        [one] 1 sayfa kesildi
+       *[other] { $count } sayfa kesildi
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be copied.
+pdfjs-views-manager-pages-status-undo-copy-label =
+    { $count ->
+        [one] 1 sayfa kopyalandı
+       *[other] { $count } sayfa kopyalandı
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be deleted.
+pdfjs-views-manager-pages-status-undo-delete-label =
+    { $count ->
+        [one] 1 sayfa silindi
+       *[other] { $count } sayfa silindi
+    }
+pdfjs-views-manager-pages-status-waiting-ready-label = Dosyanız hazırlanıyor…
+pdfjs-views-manager-pages-status-waiting-uploading-label = Dosya yükleniyor…
+pdfjs-views-manager-status-warning-cut-label = Kesilemedi. Sayfayı tazeleyip yeniden deneyin.
+pdfjs-views-manager-status-warning-copy-label = Kopyalanamadı. Sayfayı tazeleyip yeniden deneyin.
+pdfjs-views-manager-status-warning-delete-label = Silinemedi. Sayfayı tazeleyip yeniden deneyin.
+pdfjs-views-manager-status-warning-save-label = Kaydedilemedi. Sayfayı tazeleyip yeniden deneyin.
+pdfjs-views-manager-status-undo-button-label = Geri al
+pdfjs-views-manager-status-done-button-label = Tamam
+pdfjs-views-manager-status-close-button =
+    .title = Kapat
+pdfjs-views-manager-status-close-button-label = Kapat
+pdfjs-views-manager-paste-button-label = Yapıştır
+pdfjs-views-manager-paste-button-before =
+    .title = İlk sayfadan önce yapıştır
+# Variables:
+#   $page (Number) - the page number after which the paste button is.
+pdfjs-views-manager-paste-button-after =
+    .title = { $page }. sayfadan sonra yapıştır
+# Badge used to promote a new feature in the UI, keep it as short as possible.
+# It's spelled uppercase for English, but it can be translated as usual.
+pdfjs-new-badge-content = YENİ
+pdfjs-views-manager-waiting-for-file = Dosya yükleniyor…
+pdfjs-toggle-views-manager-button1 =
+    .title = Sayfaları yönet
+
+## Digital signature properties (signature verification panel)
+
+pdfjs-digital-signature-properties-button =
+    .title = Dijital imza özellikleri
+    .aria-label = Dijital imza özellikleri
+pdfjs-digital-signature-properties-button-label = Dijital imza özellikleri
+
+## Banner shown above the signature list summarising the overall
+## verification state of the document. Each variant is selected by the
+## viewer based on the worst per-signature status; one signature is
+## enough to lower the banner.
+##
+## Variables:
+##   $count (Number) - number of signatures at the worst level.
+
+pdfjs-digital-signature-properties-banner-verified = Belge geçerli bir dijital imza ile imzalanmıştır
+pdfjs-digital-signature-properties-banner-unknown =
+    { $count ->
+        [one] Belge imzalanmış ancak { $count } dijital imza doğrulanamadı
+       *[other] Belge imzalanmış ancak { $count } dijital imza doğrulanamadı
+    }
+pdfjs-digital-signature-properties-banner-untrusted =
+    { $count ->
+        [one] Belge, güvenilmeyen { $count } sertifikayla imzalanmış
+       *[other] Belge, güvenilmeyen { $count } sertifikayla imzalanmış
+    }
+pdfjs-digital-signature-properties-banner-expired =
+    { $count ->
+        [one] Belge, süresi dolmuş { $count } sertifika ile imzalanmış
+       *[other] Belge, süresi dolmuş { $count } sertifika ile imzalanmış
+    }
+pdfjs-digital-signature-properties-banner-invalid =
+    { $count ->
+        [one] Belge { $count } geçersiz dijital imza içeriyor
+       *[other] Belge { $count } geçersiz dijital imza içeriyor
+    }
+pdfjs-digital-signature-properties-banner-revoked =
+    { $count ->
+        [one] Belge, iptal edilmiş { $count } sertifika ile imzalanmış
+       *[other] Belge, iptal edilmiş { $count } sertifika ile imzalanmış
+    }
+
+## Per-signature status row. Only three distinct strings are needed:
+## the signature crypto either verified (the cert chain may still be
+## untrusted/expired/revoked, but that's surfaced on the cert row
+## below), or it failed, or its sub-format isn't supported.
+
+pdfjs-digital-signature-properties-status-verified = Durum: İmza doğrulandı
+pdfjs-digital-signature-properties-status-invalid = Durum: İmza geçersiz
+pdfjs-digital-signature-properties-status-unknown = Durum: Doğrulanamadı (desteklenmiyor)
+
+## Per-signature certificate row. The variants with an issuer / date in
+## parentheses embed fully-localized context — no English fall-through.
+##
+## Variables:
+##   $issuer (String) - issuer or subject common name from the cert.
+##   $dateObj (Date)  - notAfter date for the expired-with-date form.
+
+pdfjs-digital-signature-properties-certificate-trusted = Sertifika: Güvenilir ({ $issuer })
+pdfjs-digital-signature-properties-certificate-unknown = Sertifika: Kullanılamıyor
+pdfjs-digital-signature-properties-certificate-untrusted = Sertifika: Güvensiz
+pdfjs-digital-signature-properties-certificate-untrusted-unknown-issuer = Sertifika: Bilinmeyen yayıncı ({ $issuer })
+pdfjs-digital-signature-properties-certificate-untrusted-self-signed = Sertifika: Kendi kendine imzalanmış ({ $issuer })
+pdfjs-digital-signature-properties-certificate-untrusted-untrusted-issuer = Sertifika: Güvenilmeyen yayıncı ({ $issuer })
+pdfjs-digital-signature-properties-certificate-expired = Sertifika: Süresi dolmuş
+pdfjs-digital-signature-properties-certificate-expired-with-date = Sertifika: Süresi dolmuş ({ DATETIME($dateObj, dateStyle: "medium") })
+pdfjs-digital-signature-properties-certificate-revoked = Sertifika: İptal edilmiş
 
 ## Main menu for adding/removing signatures
 

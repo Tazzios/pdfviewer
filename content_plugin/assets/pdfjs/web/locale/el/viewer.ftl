@@ -112,14 +112,6 @@ pdfjs-document-properties-size-kb = { NUMBER($kb, maximumSignificantDigits: 3) }
 #   $mb (Number) - the PDF file size in megabytes
 #   $b (Number) - the PDF file size in bytes
 pdfjs-document-properties-size-mb = { NUMBER($mb, maximumSignificantDigits: 3) } MB ({ $b } bytes)
-# Variables:
-#   $size_kb (Number) - the PDF file size in kilobytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-kb = { $size_kb } KB ({ $size_b } bytes)
-# Variables:
-#   $size_mb (Number) - the PDF file size in megabytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-mb = { $size_mb } MB ({ $size_b } bytes)
 pdfjs-document-properties-title = Τίτλος:
 pdfjs-document-properties-author = Συγγραφέας:
 pdfjs-document-properties-subject = Θέμα:
@@ -129,10 +121,6 @@ pdfjs-document-properties-modification-date = Ημερομηνία τροποπ�
 # Variables:
 #   $dateObj (Date) - the creation/modification date and time of the PDF file
 pdfjs-document-properties-date-time-string = { DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
-# Variables:
-#   $date (Date) - the creation/modification date of the PDF file
-#   $time (Time) - the creation/modification time of the PDF file
-pdfjs-document-properties-date-string = { $date }, { $time }
 pdfjs-document-properties-creator = Δημιουργός:
 pdfjs-document-properties-producer = Παραγωγός PDF:
 pdfjs-document-properties-version = Έκδοση PDF:
@@ -165,6 +153,27 @@ pdfjs-document-properties-linearized = Ταχεία προβολή ιστού:
 pdfjs-document-properties-linearized-yes = Ναι
 pdfjs-document-properties-linearized-no = Όχι
 pdfjs-document-properties-close-button = Κλείσιμο
+pdfjs-digital-signature-properties-view-certificate = Προβολή πιστοποιητικού
+# Shown beneath an invalid signature card to explain why verification
+# failed. The text comes from NSS (e.g. "Signature integrity has been
+# compromised", "PKCS#7 signature could not be parsed") and is not
+# itself localized — it is the underlying error message produced by
+# the verification backend.
+# Variables:
+#   $reason (String) - error message describing why the signature
+#                      could not be verified.
+pdfjs-digital-signature-properties-reason = Αιτία: { $reason }
+# Variables:
+#   $dateObj (Date) - the signing time from the /Sig dict's /M entry.
+pdfjs-digital-signature-properties-timestamp = Χρονοσήμανση: { DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
+# Variables:
+#   $count (Number) - number of nested sub-signatures (one per earlier
+#                     incremental revision of the document).
+pdfjs-digital-signature-properties-sub-signatures =
+    { $count ->
+        [one] Δευτερεύουσα υπογραφή ({ $count })
+       *[other] Δευτερεύουσες υπογραφές ({ $count })
+    }
 
 ## Print
 
@@ -213,6 +222,15 @@ pdfjs-thumb-page-title =
 #   $page (Number) - the page number
 pdfjs-thumb-page-canvas =
     .aria-label = Μικρογραφία σελίδας { $page }
+# Variables:
+#   $page (Number) - the page number
+pdfjs-thumb-page-checkbox1 =
+    .title = Επιλογή σελίδας { $page }
+# Variables:
+#   $page (Number) - the page number
+#   $total (Number) - the number of pages
+pdfjs-thumb-page-title1 =
+    .title = Σελίδα { $page } από { $total }
 
 ## Find panel button title and messages
 
@@ -275,10 +293,6 @@ pdfjs-rendering-error = Προέκυψε σφάλμα κατά την εμφάν
 
 ## Annotations
 
-# Variables:
-#   $date (Date) - the modification date of the annotation
-#   $time (Time) - the modification time of the annotation
-pdfjs-annotation-date-string = { $date }, { $time }
 # .alt: This is used as a tooltip.
 # Variables:
 #   $type (String) - an annotation type from a list defined in the PDF spec
@@ -324,6 +338,10 @@ pdfjs-comment-floating-button =
     .title = Σχόλιο
     .aria-label = Σχόλιο
 pdfjs-comment-floating-button-label = Σχόλιο
+pdfjs-editor-comment-button =
+    .title = Σχόλιο
+    .aria-label = Σχόλιο
+pdfjs-editor-comment-button-label = Σχόλιο
 pdfjs-editor-signature-button =
     .title = Προσθήκη υπογραφής
 pdfjs-editor-signature-button-label = Προσθήκη υπογραφής
@@ -386,20 +404,27 @@ pdfjs-editor-add-saved-signature-button =
 pdfjs-free-text2 =
     .aria-label = Επεξεργασία κειμένου
     .default-content = Ξεκινήστε να πληκτρολογείτε…
-pdfjs-free-text =
-    .aria-label = Επεξεργασία κειμένου
-pdfjs-free-text-default-content = Ξεκινήστε να πληκτρολογείτε…
-pdfjs-ink =
-    .aria-label = Επεξεργασία σχεδίων
-pdfjs-ink-canvas =
-    .aria-label = Εικόνα από τον χρήστη
+# Used to show how many comments are present in the pdf file.
+# Variables:
+#   $count (Number) - the number of comments.
+pdfjs-editor-comments-sidebar-title =
+    { $count ->
+        [one] Σχόλια
+       *[other] Σχόλια
+    }
+pdfjs-editor-comments-sidebar-close-button =
+    .title = Κλείσιμο πλευρικής στήλης
+    .aria-label = Κλείσιμο πλευρικής στήλης
+pdfjs-editor-comments-sidebar-close-button-label = Κλείσιμο πλευρικής στήλης
+# Instructional copy to add a comment by selecting text or an annotations.
+pdfjs-editor-comments-sidebar-no-comments1 = Βλέπετε κάτι αξιοσημείωτο; Επισημάνετε το και αφήστε ένα σχόλιο.
+pdfjs-editor-comments-sidebar-no-comments-link = Μάθετε περισσότερα
 
 ## Alt-text dialog
 
 pdfjs-editor-alt-text-button-label = Εναλλακτικό κείμενο
 pdfjs-editor-alt-text-edit-button =
     .aria-label = Επεξεργασία εναλλακτικού κειμένου
-pdfjs-editor-alt-text-edit-button-label = Επεξεργασία εναλλακτικού κειμένου
 pdfjs-editor-alt-text-dialog-label = Διαλέξτε μια επιλογή
 pdfjs-editor-alt-text-dialog-description = Το εναλλακτικό κείμενο είναι χρήσιμο όταν οι άνθρωποι δεν μπορούν να δουν την εικόνα ή όταν αυτή δεν φορτώνεται.
 pdfjs-editor-alt-text-add-description-label = Προσθήκη περιγραφής
@@ -419,14 +444,6 @@ pdfjs-editor-alt-text-button =
 ## Editor resizers
 ## This is used in an aria label to help to understand the role of the resizer.
 
-pdfjs-editor-resizer-label-top-left = Επάνω αριστερή γωνία — αλλαγή μεγέθους
-pdfjs-editor-resizer-label-top-middle = Μέσο επάνω πλευράς — αλλαγή μεγέθους
-pdfjs-editor-resizer-label-top-right = Επάνω δεξιά γωνία — αλλαγή μεγέθους
-pdfjs-editor-resizer-label-middle-right = Μέσο δεξιάς πλευράς — αλλαγή μεγέθους
-pdfjs-editor-resizer-label-bottom-right = Κάτω δεξιά γωνία — αλλαγή μεγέθους
-pdfjs-editor-resizer-label-bottom-middle = Μέσο κάτω πλευράς — αλλαγή μεγέθους
-pdfjs-editor-resizer-label-bottom-left = Κάτω αριστερή γωνία — αλλαγή μεγέθους
-pdfjs-editor-resizer-label-middle-left = Μέσο αριστερής πλευράς — αλλαγή μεγέθους
 pdfjs-editor-resizer-top-left =
     .aria-label = Επάνω αριστερή γωνία — αλλαγή μεγέθους
 pdfjs-editor-resizer-top-middle =
@@ -547,6 +564,7 @@ pdfjs-editor-undo-bar-message-freetext = Το κείμενο αφαιρέθηκ�
 pdfjs-editor-undo-bar-message-ink = Το σχέδιο αφαιρέθηκε
 pdfjs-editor-undo-bar-message-stamp = Η εικόνα αφαιρέθηκε
 pdfjs-editor-undo-bar-message-signature = Η υπογραφή αφαιρέθηκε
+pdfjs-editor-undo-bar-message-comment = Το σχόλιο αφαιρέθηκε
 # Variables:
 #   $count (Number) - the number of removed annotations.
 pdfjs-editor-undo-bar-message-multiple =
@@ -618,25 +636,190 @@ pdfjs-editor-add-signature-cancel-button = Ακύρωση
 pdfjs-editor-add-signature-add-button = Προσθήκη
 pdfjs-editor-edit-signature-update-button = Ενημέρωση
 
+## Comment popup
+
+pdfjs-editor-edit-comment-popup-button-label = Επεξεργασία σχολίου
+pdfjs-editor-edit-comment-popup-button =
+    .title = Επεξεργασία σχολίου
+pdfjs-editor-delete-comment-popup-button-label = Αφαίρεση σχολίου
+pdfjs-editor-delete-comment-popup-button =
+    .title = Αφαίρεση σχολίου
+pdfjs-show-comment-button =
+    .title = Εμφάνιση σχολίου
+
 ##  Edit a comment dialog
 
-pdfjs-editor-edit-comment-actions-button-label = Ενέργειες
-pdfjs-editor-edit-comment-actions-button =
-    .title = Ενέργειες
-pdfjs-editor-edit-comment-close-button-label = Κλείσιμο
-pdfjs-editor-edit-comment-close-button =
-    .title = Κλείσιμο
-pdfjs-editor-edit-comment-actions-edit-button-label = Επεξεργασία
-pdfjs-editor-edit-comment-actions-delete-button-label = Διαγραφή
-pdfjs-editor-edit-comment-manager-text-input =
-    .placeholder = Εισαγάγετε το σχόλιό σας
-pdfjs-editor-edit-comment-manager-cancel-button = Ακύρωση
-pdfjs-editor-edit-comment-manager-save-button = Αποθήκευση
+# An existing comment is edited
+pdfjs-editor-edit-comment-dialog-title-when-editing = Επεξεργασία σχολίου
+pdfjs-editor-edit-comment-dialog-save-button-when-editing = Ενημέρωση
+# No existing comment
+pdfjs-editor-edit-comment-dialog-title-when-adding = Προσθήκη σχολίου
+pdfjs-editor-edit-comment-dialog-save-button-when-adding = Προσθήκη
+pdfjs-editor-edit-comment-dialog-text-input =
+    .placeholder = Ξεκινήστε να πληκτρολογείτε…
+pdfjs-editor-edit-comment-dialog-cancel-button = Ακύρωση
 
 ## Edit a comment button in the editor toolbar
 
-pdfjs-editor-edit-comment-button =
-    .title = Επεξεργασία σχολίου
+pdfjs-editor-add-comment-button =
+    .title = Προσθήκη σχολίου
+
+## The view manager is a sidebar displaying different views:
+##  - thumbnails;
+##  - outline;
+##  - attachments;
+##  - layers.
+## The thumbnails view is used to edit the pdf: remove/insert pages, ...
+
+pdfjs-toggle-views-manager-notification-button =
+    .title = (Απ)ενεργοποίηση πλαϊνής γραμμής (το έγγραφο περιέχει μικρογραφίες/περίγραμμα/συνημμένα/επίπεδα)
+pdfjs-toggle-views-manager-button1-label = Διαχείριση σελίδων
+pdfjs-views-manager-sidebar =
+    .aria-label = Πλαϊνή γραμμή
+pdfjs-views-manager-sidebar-resizer =
+    .aria-label = Αλλαγή μεγέθους πλαϊνής γραμμής
+pdfjs-views-manager-view-selector-button =
+    .title = Προβολές
+pdfjs-views-manager-view-selector-button-label = Προβολές
+pdfjs-views-manager-pages-title = Σελίδες
+pdfjs-views-manager-outlines-title1 = Διάρθρωση εγγράφου
+    .title = Διάρθρωση εγγράφου (διπλό κλικ για ανάπτυξη/σύμπτυξη όλων των στοιχείων)
+pdfjs-views-manager-attachments-title = Συνημμένα
+pdfjs-views-manager-layers-title1 = Επίπεδα
+    .title = Επίπεδα (διπλό κλικ για επαναφορά όλων των επιπέδων στην προεπιλεγμένη κατάσταση)
+pdfjs-views-manager-pages-option-label = Σελίδες
+pdfjs-views-manager-outlines-option-label = Διάρθρωση εγγράφου
+pdfjs-views-manager-attachments-option-label = Συνημμένα
+pdfjs-views-manager-layers-option-label = Επίπεδα
+pdfjs-views-manager-add-file-button =
+    .title = Προσθήκη αρχείου
+pdfjs-views-manager-add-file-button-label = Προσθήκη αρχείου
+# Variables:
+#   $count (Number) - the number of selected pages.
+pdfjs-views-manager-pages-status-action-label =
+    { $count ->
+        [one] { $count } επιλεγμένη
+       *[other] { $count } επιλεγμένες
+    }
+pdfjs-views-manager-pages-status-none-action-label = Επιλογή σελίδων
+pdfjs-views-manager-pages-status-action-button-label = Διαχείριση
+pdfjs-views-manager-pages-status-copy-button-label = Αντιγραφή
+pdfjs-views-manager-pages-status-cut-button-label = Αποκοπή
+pdfjs-views-manager-pages-status-delete-button-label = Διαγραφή
+pdfjs-views-manager-pages-status-export-selected-button-label = Εξαγωγή επιλεγμένων…
+# Variables:
+#   $count (Number) - the number of selected pages to be cut.
+pdfjs-views-manager-status-undo-cut-label =
+    { $count ->
+        [one] Αποκόπηκε 1 σελίδα
+       *[other] Αποκόπηκαν { $count } σελίδες
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be copied.
+pdfjs-views-manager-pages-status-undo-copy-label =
+    { $count ->
+        [one] Αντιγράφηκε 1 σελίδα
+       *[other] Αντιγράφηκαν { $count } σελίδες
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be deleted.
+pdfjs-views-manager-pages-status-undo-delete-label =
+    { $count ->
+        [one] Διαγράφηκε 1 σελίδα
+       *[other] Διαγράφηκαν { $count } σελίδες
+    }
+pdfjs-views-manager-pages-status-waiting-ready-label = Προετοιμασία αρχείου…
+pdfjs-views-manager-pages-status-waiting-uploading-label = Μεταφόρτωση αρχείου…
+pdfjs-views-manager-status-warning-cut-label = Δεν ήταν δυνατή η αποκοπή. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.
+pdfjs-views-manager-status-warning-copy-label = Δεν ήταν δυνατή η αντιγραφή. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.
+pdfjs-views-manager-status-warning-delete-label = Δεν ήταν δυνατή η διαγραφή. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.
+pdfjs-views-manager-status-warning-save-label = Δεν ήταν δυνατή η αποθήκευση. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.
+pdfjs-views-manager-status-undo-button-label = Αναίρεση
+pdfjs-views-manager-status-done-button-label = Τέλος
+pdfjs-views-manager-status-close-button =
+    .title = Κλείσιμο
+pdfjs-views-manager-status-close-button-label = Κλείσιμο
+pdfjs-views-manager-paste-button-label = Επικόλληση
+pdfjs-views-manager-paste-button-before =
+    .title = Επικόλληση πριν από την πρώτη σελίδα
+# Variables:
+#   $page (Number) - the page number after which the paste button is.
+pdfjs-views-manager-paste-button-after =
+    .title = Επικόλληση μετά τη σελίδα { $page }
+# Badge used to promote a new feature in the UI, keep it as short as possible.
+# It's spelled uppercase for English, but it can be translated as usual.
+pdfjs-new-badge-content = ΝΕΟ
+pdfjs-views-manager-waiting-for-file = Μεταφόρτωση αρχείου…
+pdfjs-toggle-views-manager-button1 =
+    .title = Διαχείριση σελίδων
+
+## Digital signature properties (signature verification panel)
+
+pdfjs-digital-signature-properties-button =
+    .title = Ιδιότητες ψηφιακής υπογραφής
+    .aria-label = Ιδιότητες ψηφιακής υπογραφής
+pdfjs-digital-signature-properties-button-label = Ιδιότητες ψηφιακής υπογραφής
+
+## Banner shown above the signature list summarising the overall
+## verification state of the document. Each variant is selected by the
+## viewer based on the worst per-signature status; one signature is
+## enough to lower the banner.
+##
+## Variables:
+##   $count (Number) - number of signatures at the worst level.
+
+pdfjs-digital-signature-properties-banner-verified = Το έγγραφο έχει υπογραφεί με έγκυρη ψηφιακή υπογραφή
+pdfjs-digital-signature-properties-banner-unknown =
+    { $count ->
+        [one] Το έγγραφο έχει υπογραφεί, αλλά δεν ήταν δυνατή η επαλήθευση { $count } ψηφιακής υπογραφής
+       *[other] Το έγγραφο έχει υπογραφεί, αλλά δεν ήταν δυνατή η επαλήθευση { $count } ψηφιακών υπογραφών
+    }
+pdfjs-digital-signature-properties-banner-untrusted =
+    { $count ->
+        [one] Το έγγραφο έχει υπογραφεί με { $count } πιστοποιητικό που δεν είναι αξιόπιστο
+       *[other] Το έγγραφο έχει υπογραφεί με { $count } πιστοποιητικά που δεν είναι αξιόπιστα
+    }
+pdfjs-digital-signature-properties-banner-expired =
+    { $count ->
+        [one] Το έγγραφο έχει υπογραφεί με { $count } ληγμένο πιστοποιητικό
+       *[other] Το έγγραφο έχει υπογραφεί με { $count } ληγμένα πιστοποιητικά
+    }
+pdfjs-digital-signature-properties-banner-invalid =
+    { $count ->
+        [one] Το έγγραφο διαθέτει { $count } μη έγκυρη ψηφιακή υπογραφή
+       *[other] Το έγγραφο διαθέτει { $count } μη έγκυρες ψηφιακές υπογραφές
+    }
+pdfjs-digital-signature-properties-banner-revoked =
+    { $count ->
+        [one] Το έγγραφο έχει υπογραφεί με { $count } ανακληθέν πιστοποιητικό
+       *[other] Το έγγραφο έχει υπογραφεί με { $count } ανακληθέντα πιστοποιητικά
+    }
+
+## Per-signature status row. Only three distinct strings are needed:
+## the signature crypto either verified (the cert chain may still be
+## untrusted/expired/revoked, but that's surfaced on the cert row
+## below), or it failed, or its sub-format isn't supported.
+
+pdfjs-digital-signature-properties-status-verified = Κατάσταση: Επαληθευμένη υπογραφή
+pdfjs-digital-signature-properties-status-invalid = Κατάσταση: Μη έγκυρη υπογραφή
+pdfjs-digital-signature-properties-status-unknown = Κατάσταση: Αδυναμία επαλήθευσης (δεν υποστηρίζεται)
+
+## Per-signature certificate row. The variants with an issuer / date in
+## parentheses embed fully-localized context — no English fall-through.
+##
+## Variables:
+##   $issuer (String) - issuer or subject common name from the cert.
+##   $dateObj (Date)  - notAfter date for the expired-with-date form.
+
+pdfjs-digital-signature-properties-certificate-trusted = Πιστοποιητικό: Έμπιστο ({ $issuer })
+pdfjs-digital-signature-properties-certificate-unknown = Πιστοποιητικό: Μη διαθέσιμο
+pdfjs-digital-signature-properties-certificate-untrusted = Πιστοποιητικό: Μη αξιόπιστο
+pdfjs-digital-signature-properties-certificate-untrusted-unknown-issuer = Πιστοποιητικό: Άγνωστος εκδότης ({ $issuer })
+pdfjs-digital-signature-properties-certificate-untrusted-self-signed = Πιστοποιητικό: Αυτοϋπογεγραμμένο ({ $issuer })
+pdfjs-digital-signature-properties-certificate-untrusted-untrusted-issuer = Πιστοποιητικό: Μη αξιόπιστος εκδότης ({ $issuer })
+pdfjs-digital-signature-properties-certificate-expired = Πιστοποιητικό: Έχει λήξει
+pdfjs-digital-signature-properties-certificate-expired-with-date = Πιστοποιητικό: Έχει λήξει ({ DATETIME($dateObj, dateStyle: "medium") })
+pdfjs-digital-signature-properties-certificate-revoked = Πιστοποιητικό: Έχει ανακληθεί
 
 ## Main menu for adding/removing signatures
 

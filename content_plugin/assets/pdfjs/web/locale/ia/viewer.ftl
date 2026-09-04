@@ -112,14 +112,6 @@ pdfjs-document-properties-size-kb = { NUMBER($kb, maximumSignificantDigits: 3) }
 #   $mb (Number) - the PDF file size in megabytes
 #   $b (Number) - the PDF file size in bytes
 pdfjs-document-properties-size-mb = { NUMBER($mb, maximumSignificantDigits: 3) } MB ({ $b } bytes)
-# Variables:
-#   $size_kb (Number) - the PDF file size in kilobytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-kb = { $size_kb } KB ({ $size_b } bytes)
-# Variables:
-#   $size_mb (Number) - the PDF file size in megabytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-mb = { $size_mb } MB ({ $size_b } bytes)
 pdfjs-document-properties-title = Titulo:
 pdfjs-document-properties-author = Autor:
 pdfjs-document-properties-subject = Subjecto:
@@ -129,10 +121,6 @@ pdfjs-document-properties-modification-date = Data de modification:
 # Variables:
 #   $dateObj (Date) - the creation/modification date and time of the PDF file
 pdfjs-document-properties-date-time-string = { DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
-# Variables:
-#   $date (Date) - the creation/modification date of the PDF file
-#   $time (Time) - the creation/modification time of the PDF file
-pdfjs-document-properties-date-string = { $date }, { $time }
 pdfjs-document-properties-creator = Creator:
 pdfjs-document-properties-producer = Productor PDF:
 pdfjs-document-properties-version = Version PDF:
@@ -165,6 +153,27 @@ pdfjs-document-properties-linearized = Vista web rapide:
 pdfjs-document-properties-linearized-yes = Si
 pdfjs-document-properties-linearized-no = No
 pdfjs-document-properties-close-button = Clauder
+pdfjs-digital-signature-properties-view-certificate = Vider le certificato
+# Shown beneath an invalid signature card to explain why verification
+# failed. The text comes from NSS (e.g. "Signature integrity has been
+# compromised", "PKCS#7 signature could not be parsed") and is not
+# itself localized — it is the underlying error message produced by
+# the verification backend.
+# Variables:
+#   $reason (String) - error message describing why the signature
+#                      could not be verified.
+pdfjs-digital-signature-properties-reason = Ration: { $reason }
+# Variables:
+#   $dateObj (Date) - the signing time from the /Sig dict's /M entry.
+pdfjs-digital-signature-properties-timestamp = Data e hora: { DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
+# Variables:
+#   $count (Number) - number of nested sub-signatures (one per earlier
+#                     incremental revision of the document).
+pdfjs-digital-signature-properties-sub-signatures =
+    { $count ->
+        [one] Firma secundari ({ $count })
+       *[other] Firmas secundari ({ $count })
+    }
 
 ## Print
 
@@ -213,6 +222,15 @@ pdfjs-thumb-page-title =
 #   $page (Number) - the page number
 pdfjs-thumb-page-canvas =
     .aria-label = Vignette del pagina { $page }
+# Variables:
+#   $page (Number) - the page number
+pdfjs-thumb-page-checkbox1 =
+    .title = Seliger pagina { $page }
+# Variables:
+#   $page (Number) - the page number
+#   $total (Number) - the number of pages
+pdfjs-thumb-page-title1 =
+    .title = Pagina { $page } de { $total }
 
 ## Find panel button title and messages
 
@@ -275,10 +293,6 @@ pdfjs-rendering-error = Un error occurreva durante que on processava le pagina.
 
 ## Annotations
 
-# Variables:
-#   $date (Date) - the modification date of the annotation
-#   $time (Time) - the modification time of the annotation
-pdfjs-annotation-date-string = { $date }, { $time }
 # .alt: This is used as a tooltip.
 # Variables:
 #   $type (String) - an annotation type from a list defined in the PDF spec
@@ -324,6 +338,10 @@ pdfjs-comment-floating-button =
     .title = Commento
     .aria-label = Commento
 pdfjs-comment-floating-button-label = Commento
+pdfjs-editor-comment-button =
+    .title = Commento
+    .aria-label = Commento
+pdfjs-editor-comment-button-label = Commento
 pdfjs-editor-signature-button =
     .title = Adder signatura
 pdfjs-editor-signature-button-label = Adder signatura
@@ -386,20 +404,27 @@ pdfjs-editor-add-saved-signature-button =
 pdfjs-free-text2 =
     .aria-label = Editor de texto
     .default-content = Initiar a inserer…
-pdfjs-free-text =
-    .aria-label = Editor de texto
-pdfjs-free-text-default-content = Comenciar a scriber…
-pdfjs-ink =
-    .aria-label = Editor de designos
-pdfjs-ink-canvas =
-    .aria-label = Imagine create per le usator
+# Used to show how many comments are present in the pdf file.
+# Variables:
+#   $count (Number) - the number of comments.
+pdfjs-editor-comments-sidebar-title =
+    { $count ->
+        [one] Commento
+       *[other] Commentos
+    }
+pdfjs-editor-comments-sidebar-close-button =
+    .title = Clauder le barra lateral
+    .aria-label = Clauder le barra lateral
+pdfjs-editor-comments-sidebar-close-button-label = Clauder le barra lateral
+# Instructional copy to add a comment by selecting text or an annotations.
+pdfjs-editor-comments-sidebar-no-comments1 = Vide tu alco notabile? Evidentia lo e lassa un commentario.
+pdfjs-editor-comments-sidebar-no-comments-link = Pro saper plus
 
 ## Alt-text dialog
 
 pdfjs-editor-alt-text-button-label = Texto alternative
 pdfjs-editor-alt-text-edit-button =
     .aria-label = Rediger texto alternative
-pdfjs-editor-alt-text-edit-button-label = Rediger texto alternative
 pdfjs-editor-alt-text-dialog-label = Elige un option
 pdfjs-editor-alt-text-dialog-description = Le texto alternative (alt text) adjuta quando le personas non pote vider le imagine o quando illo non carga.
 pdfjs-editor-alt-text-add-description-label = Adder un description
@@ -419,14 +444,6 @@ pdfjs-editor-alt-text-button =
 ## Editor resizers
 ## This is used in an aria label to help to understand the role of the resizer.
 
-pdfjs-editor-resizer-label-top-left = Angulo superior sinistre — redimensionar
-pdfjs-editor-resizer-label-top-middle = Medio superior — redimensionar
-pdfjs-editor-resizer-label-top-right = Angulo superior dextre — redimensionar
-pdfjs-editor-resizer-label-middle-right = Medio dextre — redimensionar
-pdfjs-editor-resizer-label-bottom-right = Angulo inferior dextre — redimensionar
-pdfjs-editor-resizer-label-bottom-middle = Medio inferior — redimensionar
-pdfjs-editor-resizer-label-bottom-left = Angulo inferior sinistre — redimensionar
-pdfjs-editor-resizer-label-middle-left = Medio sinistre — redimensionar
 pdfjs-editor-resizer-top-left =
     .aria-label = Angulo superior sinistre — redimensionar
 pdfjs-editor-resizer-top-middle =
@@ -547,6 +564,7 @@ pdfjs-editor-undo-bar-message-freetext = Texto removite
 pdfjs-editor-undo-bar-message-ink = Designo removite
 pdfjs-editor-undo-bar-message-stamp = Imagine removite
 pdfjs-editor-undo-bar-message-signature = Signatura removite
+pdfjs-editor-undo-bar-message-comment = Commento removite
 # Variables:
 #   $count (Number) - the number of removed annotations.
 pdfjs-editor-undo-bar-message-multiple =
@@ -618,25 +636,190 @@ pdfjs-editor-add-signature-cancel-button = Cancellar
 pdfjs-editor-add-signature-add-button = Adder
 pdfjs-editor-edit-signature-update-button = Actualisar
 
+## Comment popup
+
+pdfjs-editor-edit-comment-popup-button-label = Rediger commento
+pdfjs-editor-edit-comment-popup-button =
+    .title = Rediger commento
+pdfjs-editor-delete-comment-popup-button-label = Remover commento
+pdfjs-editor-delete-comment-popup-button =
+    .title = Remover commento
+pdfjs-show-comment-button =
+    .title = Monstrar commento
+
 ##  Edit a comment dialog
 
-pdfjs-editor-edit-comment-actions-button-label = Actiones
-pdfjs-editor-edit-comment-actions-button =
-    .title = Actiones
-pdfjs-editor-edit-comment-close-button-label = Clauder
-pdfjs-editor-edit-comment-close-button =
-    .title = Clauder
-pdfjs-editor-edit-comment-actions-edit-button-label = Rediger
-pdfjs-editor-edit-comment-actions-delete-button-label = Deler
-pdfjs-editor-edit-comment-manager-text-input =
-    .placeholder = Insere tu commento
-pdfjs-editor-edit-comment-manager-cancel-button = Cancellar
-pdfjs-editor-edit-comment-manager-save-button = Salvar
+# An existing comment is edited
+pdfjs-editor-edit-comment-dialog-title-when-editing = Rediger commento
+pdfjs-editor-edit-comment-dialog-save-button-when-editing = Actualisar
+# No existing comment
+pdfjs-editor-edit-comment-dialog-title-when-adding = Adder commento
+pdfjs-editor-edit-comment-dialog-save-button-when-adding = Adder
+pdfjs-editor-edit-comment-dialog-text-input =
+    .placeholder = Comenciar a scriber…
+pdfjs-editor-edit-comment-dialog-cancel-button = Cancellar
 
 ## Edit a comment button in the editor toolbar
 
-pdfjs-editor-edit-comment-button =
-    .title = Rediger commento
+pdfjs-editor-add-comment-button =
+    .title = Adder commento
+
+## The view manager is a sidebar displaying different views:
+##  - thumbnails;
+##  - outline;
+##  - attachments;
+##  - layers.
+## The thumbnails view is used to edit the pdf: remove/insert pages, ...
+
+pdfjs-toggle-views-manager-notification-button =
+    .title = Monstrar/celar le barra lateral (le documento contine miniaturas/structura/attachamentos/stratos)
+pdfjs-toggle-views-manager-button1-label = Gerer paginas
+pdfjs-views-manager-sidebar =
+    .aria-label = Barra lateral
+pdfjs-views-manager-sidebar-resizer =
+    .aria-label = Saltar al declaration
+pdfjs-views-manager-view-selector-button =
+    .title = Vistas
+pdfjs-views-manager-view-selector-button-label = Vistas
+pdfjs-views-manager-pages-title = Paginas
+pdfjs-views-manager-outlines-title1 = Structura de documento
+    .title = Structura de documento (clicca-duplemente pro expander/collaber tote elementos)
+pdfjs-views-manager-attachments-title = Annexos
+pdfjs-views-manager-layers-title1 = Stratos
+    .title = Stratos (clicca-duplemente pro reinitialisar tote le stratos al stato predefinite)
+pdfjs-views-manager-pages-option-label = Paginas
+pdfjs-views-manager-outlines-option-label = Schema del documento
+pdfjs-views-manager-attachments-option-label = Annexos
+pdfjs-views-manager-layers-option-label = Stratos
+pdfjs-views-manager-add-file-button =
+    .title = Adder file
+pdfjs-views-manager-add-file-button-label = Adder file
+# Variables:
+#   $count (Number) - the number of selected pages.
+pdfjs-views-manager-pages-status-action-label =
+    { $count ->
+        [one] { $count } seligite
+       *[other] { $count } seligite
+    }
+pdfjs-views-manager-pages-status-none-action-label = Seliger paginas
+pdfjs-views-manager-pages-status-action-button-label = Gerer
+pdfjs-views-manager-pages-status-copy-button-label = Copiar
+pdfjs-views-manager-pages-status-cut-button-label = Secar
+pdfjs-views-manager-pages-status-delete-button-label = Deler
+pdfjs-views-manager-pages-status-export-selected-button-label = Exportar seligite…
+# Variables:
+#   $count (Number) - the number of selected pages to be cut.
+pdfjs-views-manager-status-undo-cut-label =
+    { $count ->
+        [one] 1 pagina secate
+       *[other] { $count } paginas secate
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be copied.
+pdfjs-views-manager-pages-status-undo-copy-label =
+    { $count ->
+        [one] 1 pagina copiate
+       *[other] { $count } paginas copiate
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be deleted.
+pdfjs-views-manager-pages-status-undo-delete-label =
+    { $count ->
+        [one] 1 pagina delite
+       *[other] { $count } paginas delite
+    }
+pdfjs-views-manager-pages-status-waiting-ready-label = Preparante file…
+pdfjs-views-manager-pages-status-waiting-uploading-label = Cargante file…
+pdfjs-views-manager-status-warning-cut-label = Impossibile secar. Refresca le pagina e retenta.
+pdfjs-views-manager-status-warning-copy-label = Impossibile copiar. Refresca le pagina e retenta.
+pdfjs-views-manager-status-warning-delete-label = Impossibile deler. Refresca le pagina e retenta.
+pdfjs-views-manager-status-warning-save-label = Impossibile salvar. Refresca le pagina e retenta.
+pdfjs-views-manager-status-undo-button-label = Disfacer
+pdfjs-views-manager-status-done-button-label = Facite
+pdfjs-views-manager-status-close-button =
+    .title = Clauder
+pdfjs-views-manager-status-close-button-label = Clauder
+pdfjs-views-manager-paste-button-label = Collar
+pdfjs-views-manager-paste-button-before =
+    .title = Collar ante le prime pagina
+# Variables:
+#   $page (Number) - the page number after which the paste button is.
+pdfjs-views-manager-paste-button-after =
+    .title = Colla post pagina { $page }
+# Badge used to promote a new feature in the UI, keep it as short as possible.
+# It's spelled uppercase for English, but it can be translated as usual.
+pdfjs-new-badge-content = NOVA
+pdfjs-views-manager-waiting-for-file = Cargante file…
+pdfjs-toggle-views-manager-button1 =
+    .title = Gerer paginas
+
+## Digital signature properties (signature verification panel)
+
+pdfjs-digital-signature-properties-button =
+    .title = Proprietates del firma digital
+    .aria-label = Proprietates del firma digital
+pdfjs-digital-signature-properties-button-label = Proprietates del firma digital
+
+## Banner shown above the signature list summarising the overall
+## verification state of the document. Each variant is selected by the
+## viewer based on the worst per-signature status; one signature is
+## enough to lower the banner.
+##
+## Variables:
+##   $count (Number) - number of signatures at the worst level.
+
+pdfjs-digital-signature-properties-banner-verified = Le documento era firmate con un firma digital valide
+pdfjs-digital-signature-properties-banner-unknown =
+    { $count ->
+        [one] Documento firmate ma { $count } firma digital non poteva esser verificate
+       *[other] Documento firmate ma { $count } firmas digital non poteva esser verificate
+    }
+pdfjs-digital-signature-properties-banner-untrusted =
+    { $count ->
+        [one] Documento firmate con { $count } certificato que non es de fiducia
+       *[other] Documento firmate con { $count } certificatos que non es de fiducia
+    }
+pdfjs-digital-signature-properties-banner-expired =
+    { $count ->
+        [one] Documento firmate con { $count } certificato expirate
+       *[other] Documento firmate con { $count } certificatos expirate
+    }
+pdfjs-digital-signature-properties-banner-invalid =
+    { $count ->
+        [one] Le documento ha { $count } firma digital non valide
+       *[other] Le documento ha { $count } firmas digital non valide
+    }
+pdfjs-digital-signature-properties-banner-revoked =
+    { $count ->
+        [one] Documento firmate con { $count } certificato revocate
+       *[other] Documento firmate con { $count } certificatos revocate
+    }
+
+## Per-signature status row. Only three distinct strings are needed:
+## the signature crypto either verified (the cert chain may still be
+## untrusted/expired/revoked, but that's surfaced on the cert row
+## below), or it failed, or its sub-format isn't supported.
+
+pdfjs-digital-signature-properties-status-verified = Stato: firma verificate
+pdfjs-digital-signature-properties-status-invalid = Stato: firma non valide
+pdfjs-digital-signature-properties-status-unknown = Stato: impossibile verificar (non supportate)
+
+## Per-signature certificate row. The variants with an issuer / date in
+## parentheses embed fully-localized context — no English fall-through.
+##
+## Variables:
+##   $issuer (String) - issuer or subject common name from the cert.
+##   $dateObj (Date)  - notAfter date for the expired-with-date form.
+
+pdfjs-digital-signature-properties-certificate-trusted = Certificato: de fiducia ({ $issuer })
+pdfjs-digital-signature-properties-certificate-unknown = Certificato: indisponibile
+pdfjs-digital-signature-properties-certificate-untrusted = Certificato: non de confidentia
+pdfjs-digital-signature-properties-certificate-untrusted-unknown-issuer = Certificato: emissor incognite ({ $issuer })
+pdfjs-digital-signature-properties-certificate-untrusted-self-signed = Certificato: auto-firmate ({ $issuer })
+pdfjs-digital-signature-properties-certificate-untrusted-untrusted-issuer = Certificato: emissor non de confidentia ({ $issuer })
+pdfjs-digital-signature-properties-certificate-expired = Certificato: expirate
+pdfjs-digital-signature-properties-certificate-expired-with-date = Certificato: expirate ({ DATETIME($dateObj, dateStyle: "medium") })
+pdfjs-digital-signature-properties-certificate-revoked = Certificato: revocate
 
 ## Main menu for adding/removing signatures
 

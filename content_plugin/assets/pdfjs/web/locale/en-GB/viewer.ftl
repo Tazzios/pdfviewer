@@ -112,14 +112,6 @@ pdfjs-document-properties-size-kb = { NUMBER($kb, maximumSignificantDigits: 3) }
 #   $mb (Number) - the PDF file size in megabytes
 #   $b (Number) - the PDF file size in bytes
 pdfjs-document-properties-size-mb = { NUMBER($mb, maximumSignificantDigits: 3) } MB ({ $b } bytes)
-# Variables:
-#   $size_kb (Number) - the PDF file size in kilobytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-kb = { $size_kb } kB ({ $size_b } bytes)
-# Variables:
-#   $size_mb (Number) - the PDF file size in megabytes
-#   $size_b (Number) - the PDF file size in bytes
-pdfjs-document-properties-mb = { $size_mb } MB ({ $size_b } bytes)
 pdfjs-document-properties-title = Title:
 pdfjs-document-properties-author = Author:
 pdfjs-document-properties-subject = Subject:
@@ -129,10 +121,6 @@ pdfjs-document-properties-modification-date = Modification Date:
 # Variables:
 #   $dateObj (Date) - the creation/modification date and time of the PDF file
 pdfjs-document-properties-date-time-string = { DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
-# Variables:
-#   $date (Date) - the creation/modification date of the PDF file
-#   $time (Time) - the creation/modification time of the PDF file
-pdfjs-document-properties-date-string = { $date }, { $time }
 pdfjs-document-properties-creator = Creator:
 pdfjs-document-properties-producer = PDF Producer:
 pdfjs-document-properties-version = PDF Version:
@@ -165,6 +153,27 @@ pdfjs-document-properties-linearized = Fast Web View:
 pdfjs-document-properties-linearized-yes = Yes
 pdfjs-document-properties-linearized-no = No
 pdfjs-document-properties-close-button = Close
+pdfjs-digital-signature-properties-view-certificate = View certificate
+# Shown beneath an invalid signature card to explain why verification
+# failed. The text comes from NSS (e.g. "Signature integrity has been
+# compromised", "PKCS#7 signature could not be parsed") and is not
+# itself localized — it is the underlying error message produced by
+# the verification backend.
+# Variables:
+#   $reason (String) - error message describing why the signature
+#                      could not be verified.
+pdfjs-digital-signature-properties-reason = Reason: { $reason }
+# Variables:
+#   $dateObj (Date) - the signing time from the /Sig dict's /M entry.
+pdfjs-digital-signature-properties-timestamp = Timestamp: { DATETIME($dateObj, dateStyle: "short", timeStyle: "medium") }
+# Variables:
+#   $count (Number) - number of nested sub-signatures (one per earlier
+#                     incremental revision of the document).
+pdfjs-digital-signature-properties-sub-signatures =
+    { $count ->
+        [one] Sub-signature ({ $count })
+       *[other] Sub-signatures ({ $count })
+    }
 
 ## Print
 
@@ -213,6 +222,15 @@ pdfjs-thumb-page-title =
 #   $page (Number) - the page number
 pdfjs-thumb-page-canvas =
     .aria-label = Thumbnail of Page { $page }
+# Variables:
+#   $page (Number) - the page number
+pdfjs-thumb-page-checkbox1 =
+    .title = Select page { $page }
+# Variables:
+#   $page (Number) - the page number
+#   $total (Number) - the number of pages
+pdfjs-thumb-page-title1 =
+    .title = Page { $page } of { $total }
 
 ## Find panel button title and messages
 
@@ -275,10 +293,6 @@ pdfjs-rendering-error = An error occurred while rendering the page.
 
 ## Annotations
 
-# Variables:
-#   $date (Date) - the modification date of the annotation
-#   $time (Time) - the modification time of the annotation
-pdfjs-annotation-date-string = { $date }, { $time }
 # .alt: This is used as a tooltip.
 # Variables:
 #   $type (String) - an annotation type from a list defined in the PDF spec
@@ -324,6 +338,10 @@ pdfjs-comment-floating-button =
     .title = Comment
     .aria-label = Comment
 pdfjs-comment-floating-button-label = Comment
+pdfjs-editor-comment-button =
+    .title = Comment
+    .aria-label = Comment
+pdfjs-editor-comment-button-label = Comment
 pdfjs-editor-signature-button =
     .title = Add signature
 pdfjs-editor-signature-button-label = Add signature
@@ -386,20 +404,27 @@ pdfjs-editor-add-saved-signature-button =
 pdfjs-free-text2 =
     .aria-label = Text Editor
     .default-content = Start typing…
-pdfjs-free-text =
-    .aria-label = Text Editor
-pdfjs-free-text-default-content = Start typing…
-pdfjs-ink =
-    .aria-label = Draw Editor
-pdfjs-ink-canvas =
-    .aria-label = User-created image
+# Used to show how many comments are present in the pdf file.
+# Variables:
+#   $count (Number) - the number of comments.
+pdfjs-editor-comments-sidebar-title =
+    { $count ->
+        [one] Comment
+       *[other] Comments
+    }
+pdfjs-editor-comments-sidebar-close-button =
+    .title = Close the sidebar
+    .aria-label = Close the sidebar
+pdfjs-editor-comments-sidebar-close-button-label = Close the sidebar
+# Instructional copy to add a comment by selecting text or an annotations.
+pdfjs-editor-comments-sidebar-no-comments1 = See something noteworthy? Highlight it and leave a comment.
+pdfjs-editor-comments-sidebar-no-comments-link = Learn more
 
 ## Alt-text dialog
 
 pdfjs-editor-alt-text-button-label = Alt text
 pdfjs-editor-alt-text-edit-button =
     .aria-label = Edit alt text
-pdfjs-editor-alt-text-edit-button-label = Edit alt text
 pdfjs-editor-alt-text-dialog-label = Choose an option
 pdfjs-editor-alt-text-dialog-description = Alt text (alternative text) helps when people can’t see the image or when it doesn’t load.
 pdfjs-editor-alt-text-add-description-label = Add a description
@@ -419,14 +444,6 @@ pdfjs-editor-alt-text-button =
 ## Editor resizers
 ## This is used in an aria label to help to understand the role of the resizer.
 
-pdfjs-editor-resizer-label-top-left = Top left corner — resize
-pdfjs-editor-resizer-label-top-middle = Top middle — resize
-pdfjs-editor-resizer-label-top-right = Top right corner — resize
-pdfjs-editor-resizer-label-middle-right = Middle right — resize
-pdfjs-editor-resizer-label-bottom-right = Bottom right corner — resize
-pdfjs-editor-resizer-label-bottom-middle = Bottom middle — resize
-pdfjs-editor-resizer-label-bottom-left = Bottom left corner — resize
-pdfjs-editor-resizer-label-middle-left = Middle left — resize
 pdfjs-editor-resizer-top-left =
     .aria-label = Top left corner — resize
 pdfjs-editor-resizer-top-middle =
@@ -547,6 +564,7 @@ pdfjs-editor-undo-bar-message-freetext = Text removed
 pdfjs-editor-undo-bar-message-ink = Drawing removed
 pdfjs-editor-undo-bar-message-stamp = Image removed
 pdfjs-editor-undo-bar-message-signature = Signature removed
+pdfjs-editor-undo-bar-message-comment = Comment removed
 # Variables:
 #   $count (Number) - the number of removed annotations.
 pdfjs-editor-undo-bar-message-multiple =
@@ -618,25 +636,190 @@ pdfjs-editor-add-signature-cancel-button = Cancel
 pdfjs-editor-add-signature-add-button = Add
 pdfjs-editor-edit-signature-update-button = Update
 
+## Comment popup
+
+pdfjs-editor-edit-comment-popup-button-label = Edit comment
+pdfjs-editor-edit-comment-popup-button =
+    .title = Edit comment
+pdfjs-editor-delete-comment-popup-button-label = Remove comment
+pdfjs-editor-delete-comment-popup-button =
+    .title = Remove comment
+pdfjs-show-comment-button =
+    .title = Show comment
+
 ##  Edit a comment dialog
 
-pdfjs-editor-edit-comment-actions-button-label = Actions
-pdfjs-editor-edit-comment-actions-button =
-    .title = Actions
-pdfjs-editor-edit-comment-close-button-label = Close
-pdfjs-editor-edit-comment-close-button =
-    .title = Close
-pdfjs-editor-edit-comment-actions-edit-button-label = Edit
-pdfjs-editor-edit-comment-actions-delete-button-label = Delete
-pdfjs-editor-edit-comment-manager-text-input =
-    .placeholder = Enter your comment
-pdfjs-editor-edit-comment-manager-cancel-button = Cancel
-pdfjs-editor-edit-comment-manager-save-button = Save
+# An existing comment is edited
+pdfjs-editor-edit-comment-dialog-title-when-editing = Edit comment
+pdfjs-editor-edit-comment-dialog-save-button-when-editing = Update
+# No existing comment
+pdfjs-editor-edit-comment-dialog-title-when-adding = Add comment
+pdfjs-editor-edit-comment-dialog-save-button-when-adding = Add
+pdfjs-editor-edit-comment-dialog-text-input =
+    .placeholder = Start typing…
+pdfjs-editor-edit-comment-dialog-cancel-button = Cancel
 
 ## Edit a comment button in the editor toolbar
 
-pdfjs-editor-edit-comment-button =
-    .title = Edit comment
+pdfjs-editor-add-comment-button =
+    .title = Add comment
+
+## The view manager is a sidebar displaying different views:
+##  - thumbnails;
+##  - outline;
+##  - attachments;
+##  - layers.
+## The thumbnails view is used to edit the pdf: remove/insert pages, ...
+
+pdfjs-toggle-views-manager-notification-button =
+    .title = Toggle Sidebar (document contains thumbnails/outline/attachments/layers)
+pdfjs-toggle-views-manager-button1-label = Manage pages
+pdfjs-views-manager-sidebar =
+    .aria-label = Sidebar
+pdfjs-views-manager-sidebar-resizer =
+    .aria-label = Sidebar resizer
+pdfjs-views-manager-view-selector-button =
+    .title = Views
+pdfjs-views-manager-view-selector-button-label = Views
+pdfjs-views-manager-pages-title = Pages
+pdfjs-views-manager-outlines-title1 = Document outline
+    .title = Document outline (double-click to expand/collapse all items)
+pdfjs-views-manager-attachments-title = Attachments
+pdfjs-views-manager-layers-title1 = Layers
+    .title = Layers (double-click to reset all layers to the default state)
+pdfjs-views-manager-pages-option-label = Pages
+pdfjs-views-manager-outlines-option-label = Document outline
+pdfjs-views-manager-attachments-option-label = Attachments
+pdfjs-views-manager-layers-option-label = Layers
+pdfjs-views-manager-add-file-button =
+    .title = Add file
+pdfjs-views-manager-add-file-button-label = Add file
+# Variables:
+#   $count (Number) - the number of selected pages.
+pdfjs-views-manager-pages-status-action-label =
+    { $count ->
+        [one] { $count } selected
+       *[other] { $count } selected
+    }
+pdfjs-views-manager-pages-status-none-action-label = Select pages
+pdfjs-views-manager-pages-status-action-button-label = Manage
+pdfjs-views-manager-pages-status-copy-button-label = Copy
+pdfjs-views-manager-pages-status-cut-button-label = Cut
+pdfjs-views-manager-pages-status-delete-button-label = Delete
+pdfjs-views-manager-pages-status-export-selected-button-label = Export selected…
+# Variables:
+#   $count (Number) - the number of selected pages to be cut.
+pdfjs-views-manager-status-undo-cut-label =
+    { $count ->
+        [one] 1 page cut
+       *[other] { $count } pages cut
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be copied.
+pdfjs-views-manager-pages-status-undo-copy-label =
+    { $count ->
+        [one] 1 page copied
+       *[other] { $count } pages copied
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be deleted.
+pdfjs-views-manager-pages-status-undo-delete-label =
+    { $count ->
+        [one] 1 page deleted
+       *[other] { $count } pages deleted
+    }
+pdfjs-views-manager-pages-status-waiting-ready-label = Getting your file ready…
+pdfjs-views-manager-pages-status-waiting-uploading-label = Uploading file…
+pdfjs-views-manager-status-warning-cut-label = Couldn’t cut. Refresh page and try again.
+pdfjs-views-manager-status-warning-copy-label = Couldn’t copy. Refresh page and try again.
+pdfjs-views-manager-status-warning-delete-label = Couldn’t delete. Refresh page and try again.
+pdfjs-views-manager-status-warning-save-label = Couldn’t save. Refresh page and try again.
+pdfjs-views-manager-status-undo-button-label = Undo
+pdfjs-views-manager-status-done-button-label = Done
+pdfjs-views-manager-status-close-button =
+    .title = Close
+pdfjs-views-manager-status-close-button-label = Close
+pdfjs-views-manager-paste-button-label = Paste
+pdfjs-views-manager-paste-button-before =
+    .title = Paste before the first page
+# Variables:
+#   $page (Number) - the page number after which the paste button is.
+pdfjs-views-manager-paste-button-after =
+    .title = Paste after page { $page }
+# Badge used to promote a new feature in the UI, keep it as short as possible.
+# It's spelled uppercase for English, but it can be translated as usual.
+pdfjs-new-badge-content = NEW
+pdfjs-views-manager-waiting-for-file = Uploading file…
+pdfjs-toggle-views-manager-button1 =
+    .title = Manage pages
+
+## Digital signature properties (signature verification panel)
+
+pdfjs-digital-signature-properties-button =
+    .title = Digital signature properties
+    .aria-label = Digital signature properties
+pdfjs-digital-signature-properties-button-label = Digital signature properties
+
+## Banner shown above the signature list summarising the overall
+## verification state of the document. Each variant is selected by the
+## viewer based on the worst per-signature status; one signature is
+## enough to lower the banner.
+##
+## Variables:
+##   $count (Number) - number of signatures at the worst level.
+
+pdfjs-digital-signature-properties-banner-verified = Document was signed with a valid digital signature
+pdfjs-digital-signature-properties-banner-unknown =
+    { $count ->
+        [one] Document signed but { $count } digital signature could not be verified
+       *[other] Document signed but { $count } digital signatures could not be verified
+    }
+pdfjs-digital-signature-properties-banner-untrusted =
+    { $count ->
+        [one] Document signed with { $count } certificate that is not trusted
+       *[other] Document signed with { $count } certificates that are not trusted
+    }
+pdfjs-digital-signature-properties-banner-expired =
+    { $count ->
+        [one] Document signed with { $count } expired certificate
+       *[other] Document signed with { $count } expired certificates
+    }
+pdfjs-digital-signature-properties-banner-invalid =
+    { $count ->
+        [one] Document has { $count } invalid digital signature
+       *[other] Document has { $count } invalid digital signatures
+    }
+pdfjs-digital-signature-properties-banner-revoked =
+    { $count ->
+        [one] Document signed with { $count } revoked certificate
+       *[other] Document signed with { $count } revoked certificates
+    }
+
+## Per-signature status row. Only three distinct strings are needed:
+## the signature crypto either verified (the cert chain may still be
+## untrusted/expired/revoked, but that's surfaced on the cert row
+## below), or it failed, or its sub-format isn't supported.
+
+pdfjs-digital-signature-properties-status-verified = Status: Signature verified
+pdfjs-digital-signature-properties-status-invalid = Status: Signature invalid
+pdfjs-digital-signature-properties-status-unknown = Status: Unable to verify (unsupported)
+
+## Per-signature certificate row. The variants with an issuer / date in
+## parentheses embed fully-localized context — no English fall-through.
+##
+## Variables:
+##   $issuer (String) - issuer or subject common name from the cert.
+##   $dateObj (Date)  - notAfter date for the expired-with-date form.
+
+pdfjs-digital-signature-properties-certificate-trusted = Certificate: Trusted ({ $issuer })
+pdfjs-digital-signature-properties-certificate-unknown = Certificate: Unavailable
+pdfjs-digital-signature-properties-certificate-untrusted = Certificate: Untrusted
+pdfjs-digital-signature-properties-certificate-untrusted-unknown-issuer = Certificate: Unknown issuer ({ $issuer })
+pdfjs-digital-signature-properties-certificate-untrusted-self-signed = Certificate: Self-signed ({ $issuer })
+pdfjs-digital-signature-properties-certificate-untrusted-untrusted-issuer = Certificate: Untrusted issuer ({ $issuer })
+pdfjs-digital-signature-properties-certificate-expired = Certificate: Expired
+pdfjs-digital-signature-properties-certificate-expired-with-date = Certificate: Expired ({ DATETIME($dateObj, dateStyle: "medium") })
+pdfjs-digital-signature-properties-certificate-revoked = Certificate: Revoked
 
 ## Main menu for adding/removing signatures
 
