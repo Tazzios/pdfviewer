@@ -2,6 +2,8 @@ V1.6.0 September 2026
   
 New: Joomla 6 compatible  
 Update: PDFjs to 6.3.289  
+Fix: Filelink did not work by @ptouw #44  
+Improved: space, (, +, and ) are now possible #14  
 
 V1.4.1 october 2025
 Long overdue
