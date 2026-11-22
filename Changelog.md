@@ -1,4 +1,4 @@
-Unreleased  
+V1.6.1 November 2026  
 New: content plugin and editor button are now installed together as one package (pkg_pdfviewer)  
 New: editor button rebuilt for Joomla 5 and 6, with its own default settings   
 Security: url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page  

@@ -10,7 +10,7 @@
 	<creationDate>November 2026</creationDate>
 	<copyright></copyright>
 	<license>GNU/GPLv3 www.gnu.org/licenses/gpl-3.0.html</license>
-	<version>1.6.0</version>
+	<version>1.6.1</version>
 	<description>PDF viewer: content plugin and editor button to show PDF files with PDF.js</description>
 	<php_minimum>8.1</php_minimum>
 	<blockChildUninstall>true</blockChildUninstall>
