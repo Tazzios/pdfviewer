@@ -1,0 +1,61 @@
+name: Update PDF.js
+
+# Checks every Monday for a new PDF.js release and opens a pull request with the
+# update (including the plugin's own changes to viewer.html and viewer.mjs).
+# Can also be started by hand from the Actions tab, optionally with a version.
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'PDF.js version, for example 6.5.438 (empty = newest release)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download PDF.js and apply the plugin changes
+        id: update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          old=$(node tools/update-pdfjs.js --check $VERSION | sed -n 's/^current=//p')
+          new=$(node tools/update-pdfjs.js --check $VERSION | sed -n 's/^latest=//p')
+          echo "old=$old" >> "$GITHUB_OUTPUT"
+          echo "new=$new" >> "$GITHUB_OUTPUT"
+          node tools/update-pdfjs.js $VERSION
+
+      - name: Test
+        run: node --test tests/js/*.test.js
+
+      - name: Open a pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: update-pdfjs/${{ steps.update.outputs.new }}
+          commit-message: Update PDF.js to ${{ steps.update.outputs.new }}
+          title: Update PDF.js to ${{ steps.update.outputs.new }}
+          body: |
+            Updates the bundled PDF.js from ${{ steps.update.outputs.old }} to ${{ steps.update.outputs.new }}
+            ([release notes](https://github.com/mozilla/pdf.js/releases/tag/v${{ steps.update.outputs.new }})).
+
+            Made with `node tools/update-pdfjs.js`, which also applied the plugin's own changes:
+            - `web/viewer.html`: the Open file button and the Current view link are hidden
+            - `web/viewer.mjs`: PDF files from other domains are allowed
+
+            Before merging: test the viewer on a test site and add a line to Changelog.md.
+          delete-branch: true
