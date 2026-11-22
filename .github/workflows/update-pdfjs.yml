@@ -1,12 +1,10 @@
 name: Update PDF.js
 
-# Checks every Monday for a new PDF.js release and opens a pull request with the
-# update (including the plugin's own changes to viewer.html and viewer.mjs).
-# Can also be started by hand from the Actions tab, optionally with a version.
+# Started by hand from the Actions tab. Downloads a PDF.js release (the newest
+# one, or the version you enter), applies the plugin's own changes to
+# viewer.html and viewer.mjs and opens a pull request with the update.
 
 on:
-  schedule:
-    - cron: '17 6 * * 1'
   workflow_dispatch:
     inputs:
       version:
