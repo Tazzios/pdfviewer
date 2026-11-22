@@ -18,11 +18,107 @@ namespace Joomla\CMS\Plugin {
         protected $_type = '';
         protected $_name = '';
 
+        private $application;
+
         public function __construct($subject = null, array $config = [])
         {
+            // Joomla 6 style: only the config array
+            if (\is_array($subject)) {
+                $config = $subject;
+            }
+
             $this->params = new Registry($config['params'] ?? []);
             $this->_type  = $config['type'] ?? '';
             $this->_name  = $config['name'] ?? '';
+        }
+
+        public function setApplication($application): void
+        {
+            $this->application = $application;
+        }
+
+        public function getApplication()
+        {
+            return $this->application;
+        }
+    }
+
+    class PluginHelper
+    {
+        /** @var array<string, object> keyed by "type/name" */
+        public static array $plugins = [];
+        public static string $layoutPath = '';
+
+        public static function getPlugin($type, $plugin = null)
+        {
+            return static::$plugins[$type . '/' . $plugin] ?? false;
+        }
+
+        public static function getLayoutPath($type, $name, $layout = 'default')
+        {
+            return static::$layoutPath;
+        }
+    }
+}
+
+namespace Joomla\CMS\Editor\Button {
+    class Button
+    {
+        public function __construct(public string $name, public array $props = [], public array $options = [])
+        {
+        }
+
+        public function get(string $name, $default = null)
+        {
+            return $this->props[$name] ?? $default;
+        }
+
+        public function getOptions(): array
+        {
+            return $this->options;
+        }
+    }
+}
+
+namespace Joomla\CMS\Object {
+    #[\AllowDynamicProperties]
+    class CMSObject
+    {
+        public function set($property, $value = null)
+        {
+            $this->$property = $value;
+        }
+
+        public function get($property, $default = null)
+        {
+            return $this->$property ?? $default;
+        }
+    }
+}
+
+namespace Joomla\CMS\Language {
+    class Text
+    {
+        public static function _($string)
+        {
+            return $string;
+        }
+    }
+}
+
+namespace Joomla\CMS\Session {
+    class Session
+    {
+        public static string $token = 'abc123token';
+
+        public static function getFormToken($forceNew = false)
+        {
+            return static::$token;
+        }
+
+        public static function checkToken($method = 'post')
+        {
+            return (bool) \Joomla\CMS\Factory::getApplication()->getInput()->get(static::$token, '', 'alnum');
         }
     }
 }
@@ -81,10 +177,29 @@ namespace Joomla\CMS {
         public Input $input;
         public string $template = 'cassiopeia';
         public array $messages = [];
+        public ?TestUser $identity = null;
+        public array $userState = [];
+        public TestDocument $document;
 
         public function __construct(array $request = [])
         {
-            $this->input = new Input($request);
+            $this->input    = new Input($request);
+            $this->document = new TestDocument();
+        }
+
+        public function getIdentity()
+        {
+            return $this->identity;
+        }
+
+        public function getUserState($key, $default = null)
+        {
+            return $this->userState[$key] ?? $default;
+        }
+
+        public function getDocument()
+        {
+            return $this->document;
         }
 
         public function getInput(): Input
@@ -108,10 +223,83 @@ namespace Joomla\CMS {
         }
     }
 
+    class TestUser
+    {
+        public int $id = 0;
+        public int $guest = 1;
+        /** @var string[] actions on com_content the user may do */
+        public array $allowed = [];
+        public array $categories = [];
+
+        public static function editor(array $allowed = ['core.create']): self
+        {
+            $user          = new self();
+            $user->id      = 42;
+            $user->guest   = 0;
+            $user->allowed = $allowed;
+
+            return $user;
+        }
+
+        public function authorise($action, $asset = null)
+        {
+            return \in_array($action, $this->allowed, true);
+        }
+
+        public function getAuthorisedCategories($component, $action)
+        {
+            return $this->categories;
+        }
+    }
+
+    class TestDocument
+    {
+        public array $scripts = [];
+
+        public function getWebAssetManager()
+        {
+            return $this;
+        }
+
+        public function registerAndUseScript($name, $uri = '', $options = [], $attributes = [], $dependencies = [])
+        {
+            $this->scripts[$name] = $uri;
+
+            return $this;
+        }
+    }
+
+    class TestQuery
+    {
+        private array $parts = [];
+
+        public function __call($method, $args)
+        {
+            $this->parts[] = strtoupper($method) . ' ' . implode(', ', (array) $args[0]);
+
+            return $this;
+        }
+
+        public function __toString(): string
+        {
+            return implode(' ', $this->parts);
+        }
+    }
+
     class TestDatabase
     {
         public array $queries = [];
         public array $result = [];
+
+        public function getQuery($new = false)
+        {
+            return new TestQuery();
+        }
+
+        public function quoteName($name)
+        {
+            return \is_array($name) ? array_map(fn ($n) => '`' . $n . '`', $name) : '`' . $name . '`';
+        }
 
         public function setQuery($query)
         {
