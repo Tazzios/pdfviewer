@@ -20,15 +20,36 @@
     return /^\d+(\.\d+)?(px|%)?$/.test(v) ? v : '';
   }
 
+  var BUILTIN = {
+    viewer: 'pdfjs',
+    style: 'embed',
+    sizes: { embed: { width: '100%', height: '800' }, popup: { width: '800', height: '800' } },
+  };
+
+  /**
+   * Fills missing settings so buildTag always has a button and a content set.
+   */
+  function normalise(settings) {
+    var s = settings || {};
+    var content = s.content || BUILTIN;
+    return { button: s.button || content, content: content };
+  }
+
   /**
    * Builds the {pdfviewer ...} tag.
    *
+   * "default" in the form means the default of this button. A parameter is
+   * only written to the tag when it differs from the content plugin setting,
+   * because that is what the content plugin uses when it is left out.
+   *
    * @param {object} v         Form values: source, jdownloadsid, file, viewer, style,
    *                           width, height, linktext, search, phrase, page, zoom, pagemode
-   * @param {object} defaults  Defaults of the content plugin: viewer, style
+   * @param {object} settings  { button: {...}, content: {...} }, each with viewer, style
+   *                           and sizes.embed/popup.width/height
    * @return {string}
    */
-  function buildTag(v, defaults) {
+  function buildTag(v, settings) {
+    var s = normalise(settings);
     var parts = [];
     var isJd = v.source === 'jdownloads';
 
@@ -41,23 +62,23 @@
     }
 
     // A link can only be shown with pdf.js
-    var viewer = isJd ? (v.viewer === 'default' ? defaults.viewer : v.viewer) : 'pdfjs';
-    if (isJd ? v.viewer !== 'default' : defaults.viewer !== 'pdfjs') {
+    var viewer = isJd ? (v.viewer === 'default' ? s.button.viewer : v.viewer) : 'pdfjs';
+    if (viewer !== s.content.viewer) {
       parts.push('viewer=' + viewer);
     }
 
-    var style = v.style === 'default' ? defaults.style : v.style;
-    if (v.style !== 'default') {
-      parts.push('style=' + v.style);
+    var style = v.style === 'default' ? s.button.style : v.style;
+    if (style !== s.content.style) {
+      parts.push('style=' + style);
     }
 
     if (style !== 'new') {
-      if (size(v.height)) {
-        parts.push('height=' + size(v.height));
-      }
-      if (size(v.width)) {
-        parts.push('width=' + size(v.width));
-      }
+      ['height', 'width'].forEach(function (dimension) {
+        var value = size(v[dimension]) || size(s.button.sizes[style][dimension]);
+        if (value && value !== s.content.sizes[style][dimension]) {
+          parts.push(dimension + '=' + value);
+        }
+      });
     }
 
     if (style !== 'embed' && String(v.linktext || '').trim() !== '') {
@@ -118,7 +139,12 @@
     var $ = function (id) { return doc.getElementById('pdfviewer-' + id); };
     var val = function (id) { return $(id) ? $(id).value : ''; };
     var show = function (id, visible) { if ($(id)) { $(id).hidden = !visible; } };
-    var defaults = { viewer: form.dataset.defaultViewer || 'pdfjs', style: form.dataset.defaultStyle || 'embed' };
+    var settings;
+    try {
+      settings = normalise(JSON.parse(form.dataset.settings || '{}'));
+    } catch (e) {
+      settings = normalise(null);
+    }
     var lastTitle = '';
 
     function values() {
@@ -142,8 +168,14 @@
     function refresh() {
       var v = values();
       var isJd = v.source === 'jdownloads';
-      var viewer = isJd ? (v.viewer === 'default' ? defaults.viewer : v.viewer) : 'pdfjs';
-      var style = v.style === 'default' ? defaults.style : v.style;
+      var viewer = isJd ? (v.viewer === 'default' ? settings.button.viewer : v.viewer) : 'pdfjs';
+      var style = v.style === 'default' ? settings.button.style : v.style;
+
+      // Show the default size of this style as placeholder
+      if (style !== 'new') {
+        $('width').placeholder = settings.button.sizes[style].width;
+        $('height').placeholder = settings.button.sizes[style].height;
+      }
 
       // Use the jDownloads title as link text, unless the user typed one
       if (isJd && $('jdownloadsid')) {
@@ -169,7 +201,7 @@
       show('page-group', viewer !== 'pdfjs' || v.search.trim() === '');
       show('pdfjs-group', viewer === 'pdfjs');
 
-      $('preview').textContent = buildTag(values(), defaults);
+      $('preview').textContent = buildTag(values(), settings);
     }
 
     form.addEventListener('input', refresh);
@@ -181,7 +213,7 @@
         $('file').focus();
         return;
       }
-      insertInEditor(root.parent || root, form.dataset.editor, buildTag(v, defaults));
+      insertInEditor(root.parent || root, form.dataset.editor, buildTag(v, settings));
     });
 
     refresh();

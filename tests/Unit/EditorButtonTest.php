@@ -82,7 +82,7 @@ final class EditorButtonTest extends TestCase
         }
     }
 
-    private function plugin(?TestUser $user, array $request = [], array $userState = []): Pdfviewer
+    private function plugin(?TestUser $user, array $request = [], array $userState = [], array $params = []): Pdfviewer
     {
         $app            = new TestApplication($request);
         $app->identity  = $user;
@@ -90,7 +90,7 @@ final class EditorButtonTest extends TestCase
 
         Factory::$application = $app;
 
-        $plugin = new Pdfviewer(null, ['type' => 'editors-xtd', 'name' => 'pdfviewer', 'params' => []]);
+        $plugin = new Pdfviewer(null, ['type' => 'editors-xtd', 'name' => 'pdfviewer', 'params' => $params]);
         $plugin->setApplication($app);
 
         return $plugin;
@@ -291,24 +291,83 @@ final class EditorButtonTest extends TestCase
         $this->assertStringContainsString('data-editor="jform_articletextscript"', $html);
     }
 
-    public function testDefaultsComeFromContentPlugin(): void
+    /**
+     * Decodes the settings JSON the dialog gives to the script.
+     */
+    private function dialogSettings(string $html): array
     {
-        PluginHelper::$plugins['content/pdfviewer'] = (object) ['params' => '{"viewer":"pdfimage","style":"Popup"}'];
+        $this->assertMatchesRegularExpression('/data-settings="([^"]*)"/', $html);
+        preg_match('/data-settings="([^"]*)"/', $html, $m);
 
-        $html = $this->plugin(TestUser::editor(), $this->validRequest())->renderDialog();
-
-        $this->assertStringContainsString('data-default-viewer="pdfimage"', $html);
-        $this->assertStringContainsString('data-default-style="popup"', $html);
-        $this->assertStringContainsString('default (pdfimage)', $html);
+        return json_decode(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'), true);
     }
 
-    public function testUnknownDefaultsFallBack(): void
+    public function testButtonDefaultsAreShownInDialog(): void
     {
-        PluginHelper::$plugins['content/pdfviewer'] = (object) ['params' => '{"viewer":"evil\"","style":"x"}'];
+        $params = ['viewer' => 'pdfimage', 'style' => 'popup', 'popupwidth' => '90%', 'popupheight' => '600'];
+
+        $html     = $this->plugin(TestUser::editor(), $this->validRequest(), [], $params)->renderDialog();
+        $settings = $this->dialogSettings($html);
+
+        $this->assertStringContainsString('default (pdfimage)', $html);
+        $this->assertStringContainsString('default (popup)', $html);
+        $this->assertSame('pdfimage', $settings['button']['viewer']);
+        $this->assertSame('popup', $settings['button']['style']);
+        $this->assertSame(['width' => '90%', 'height' => '600'], $settings['button']['sizes']['popup']);
+        $this->assertSame(['width' => '100%', 'height' => '800'], $settings['button']['sizes']['embed']);
+    }
+
+    public function testContentPluginSettingsAreGivenToTheScript(): void
+    {
+        PluginHelper::$plugins['content/pdfviewer'] = (object) [
+            'params' => '{"viewer":"pdfimage","style":"Popup","embedheight":"500","popupwidth":"70%"}',
+        ];
+
+        $settings = $this->dialogSettings($this->plugin(TestUser::editor(), $this->validRequest())->renderDialog());
+
+        $this->assertSame('pdfimage', $settings['content']['viewer']);
+        $this->assertSame('popup', $settings['content']['style'], 'the content plugin stores Popup with a capital');
+        $this->assertSame('500', $settings['content']['sizes']['embed']['height']);
+        $this->assertSame('70%', $settings['content']['sizes']['popup']['width']);
+    }
+
+    public function testEmptyButtonSettingsFallBackToContentPlugin(): void
+    {
+        PluginHelper::$plugins['content/pdfviewer'] = (object) ['params' => '{"style":"New","embedwidth":"640"}'];
+
+        $defaults = $this->plugin(TestUser::editor(), [], [], ['style' => '', 'embedwidth' => ''])->getButtonDefaults();
+
+        $this->assertSame('new', $defaults['style']);
+        $this->assertSame('640', $defaults['sizes']['embed']['width']);
+    }
+
+    public function testInvalidSettingsFallBack(): void
+    {
+        PluginHelper::$plugins['content/pdfviewer'] = (object) ['params' => '{"viewer":"evil\\"","style":"x","embedwidth":"1px;x"}'];
 
         $defaults = $this->plugin(TestUser::editor())->getContentDefaults();
 
-        $this->assertSame(['viewer' => 'pdfjs', 'style' => 'embed'], $defaults);
+        $this->assertSame('pdfjs', $defaults['viewer']);
+        $this->assertSame('embed', $defaults['style']);
+        $this->assertSame('100%', $defaults['sizes']['embed']['width']);
+    }
+
+    public function testSettingsJsonCannotBreakTheAttribute(): void
+    {
+        $html = $this->plugin(TestUser::editor(), $this->validRequest(), [], ['embedwidth' => '"><script>'])->renderDialog();
+
+        $this->assertStringNotContainsString('"><script>', $html);
+        $this->assertSame('100%', $this->dialogSettings($html)['button']['sizes']['embed']['width']);
+    }
+
+    public function testManifestHasButtonSettings(): void
+    {
+        $manifest = simplexml_load_file(dirname(__DIR__, 2) . '/editor_button/pdfviewer.xml');
+        $names    = array_map('strval', $manifest->xpath('//config//field/@name'));
+
+        foreach (['viewer', 'style', 'embedwidth', 'embedheight', 'popupwidth', 'popupheight'] as $name) {
+            $this->assertContains($name, $names);
+        }
     }
 
     public function testAjaxEventJoomla5AddsResult(): void

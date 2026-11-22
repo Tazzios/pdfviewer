@@ -6,7 +6,9 @@
  * @copyright  (C) 2023 Tazzios
  * @license    GNU General Public License version 3 or later
  *
- * @var  array  $displayData  editor, jdownloadsFiles (array|null), defaults (viewer, style)
+ * @var  array  $displayData  editor, jdownloadsFiles (array|null),
+ *                            defaults (button settings) and content (content plugin settings),
+ *                            each with viewer, style and sizes
  */
 
 \defined('_JEXEC') or die;
@@ -16,13 +18,14 @@ $e = static fn ($value): string => htmlspecialchars((string) $value, ENT_QUOTES,
 $editor   = $displayData['editor'];
 $files    = $displayData['jdownloadsFiles'];
 $defaults = $displayData['defaults'];
+$content  = $displayData['content'];
+$settings = json_encode(['button' => $defaults, 'content' => $content], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 $hasJd    = is_array($files) && count($files) > 0;
 ?>
 <div class="container-popup">
     <form id="pdfviewer-form" class="pdfviewer-xtd"
           data-editor="<?php echo $e($editor); ?>"
-          data-default-viewer="<?php echo $e($defaults['viewer']); ?>"
-          data-default-style="<?php echo $e($defaults['style']); ?>">
+          data-settings="<?php echo $e($settings); ?>">
 
         <fieldset class="mb-3">
             <legend class="visually-hidden">Source</legend>

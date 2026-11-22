@@ -165,7 +165,8 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
         $displayData = [
             'editor'          => preg_replace('#[^A-Z0-9\-\_\[\]]#i', '', (string) $input->getCmd('e_name', '')),
             'jdownloadsFiles' => $this->getJdownloadsFiles(),
-            'defaults'        => $this->getContentDefaults(),
+            'content'         => $content = $this->getContentDefaults(),
+            'defaults'        => $this->getButtonDefaults($content),
         ];
 
         $app->getDocument()->getWebAssetManager()->registerAndUseScript(
@@ -244,10 +245,10 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
     }
 
     /**
-     * Default viewer and style of the content plugin, which is what a tag
-     * without viewer= or style= will use.
+     * Settings of the content plugin: what a tag without viewer=, style=,
+     * width= or height= will use.
      *
-     * @return  array{viewer: string, style: string}
+     * @return  array{viewer: string, style: string, sizes: array}
      */
     public function getContentDefaults(): array
     {
@@ -258,12 +259,54 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
             $params = $plugin->params instanceof Registry ? $plugin->params : new Registry($plugin->params);
         }
 
-        $viewer = strtolower((string) $params->get('viewer', 'pdfjs'));
-        $style  = strtolower((string) $params->get('style', 'embed'));
+        return static::normaliseDefaults($params, static::normaliseDefaults(new Registry(), null));
+    }
 
-        return [
-            'viewer' => \in_array($viewer, ['pdfjs', 'pdfimage'], true) ? $viewer : 'pdfjs',
-            'style'  => \in_array($style, ['embed', 'popup', 'new'], true) ? $style : 'embed',
+    /**
+     * Defaults of this button, set in its plugin settings. Empty settings
+     * fall back to the content plugin.
+     *
+     * @return  array{viewer: string, style: string, sizes: array}
+     */
+    public function getButtonDefaults(?array $contentDefaults = null): array
+    {
+        return static::normaliseDefaults($this->params, $contentDefaults ?? $this->getContentDefaults());
+    }
+
+    /**
+     * Reads viewer, style and the embed/popup sizes from plugin parameters.
+     * Unknown or empty values take the fallback (or the built-in defaults).
+     */
+    private static function normaliseDefaults(Registry $params, ?array $fallback): array
+    {
+        $fallback ??= [
+            'viewer' => 'pdfjs',
+            'style'  => 'embed',
+            'sizes'  => [
+                'embed' => ['width' => '100%', 'height' => '800'],
+                'popup' => ['width' => '800', 'height' => '800'],
+            ],
         ];
+
+        $viewer = strtolower(trim((string) $params->get('viewer', '')));
+        $style  = strtolower(trim((string) $params->get('style', '')));
+
+        $result = [
+            'viewer' => \in_array($viewer, ['pdfjs', 'pdfimage'], true) ? $viewer : $fallback['viewer'],
+            'style'  => \in_array($style, ['embed', 'popup', 'new'], true) ? $style : $fallback['style'],
+            'sizes'  => [],
+        ];
+
+        foreach (['embed', 'popup'] as $type) {
+            foreach (['width', 'height'] as $dimension) {
+                $value = trim((string) $params->get($type . $dimension, ''));
+
+                $result['sizes'][$type][$dimension] = preg_match('/^\d+(\.\d+)?(px|%)?$/', $value)
+                    ? $value
+                    : $fallback['sizes'][$type][$dimension];
+            }
+        }
+
+        return $result;
     }
 }
