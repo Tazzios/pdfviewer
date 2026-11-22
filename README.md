@@ -154,3 +154,15 @@ Run the automated tests (needs PHP 8.1+ and Composer):
 >vendor/bin/phpunit
 
 The tests run the content plugin against the real Joomla Framework input filter, with small stand-ins for the Joomla CMS classes (`tests/Stubs/joomla.php`). GitHub Actions runs them, plus a PHP syntax check and a manifest check, on every push and pull request.
+
+### Update PDF.js
+
+The plugin bundles the PDF.js viewer with a few changes (see `PATCHES` in `tools/update-pdfjs.js`): the Open file button and the Current view link are hidden, and PDF files from other domains are allowed. To update PDF.js (needs Node.js 18+):
+
+>node tools/update-pdfjs.js            (newest release)  
+>node tools/update-pdfjs.js 6.5.438    (a specific release)  
+>node tools/update-pdfjs.js --check    (only show current and newest version)
+
+The script downloads the release, replaces `content_plugin/assets/pdfjs`, applies the changes and adds "Update: PDFjs to <version>" to the Unreleased section of Changelog.md. If PDF.js changed the code a change depends on, it stops with an error and leaves the old files in place.
+
+The GitHub Actions workflow "Update PDF.js" does the same and opens a pull request with the result. It only runs when you start it by hand from the Actions tab (Actions, Update PDF.js, Run workflow), optionally with a version. For this the repository setting "Allow GitHub Actions to create and approve pull requests" (Settings, Actions, General) must be on.
