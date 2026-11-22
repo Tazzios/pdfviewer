@@ -6,6 +6,7 @@ Fix: popups on one page could get the same id
 Improved: linktext, width and height are escaped  
 Improved: pdfimage shows a clear message when Imagick is missing and no longer shows server paths to visitors  
 New: automated tests (PHPUnit) and GitHub Actions checks  
+Update: PDFjs to 6.5.438  
 
 V1.6.0 September 2026  
 New: Joomla 6 compatible  
