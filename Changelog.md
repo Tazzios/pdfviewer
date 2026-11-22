@@ -1,3 +1,6 @@
+Unreleased  
+Fix: pdfimage embed image was stretched to the full width in 1.6.1, it keeps the page proportions again  
+
 V1.6.1 November 2026  
 New: content plugin and editor button are now installed together as one package (pkg_pdfviewer)  
 New: editor button rebuilt for Joomla 5 and 6, with its own default settings   

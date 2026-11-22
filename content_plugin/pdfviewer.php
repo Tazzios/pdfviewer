@@ -336,6 +336,16 @@ class PlgContentPdfviewer extends CMSPlugin
     }
 
     /**
+     * Style for an embedded page image. The height is the size of the image and the
+     * width is only a maximum, so the image keeps the aspect ratio of the page and is
+     * never stretched (object-fit covers the case where the maximum width kicks in).
+     */
+    private static function imageEmbedStyle($width, $height): string
+    {
+        return 'width:auto;max-width:' . static::cssSize($width) . ';height:' . (int) $height . 'px;object-fit:contain;';
+    }
+
+    /**
      * Render a PDF page as an image (requires Imagick and jDownloads)
      */
     private static function createPdfImage($file_id, $pagenumber, $height, $width, $style, $linktext): string
@@ -402,9 +412,7 @@ class PlgContentPdfviewer extends CMSPlugin
         $imgBase64 = base64_encode($img);
 
         if ($style === 'embed') {
-            $heightStyle = 'height:' . (int)$height . 'px;';
-            $widthStyle = 'width:' . static::cssSize($width) . ';';
-            return '<img src="data:image/jpg;base64,' . $imgBase64 . '" style="' . $widthStyle . $heightStyle . '" class="pdfimage_embed_image">';
+            return '<img src="data:image/jpg;base64,' . $imgBase64 . '" style="' . static::imageEmbedStyle($width, $height) . '" class="pdfimage_embed_image">';
         }
 
         $linktext = static::escape((string) $linktext);
