@@ -1,14 +1,12 @@
 Unreleased  
 New: content plugin and editor button are now installed together as one package (pkg_pdfviewer)  
-New: editor button rebuilt for Joomla 5 and 6, with its own default settings  
-Improved: the editor button dialog fits its content and is only available to logged-in editors  
+New: editor button rebuilt for Joomla 5 and 6, with its own default settings   
 Security: url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page  
 Security: jdownloadsid is now always an integer (SQL query for pdfimage)  
 Fix: nameddest url parameter was missing #nameddest=  
 Fix: popups on one page could get the same id  
 Improved: linktext, width and height are escaped  
 Improved: pdfimage shows a clear message when Imagick is missing and no longer shows server paths to visitors  
-New: automated tests (PHPUnit) and GitHub Actions checks  
 Update: PDFjs to 6.5.438  
 
 V1.6.0 September 2026  
