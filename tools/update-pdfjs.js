@@ -13,6 +13,8 @@
  * plugin's own changes (PATCHES below) to web/viewer.html and web/viewer.mjs.
  * If a change can no longer be applied (because PDF.js changed that code),
  * the script stops with an error and leaves the old files in place.
+ * Finally it adds "Update: PDFjs to <version>" to the Unreleased section of
+ * Changelog.md.
  *
  * Needs Node.js 18 or newer, no npm packages.
  */
@@ -73,6 +75,21 @@ function applyPatches(file, text) {
     }
   }
   return text;
+}
+
+// Adds "Update: PDFjs to <version>" to the Unreleased section of the changelog,
+// or replaces the PDF.js line that is already there.
+function updateChangelog(text, version) {
+  const entry = `Update: PDFjs to ${version}  `;
+  const eol = text.includes('\r\n') ? '\r\n' : '\n';
+  const lines = text.split(/\r?\n/);
+  if (!/^unreleased\b/i.test(lines[0] || '')) lines.unshift('Unreleased  ', '');
+  let end = lines.findIndex((l, i) => i > 0 && l.trim() === '');
+  if (end < 0) end = lines.length;
+  const existing = lines.slice(1, end).findIndex((l) => /^Update: PDF\.?js to/i.test(l));
+  if (existing >= 0) lines[existing + 1] = entry;
+  else lines.splice(end, 0, entry);
+  return lines.join(eol);
 }
 
 // Version of the PDF.js that is now in assets/pdfjs, or null.
@@ -165,13 +182,18 @@ async function main(args) {
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.writeFileSync(dest, data);
   }
+  const changelog = path.join(ROOT, 'Changelog.md');
+  if (fs.existsSync(changelog)) {
+    fs.writeFileSync(changelog, updateChangelog(fs.readFileSync(changelog, 'utf8'), version));
+  }
   console.log(`PDF.js ${current || 'none'} -> ${version}: ${files.size} files written to ${path.relative(ROOT, TARGET)}`);
   for (const [file, patches] of Object.entries(PATCHES)) {
     for (const p of patches) console.log(`  applied to ${file}: ${p.name}`);
   }
+  console.log(`  Changelog.md: Update: PDFjs to ${version}`);
 }
 
-module.exports = { PATCHES, applyPatches, currentVersion, unzip };
+module.exports = { PATCHES, applyPatches, currentVersion, unzip, updateChangelog };
 
 if (require.main === module) {
   main(process.argv.slice(2)).catch((e) => {

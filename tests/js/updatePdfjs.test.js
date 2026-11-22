@@ -5,7 +5,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { PATCHES, applyPatches, currentVersion } = require(path.join(__dirname, '../../tools/update-pdfjs.js'));
+const { PATCHES, applyPatches, currentVersion, updateChangelog } = require(path.join(__dirname, '../../tools/update-pdfjs.js'));
 
 const pdfjs = path.join(__dirname, '../../content_plugin/assets/pdfjs');
 
@@ -39,4 +39,20 @@ test('the bundled PDF.js has all patches applied', () => {
     const text = fs.readFileSync(path.join(pdfjs, file), 'utf8');
     assert.equal(applyPatches(file, text), text, `${file} is missing a patch, run node tools/update-pdfjs.js --force`);
   }
+});
+
+test('adds the PDF.js update to the Unreleased section of the changelog', () => {
+  const log = 'Unreleased  \nFix: something  \n\nV1.6.0 September 2026  \nUpdate: PDFjs to 6.3.289  \n';
+  const once = updateChangelog(log, '6.5.438');
+  assert.equal(once, 'Unreleased  \nFix: something  \nUpdate: PDFjs to 6.5.438  \n\nV1.6.0 September 2026  \nUpdate: PDFjs to 6.3.289  \n');
+  // A second update replaces the line instead of adding one
+  assert.equal(updateChangelog(once, '6.6.1'), once.replace('6.5.438', '6.6.1'));
+});
+
+test('starts an Unreleased section when there is none', () => {
+  assert.equal(updateChangelog('V1.6.0  \nNew: x  \n', '6.5.438'), 'Unreleased  \nUpdate: PDFjs to 6.5.438  \n\nV1.6.0  \nNew: x  \n');
+});
+
+test('keeps Windows line endings', () => {
+  assert.equal(updateChangelog('Unreleased  \r\nFix: a  \r\n', '6.5.438'), 'Unreleased  \r\nFix: a  \r\nUpdate: PDFjs to 6.5.438  \r\n');
 });

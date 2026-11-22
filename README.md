@@ -163,6 +163,6 @@ The plugin bundles the PDF.js viewer with a few changes (see `PATCHES` in `tools
 >node tools/update-pdfjs.js 6.5.438    (a specific release)  
 >node tools/update-pdfjs.js --check    (only show current and newest version)
 
-The script downloads the release, replaces `content_plugin/assets/pdfjs` and applies the changes. If PDF.js changed the code a change depends on, it stops with an error and leaves the old files in place.
+The script downloads the release, replaces `content_plugin/assets/pdfjs`, applies the changes and adds "Update: PDFjs to <version>" to the Unreleased section of Changelog.md. If PDF.js changed the code a change depends on, it stops with an error and leaves the old files in place.
 
 The GitHub Actions workflow "Update PDF.js" does the same and opens a pull request with the result. It only runs when you start it by hand from the Actions tab (Actions, Update PDF.js, Run workflow), optionally with a version. For this the repository setting "Allow GitHub Actions to create and approve pull requests" (Settings, Actions, General) must be on.

@@ -55,5 +55,7 @@ jobs:
             - `web/viewer.html`: the Open file button and the Current view link are hidden
             - `web/viewer.mjs`: PDF files from other domains are allowed
 
-            Before merging: test the viewer on a test site and add a line to Changelog.md.
+            Changelog.md has "Update: PDFjs to ${{ steps.update.outputs.new }}" under Unreleased.
+
+            Before merging: test the viewer on a test site.
           delete-branch: true
