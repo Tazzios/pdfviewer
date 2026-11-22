@@ -4,3 +4,9 @@ packer_cache/
 # For built boxes
 *.box
 pdfviewer.zip
+
+# Composer / PHPUnit
+/vendor/
+composer.lock
+.phpunit.cache/
+.phpunit.result.cache
