@@ -56,6 +56,8 @@ test('update-xml keeps old entries and adds the package and both plugins', () =>
   assert.match(out, /<folder>editors-xtd<\/folder>/);
   assert.match(out, /releases\/download\/v1\.6\.1\/pkg_pdfviewer_1\.6\.1\.zip/);
   assert.match(out, /<sha256>(ab){32}<\/sha256>/);
+  const changelogs = (x) => x.split('<changelogurl>https://raw.githubusercontent.com/Tazzios/pdfviewer/main/changelog.xml</changelogurl>').length - 1;
+  assert.equal(changelogs(out) - changelogs(current), 3);
   // Running it again replaces the entries instead of adding them twice.
   assert.equal(addUpdate(out, '1.6.1', 'ab'.repeat(32)), out);
   assert.match(out, /<\/updates>\n$/);

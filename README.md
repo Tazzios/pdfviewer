@@ -178,7 +178,7 @@ Existing installs look for updates here:
 - the content plugin before 1.6.1: `updates_plugin.xml` on master (GitHub serves main for this old branch name)
 - the editor button before 1.6.1: `updates_button.xml` on master
 
-The same step adds the changes of that version (from Changelog.md) to `changelog.xml`. Joomla shows them behind the Changelog button in the update list, for sites that already have a package with `<changelogurl>` (1.6.2 and newer).
+The same step adds the changes of that version (from Changelog.md) to `changelog.xml`. Every update entry links to it with `<changelogurl>`, so Joomla shows them behind the Changelog button in the update list (System, Update, Extensions).
 
 Do not rename or remove these two files, or older installs stop receiving updates. Sites with only one of the old plugins get the package, which installs both.
 
