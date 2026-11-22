@@ -3,6 +3,14 @@
 	<changelog>
 		<element>pkg_pdfviewer</element>
 		<type>package</type>
+		<version>1.6.2</version>
+		<fix>
+			<item>pdfimage embed image was stretched to the full width in 1.6.1, it keeps the page proportions again</item>
+		</fix>
+	</changelog>
+	<changelog>
+		<element>pkg_pdfviewer</element>
+		<type>package</type>
 		<version>1.6.1</version>
 		<security>
 			<item>url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page</item>
