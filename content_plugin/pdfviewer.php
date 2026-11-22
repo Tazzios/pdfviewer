@@ -25,6 +25,17 @@ use Joomla\Database\DatabaseInterface;
 class PlgContentPdfviewer extends CMSPlugin 
 {
     /**
+     * Allowed values for the PDF.js zoom and pagemode hash parameters.
+     */
+    private const ZOOM_VALUES = ['auto', 'page-actual', 'page-fit', 'page-width', 'page-height'];
+    private const PAGEMODE_VALUES = ['none', 'thumbs', 'bookmarks', 'attachments', 'layers'];
+
+    /**
+     * Counter used to give every popup on a page its own id.
+     */
+    private static int $instance = 0;
+
+    /**
      * Event: onContentPrepare
      */
     public function onContentPrepare($context, &$article, &$params, $page = 0)
@@ -47,7 +58,7 @@ class PlgContentPdfviewer extends CMSPlugin
         }
 
         $app = Factory::getApplication();
-        $input = $app->input;
+        $input = method_exists($app, 'getInput') ? $app->getInput() : $app->input;
 
         foreach ($matches as $match) {
             $output = ''; // Ensure no double placement
@@ -81,7 +92,7 @@ class PlgContentPdfviewer extends CMSPlugin
                 if (isset($tagparameters['jdownloadsid'])) {
                     $jdownloadsPath = JPATH_ADMINISTRATOR . '/components/com_jdownloads';
                     if (file_exists($jdownloadsPath)) {
-                        $jdownloadsid = trim($tagparameters['jdownloadsid']);
+                        $jdownloadsid = (string) (int) trim($tagparameters['jdownloadsid'], " \t\n\r\0\x0B\"'");
                         $filelink = Uri::base() . 'index.php?option=com_jdownloads&task=download.send&id=' . $jdownloadsid;
                     } else {
                         $showpdfpreview = 'no';
@@ -185,30 +196,32 @@ class PlgContentPdfviewer extends CMSPlugin
 		*/
 		
 
+        // All values end up in the hash of the viewer url, so they are url encoded here
+        // and the complete url is HTML escaped when it is placed in the page.
         if ($input->get('highlight', '', 'BASE64')) {
-            $search = base64_decode(htmlspecialchars($input->get('highlight', '', 'BASE64')));
-            $search = str_replace(['[', ']', '"', ','], ['', '', '', ' '], $search);
-            $pagereference = '#search=' . $search;
+            $search = (string) base64_decode($input->get('highlight', '', 'BASE64'));
+            $search = trim(str_replace(['[', ']', '"', ','], ['', '', '', ' '], $search));
+            $pagereference = '#search=' . rawurlencode($search);
         } elseif ($input->getString('search')) {
             $search = $input->getString('search');
-            $pagereference = '#search=' . $search;
+            $pagereference = '#search=' . rawurlencode($search);
         } elseif ($input->getString('nameddest')) {
-            $pagereference = $input->getString('nameddest');
+            $pagereference = '#nameddest=' . rawurlencode($input->getString('nameddest'));
         } elseif ($input->getInt('page')) {
             $pagereference = '#page=' . $input->getInt('page');
         } elseif (!empty($tagparameters['search'])) {
             $search = str_replace('%20', ' ', trim($tagparameters['search'], '"'));
-            $pagereference = '#search=' . $search;
+            $pagereference = '#search=' . rawurlencode($search);
         } elseif (!empty($tagparameters['nameddest'])) {
-            $pagereference = '#nameddest=' . trim($tagparameters['nameddest']);
-        } elseif (!empty($tagparameters['page']) && $tagparameters['page'] != 0) {
-            $pagereference = '#page=' . trim($tagparameters['page']);
+            $pagereference = '#nameddest=' . rawurlencode(str_replace('%20', ' ', trim($tagparameters['nameddest'], " \"'")));
+        } elseif ((int) ($tagparameters['page'] ?? 0) > 0) {
+            $pagereference = '#page=' . (int) $tagparameters['page'];
         }
 
         if ($search !== '') {
-            $phrase = $input->getString('phrase', $tagparameters['phrase'] ?? '');
-            if ($phrase) {
-                $pagereference .= '&phrase=' . trim($phrase);
+            $phrase = strtolower(trim($input->getString('phrase', $tagparameters['phrase'] ?? '')));
+            if (in_array($phrase, ['true', '1', 'yes'], true)) {
+                $pagereference .= '&phrase=true';
             }
         }
 
@@ -222,16 +235,19 @@ class PlgContentPdfviewer extends CMSPlugin
     {
         $settings = '';
 
-        // Zoom
-        $zoom = $input->getString('zoom', $tagparameters['zoom'] ?? '');
-        if ($zoom) {
-            $settings .= ($pagereference === '' ? '#zoom=' : '&zoom=') . trim($zoom);
+        // Zoom: a keyword or a percentage, optionally followed by a position (150,0,0)
+        $zoom = strtolower(trim($input->getString('zoom', $tagparameters['zoom'] ?? '')));
+        if ($zoom !== '' && (in_array($zoom, self::ZOOM_VALUES, true) || preg_match('/^\d+(\.\d+)?(,-?\d+(\.\d+)?){0,2}$/', $zoom))) {
+            $settings .= ($pagereference === '' ? '#zoom=' : '&zoom=') . $zoom;
         }
 
         // Pagemode
-        $pagemode = $input->getString('pagemode', $tagparameters['pagemode'] ?? '');
+        $pagemode = strtolower(trim($input->getString('pagemode', $tagparameters['pagemode'] ?? '')));
+        if (!in_array($pagemode, self::PAGEMODE_VALUES, true)) {
+            $pagemode = '';
+        }
         if ($pagemode) {
-            $settings .= ($pagereference === '' && $settings === '' ? '#pagemode=' : '&pagemode=') . trim($pagemode);
+            $settings .= ($pagereference === '' && $settings === '' ? '#pagemode=' : '&pagemode=') . $pagemode;
         } elseif ($pagereference === '' && $settings === '') {
             $settings .= '#pagemode=none';
         } else {
@@ -257,15 +273,17 @@ class PlgContentPdfviewer extends CMSPlugin
             : $base . "plugins/content/pdfviewer/assets/pdfjs/web/viewer.html";
 
         $filelink = strtr(rawurlencode($filelink), ['%2F' => '/', '%3A' => ':']);
+        $src = static::escape($viewerPath . '?file=' . $filelink . $pagereference . $pdfjsviewsettings);
+        $linktext = static::escape((string) $linktext);
 
         if ($style === 'embed') {
             $heightStyle = 'height:' . (int)$height . 'px;';
-            $widthStyle = is_numeric($width) ? 'width:' . (int)$width . 'px;' : 'width:' . $width . ';';
-            return '<iframe src="' . $viewerPath . '?file=' . $filelink . $pagereference . $pdfjsviewsettings . '" style="' . $widthStyle . $heightStyle . '" frameborder="0"></iframe>';
+            $widthStyle = 'width:' . static::cssSize($width) . ';';
+            return '<iframe src="' . $src . '" style="' . $widthStyle . $heightStyle . '" frameborder="0"></iframe>';
         }
 
         if ($style === 'popup') {
-            $randomId = rand(0, 1000);
+            $randomId = ++self::$instance;
             HTMLHelper::_('bootstrap.modal', '.selector', []);
             return '<a data-bs-toggle="modal" data-bs-target="#pdfModal' . $randomId . '">' . $linktext . '</a>
                 <div id="pdfModal' . $randomId . '" class="modal fade" tabindex="-1">
@@ -276,7 +294,7 @@ class PlgContentPdfviewer extends CMSPlugin
                                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <iframe width="100%" height="100%" src="' . $viewerPath . '?file=' . $filelink . $pagereference . $pdfjsviewsettings . '" title="' . $linktext . '" frameborder="0" allowfullscreen></iframe>
+                                <iframe width="100%" height="100%" src="' . $src . '" title="' . $linktext . '" frameborder="0" allowfullscreen></iframe>
                             </div>
                         </div>
                     </div>
@@ -284,10 +302,37 @@ class PlgContentPdfviewer extends CMSPlugin
         }
 
         if ($style === 'new') {
-            return '<a class="pdfviewer_button" target="_blank" href="' . $viewerPath . '?file=' . $filelink . $pagereference . $pdfjsviewsettings . '">' . $linktext . '</a>';
+            return '<a class="pdfviewer_button" target="_blank" href="' . $src . '">' . $linktext . '</a>';
         }
 
         return '';
+    }
+
+    /**
+     * Escape a value for use inside an HTML attribute or as text.
+     */
+    private static function escape(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    /**
+     * Turn a width/height value into a safe CSS size: a number becomes pixels,
+     * a number with px or % is kept, anything else falls back to 100%.
+     */
+    private static function cssSize($value): string
+    {
+        $value = trim((string) $value, " \t\n\r\0\x0B\"'");
+
+        if (is_numeric($value)) {
+            return (int) $value . 'px';
+        }
+
+        if (preg_match('/^\d+(\.\d+)?(px|%)$/', $value)) {
+            return $value;
+        }
+
+        return '100%';
     }
 
     /**
@@ -300,7 +345,8 @@ class PlgContentPdfviewer extends CMSPlugin
         $files_uploaddir = $params->get('files_uploaddir');
 
 		// get categorie path
-		$db = Factory::getDbo();
+		$file_id = (int) $file_id;
+		$db = Factory::getContainer()->get(DatabaseInterface::class);
 		$db->setQuery("WITH RECURSIVE n AS 
 			( SELECT id, parent_id, concat('/', title ,'/') AS path  
 			FROM #__jdownloads_categories 
@@ -323,7 +369,11 @@ class PlgContentPdfviewer extends CMSPlugin
             $filelink = $files_uploaddir . $file['path'] . $file['filename'];
         }
 
-        $pagenumber = $pagenumber !== '' ? (int)$pagenumber - 1 : 0;
+        $pagenumber = max(0, $pagenumber !== '' ? (int)$pagenumber - 1 : 0);
+
+        if (!class_exists('Imagick')) {
+            return 'The pdfimage viewer needs the PHP Imagick extension';
+        }
 
         $imgk = new \Imagick();
         $imgk->setResolution(150, 150);
@@ -331,11 +381,16 @@ class PlgContentPdfviewer extends CMSPlugin
         try {
             $imgk->readImage("{$filelink}[{$pagenumber}]");
         } catch (\Exception $ex) {
-            return 'cannot convert file to image. Make sure  page ' . ($pagenumber + 1) . ' exists. <br> and the filelink is correct: ' . $filelink;
+            // Do not show the server path to visitors, only in debug mode
+            $message = 'cannot convert file to image. Make sure page ' . ($pagenumber + 1) . ' exists.';
+            if (Factory::getApplication()->get('debug')) {
+                $message .= '<br> and the filelink is correct: ' . static::escape($filelink);
+            }
+            return $message;
         }
 
         if ($style === 'popup') {
-            $imgk->scaleImage($width - 40, 0);
+            $imgk->scaleImage(max(100, (int) $width - 40), 0);
         } else {
             $imgk->scaleImage(1000, 0);
         }
@@ -348,12 +403,14 @@ class PlgContentPdfviewer extends CMSPlugin
 
         if ($style === 'embed') {
             $heightStyle = 'height:' . (int)$height . 'px;';
-            $widthStyle = is_numeric($width) ? 'width:' . (int)$width . 'px;' : 'width:' . $width . '%;';
+            $widthStyle = 'width:' . static::cssSize($width) . ';';
             return '<img src="data:image/jpg;base64,' . $imgBase64 . '" style="' . $widthStyle . $heightStyle . '" class="pdfimage_embed_image">';
         }
 
+        $linktext = static::escape((string) $linktext);
+
         if ($style === 'popup') {
-            $randomId = rand(0, 1000);
+            $randomId = ++self::$instance;
             HTMLHelper::_('bootstrap.modal', '.selector', []);
             return '<a data-bs-toggle="modal" data-bs-target="#imgModal' . $randomId . '">' . $linktext . '</a>
                 <div id="imgModal' . $randomId . '" class="modal fade" tabindex="-1">
