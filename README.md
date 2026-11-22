@@ -166,3 +166,24 @@ The plugin bundles the PDF.js viewer with a few changes (see `PATCHES` in `tools
 The script downloads the release, replaces `content_plugin/assets/pdfjs`, applies the changes and adds "Update: PDFjs to <version>" to the Unreleased section of Changelog.md. If PDF.js changed the code a change depends on, it stops with an error and leaves the old files in place.
 
 The GitHub Actions workflow "Update PDF.js" does the same and opens a pull request with the result. It only runs when you start it by hand from the Actions tab (Actions, Update PDF.js, Run workflow), optionally with a version. For this the repository setting "Allow GitHub Actions to create and approve pull requests" (Settings, Actions, General) must be on.
+
+### Release
+
+A release is one package, `pkg_pdfviewer_<version>.zip`, with the content plugin and the editor button inside. Releasing takes two steps, both started by hand from the Actions tab:
+
+1. **Release** (Actions, Release, Run workflow) with a version, for example 1.6.1. It sets the version in the three manifests, turns the Unreleased section of Changelog.md into the release notes, commits this to main, tags `v<version>`, builds the package and publishes a GitHub release with it. Existing installs are not offered the update yet.
+2. **Offer update to existing installs**, after you have tested the zip from the release. It adds the version to `updates_plugin.xml` and `updates_button.xml` and opens a pull request. Merging that pull request is the moment every site sees the update in Joomla.
+
+Existing installs look for updates here:
+- the package (1.6.1 and newer): `updates_plugin.xml` on main
+- the content plugin before 1.6.1: `updates_plugin.xml` on master (GitHub serves main for this old branch name)
+- the editor button before 1.6.1: `updates_button.xml` on master
+
+Do not rename or remove these two files, or older installs stop receiving updates. Sites with only one of the old plugins get the package, which installs both.
+
+The same steps work locally (needs Node.js 18+):
+
+>node tools/release.js prepare 1.6.1  
+>node tools/release.js build                 (writes dist/pkg_pdfviewer_1.6.1.zip)  
+>node tools/release.js notes 1.6.1  
+>node tools/release.js update-xml 1.6.1 --sha256 &lt;hash of the zip&gt;

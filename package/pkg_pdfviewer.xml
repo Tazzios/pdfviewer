@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="package" method="upgrade">
+	<name>PDF viewer</name>
+	<packagename>pdfviewer</packagename>
+	<author>Tazzios</author>
+	<authorUrl>https://github.com/Tazzios</authorUrl>
+	<packager>Tazzios</packager>
+	<packagerurl>https://github.com/Tazzios/pdfviewer</packagerurl>
+	<url>https://github.com/Tazzios/pdfviewer</url>
+	<creationDate>November 2026</creationDate>
+	<copyright></copyright>
+	<license>GNU/GPLv3 www.gnu.org/licenses/gpl-3.0.html</license>
+	<version>1.6.0</version>
+	<description>PDF viewer: content plugin and editor button to show PDF files with PDF.js</description>
+	<php_minimum>8.1</php_minimum>
+	<blockChildUninstall>true</blockChildUninstall>
+	<files folder="packages">
+		<file type="plugin" id="pdfviewer" group="content">plg_content_pdfviewer.zip</file>
+		<file type="plugin" id="pdfviewer" group="editors-xtd">plg_editors-xtd_pdfviewer.zip</file>
+	</files>
+	<updateservers>
+		<server type="extension" priority="1" name="pdfviewer">https://raw.githubusercontent.com/Tazzios/pdfviewer/main/updates_plugin.xml</server>
+	</updateservers>
+</extension>

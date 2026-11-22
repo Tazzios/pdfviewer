@@ -1,4 +1,7 @@
 Unreleased  
+New: content plugin and editor button are now installed together as one package (pkg_pdfviewer)  
+New: editor button rebuilt for Joomla 5 and 6, with its own default settings  
+Improved: the editor button dialog fits its content and is only available to logged-in editors  
 Security: url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page  
 Security: jdownloadsid is now always an integer (SQL query for pdfimage)  
 Fix: nameddest url parameter was missing #nameddest=  
