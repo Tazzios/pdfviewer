@@ -14,8 +14,7 @@ Compared to other existing pdfviewer for joomla this one is focused on integrati
 - Customize height and width for each PDF embedding.
 - Advanced jDownloads integration
 - Show one page as an image
-
-The Editor button is gone. :(
+- Editor button
 
 ## Examples
 
