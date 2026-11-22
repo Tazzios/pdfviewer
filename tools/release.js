@@ -35,6 +35,7 @@ const MANIFESTS = {
   button: 'editor_button/pdfviewer.xml',
   package: 'package/pkg_pdfviewer.xml',
 };
+const CHANGELOG_URL = `https://raw.githubusercontent.com/${REPO}/main/changelog.xml`;
 // Joomla versions that are offered the update (regular expression on the Joomla version).
 const TARGET_PLATFORM = '(5|6)\\..*';
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -251,6 +252,9 @@ function updateEntry(target, version, sha256) {
     '\t\t<client>0</client>',
     `\t\t<version>${version}</version>`,
     `\t\t<infourl title="Release notes">https://github.com/${REPO}/releases/tag/v${version}</infourl>`,
+    // Joomla 4+ shows a Changelog button in the update list from this, also on
+    // sites whose installed version has no <changelogurl> in its manifest yet.
+    `\t\t<changelogurl>${CHANGELOG_URL}</changelogurl>`,
     '\t\t<downloads>',
     `\t\t\t<downloadurl type="full" format="zip">${downloadUrl(version)}</downloadurl>`,
     '\t\t</downloads>',
