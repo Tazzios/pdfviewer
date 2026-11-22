@@ -148,7 +148,7 @@
       }
 
       var chrome = box.getBoundingClientRect().height - frame.getBoundingClientRect().height;
-      var content = form.getBoundingClientRect().bottom + win.pageYOffset + 8;
+      var content = form.getBoundingClientRect().bottom + win.pageYOffset + 20;
       var max = win.parent.innerHeight * 0.9;
 
       box.style.height = Math.ceil(Math.min(max, content + chrome)) + 'px';

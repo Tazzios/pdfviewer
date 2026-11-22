@@ -119,7 +119,7 @@ test('modal is sized to the form, at most 90% of the window', () => {
   const win = { frameElement: frame, pageYOffset: 0, parent: { innerHeight: 1000 } };
 
   fitToContent(win, doc);
-  assert.equal(box.style.height, '568px'); // 500 + 8 + 60 header
+  assert.equal(box.style.height, '580px'); // 500 + 20 + 60 header
 
   win.parent.innerHeight = 400;
   fitToContent(win, doc);
