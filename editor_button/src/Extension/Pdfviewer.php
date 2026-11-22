@@ -171,7 +171,8 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
         $app->getDocument()->getWebAssetManager()->registerAndUseScript(
             self::SCRIPT_ASSET,
             'plg_editors-xtd_pdfviewer/pdfviewer.js',
-            [],
+            // version=auto adds a hash of the file, so browsers fetch a changed script
+            ['version' => 'auto'],
             ['defer' => true],
             ['core']
         );
