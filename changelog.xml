@@ -3,7 +3,7 @@
 	<changelog>
 		<element>pkg_pdfviewer</element>
 		<type>package</type>
-		<version>1.6.1</version>
+		<version>1.6.2</version>
 		<security>
 			<item>url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page</item>
 			<item>jdownloadsid is now always an integer (SQL query for pdfimage)</item>
@@ -11,6 +11,7 @@
 		<fix>
 			<item>nameddest url parameter was missing #nameddest=</item>
 			<item>popups on one page could get the same id</item>
+			<item>pdfimage embed image was stretched</item>
 		</fix>
 		<addition>
 			<item>content plugin and editor button are now installed together as one package (pkg_pdfviewer)</item>
