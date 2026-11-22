@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<changelogs>
+	<changelog>
+		<element>pkg_pdfviewer</element>
+		<type>package</type>
+		<version>1.6.1</version>
+		<security>
+			<item>url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page</item>
+			<item>jdownloadsid is now always an integer (SQL query for pdfimage)</item>
+		</security>
+		<fix>
+			<item>nameddest url parameter was missing #nameddest=</item>
+			<item>popups on one page could get the same id</item>
+		</fix>
+		<addition>
+			<item>content plugin and editor button are now installed together as one package (pkg_pdfviewer)</item>
+			<item>editor button rebuilt for Joomla 5 and 6, with its own default settings</item>
+		</addition>
+		<change>
+			<item>linktext, width and height are escaped</item>
+			<item>pdfimage shows a clear message when Imagick is missing and no longer shows server paths to visitors</item>
+			<item>Update: PDFjs to 6.5.438</item>
+		</change>
+	</changelog>
+</changelogs>

@@ -2,7 +2,8 @@ name: Offer update to existing installs
 
 # Second step of a release, started by hand from the Actions tab after the
 # workflow "Release". Adds the version to updates_plugin.xml and
-# updates_button.xml and opens a pull request with that change.
+# updates_button.xml, adds its changes to changelog.xml (the Changelog button
+# in Joomla's update list) and opens a pull request with that change.
 #
 # Nothing is offered until you merge that pull request: from that moment
 # every site with the plugin sees the update in Joomla.
@@ -58,7 +59,7 @@ jobs:
         run: |
           node tools/release.js update-xml "${{ steps.release.outputs.version }}" --sha256 "${{ steps.release.outputs.sha256 }}"
           sudo apt-get update -q && sudo apt-get install -y -q libxml2-utils
-          xmllint --noout updates_plugin.xml updates_button.xml
+          xmllint --noout updates_plugin.xml updates_button.xml changelog.xml
           rm -rf dist
 
       - name: Open a pull request
@@ -68,7 +69,7 @@ jobs:
           commit-message: Offer version ${{ steps.release.outputs.version }} to existing installs
           title: Offer version ${{ steps.release.outputs.version }} to existing installs
           body: |
-            Adds version ${{ steps.release.outputs.version }} to `updates_plugin.xml` and `updates_button.xml`.
+            Adds version ${{ steps.release.outputs.version }} to `updates_plugin.xml` and `updates_button.xml`, and its changes from Changelog.md to `changelog.xml`.
 
             **Merging this pull request publishes the update:** every Joomla site with the package, the content plugin or the editor button then sees version ${{ steps.release.outputs.version }} under System, Update, Extensions.
 

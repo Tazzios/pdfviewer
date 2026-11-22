@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('node:zlib');
-const { addUpdate, releaseChangelog, releaseNotes, setManifestVersion, zip, crc32 } =
+const { addUpdate, addChangelog, changelogEntry, releaseChangelog, releaseNotes, setManifestVersion, zip, crc32 } =
   require(path.join(__dirname, '../../tools/release.js'));
 
 const ROOT = path.join(__dirname, '../..');
@@ -67,4 +67,26 @@ test('plugin manifests no longer have their own update server', () => {
   }
   assert.match(fs.readFileSync(path.join(ROOT, 'package/pkg_pdfviewer.xml'), 'utf8'),
     /main\/updates_plugin\.xml/);
+});
+
+test('changelog.xml gets the changes of a version, grouped by type', () => {
+  const log = 'V1.6.2 December 2026  \nSecurity: a & b  \nFix: c  \nNew: d  \nImproved: e  \nUpdate: PDFjs to 7.0.0  \nSomething else  \n\nV1.6.1 x\nFix: old\n';
+  const entry = changelogEntry(log, '1.6.2');
+  assert.match(entry, /<element>pkg_pdfviewer<\/element>\s*<type>package<\/type>\s*<version>1\.6\.2<\/version>/);
+  assert.match(entry, /<security>\s*<item>a &amp; b<\/item>/);
+  assert.match(entry, /<fix>\s*<item>c<\/item>/);
+  assert.match(entry, /<addition>\s*<item>d<\/item>/);
+  assert.match(entry, /<change>\s*<item>e<\/item>\s*<item>Update: PDFjs to 7\.0\.0<\/item>/);
+  assert.match(entry, /<note>\s*<item>Something else<\/item>/);
+  assert.doesNotMatch(entry, /old/);
+
+  const xml = addChangelog(addChangelog('', changelogEntry(log, '1.6.1'), '1.6.1'), entry, '1.6.2');
+  assert.ok(xml.indexOf('1.6.2') < xml.indexOf('1.6.1'), 'newest first');
+  assert.equal(addChangelog(xml, entry, '1.6.2'), xml, 'running twice changes nothing');
+});
+
+test('the package points to changelog.xml', () => {
+  assert.match(fs.readFileSync(path.join(ROOT, 'changelog.xml'), 'utf8'), /<element>pkg_pdfviewer<\/element>/);
+  assert.match(fs.readFileSync(path.join(ROOT, 'package/pkg_pdfviewer.xml'), 'utf8'),
+    /<changelogurl>https:\/\/raw\.githubusercontent\.com\/Tazzios\/pdfviewer\/main\/changelog\.xml<\/changelogurl>/);
 });

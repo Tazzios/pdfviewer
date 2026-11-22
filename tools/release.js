@@ -17,7 +17,9 @@
  *
  *   node tools/release.js update-xml 1.6.1 [--sha256 <hash>]
  *       Offers 1.6.1 to existing installs: adds it to updates_plugin.xml and
- *       updates_button.xml. Do this only after the GitHub release exists.
+ *       updates_button.xml, and adds its changes (from Changelog.md) to
+ *       changelog.xml, which Joomla shows behind the Changelog button in the
+ *       update list. Do this only after the GitHub release exists.
  *
  * Needs Node.js 18 or newer, no npm packages.
  */
@@ -100,7 +102,8 @@ function prepare(version, now = new Date()) {
 
 /* ---------- notes ---------- */
 
-function releaseNotes(text, version) {
+// The lines of the Changelog.md section for this version, trimmed.
+function sectionBody(text, version) {
   const lines = text.split(/\r?\n/);
   const re = new RegExp(`^v${version.replace(/\./g, '\\.')}(\\s|$)`, 'i');
   const i = lines.findIndex((l) => re.test(l.trim()));
@@ -108,6 +111,11 @@ function releaseNotes(text, version) {
   const body = sectionLines(lines, i).map((l) => l.replace(/\s+$/, ''));
   while (body.length && !body[body.length - 1]) body.pop();
   while (body.length && !body[0]) body.shift();
+  return body;
+}
+
+function releaseNotes(text, version) {
+  const body = sectionBody(text, version);
   const items = body.map((l) => (/^(New|Fix|Fixed|Improved|Update|Security|Removed|Changed):/i.test(l) ? `- ${l}` : l));
   return [
     ...items,
@@ -284,6 +292,58 @@ function updateXml(version, sha256) {
     write(file, addUpdate(current, version, sha256 && sha256.toLowerCase()));
     console.log(`${file}: offers ${version} (${downloadUrl(version)})`);
   }
+  const current = fs.existsSync(path.join(ROOT, 'changelog.xml')) ? read('changelog.xml') : '';
+  write('changelog.xml', addChangelog(current, changelogEntry(read('Changelog.md'), version), version));
+  console.log(`changelog.xml: changes of ${version}`);
+}
+
+/* ---------- changelog.xml ---------- */
+
+// Changelog.md prefix -> Joomla changelog type.
+const CHANGE_TYPES = [
+  [/^security$/i, 'security'],
+  [/^fix(ed)?$/i, 'fix'],
+  [/^(new|added)$/i, 'addition'],
+  [/^(improved|update|updated|changed)$/i, 'change'],
+  [/^removed?$/i, 'remove'],
+  [/^language$/i, 'language'],
+];
+const TYPE_ORDER = ['security', 'fix', 'language', 'addition', 'change', 'remove', 'note'];
+
+const escapeXml = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// The Joomla <changelog> block for one version, made from its Changelog.md section.
+function changelogEntry(text, version) {
+  const groups = {};
+  for (const line of sectionBody(text, version)) {
+    if (!line.trim()) continue;
+    const m = line.match(/^\s*([A-Za-z]+):\s*(.+)$/);
+    const type = (m && (CHANGE_TYPES.find(([re]) => re.test(m[1])) || [])[1]) || 'note';
+    let item = m && type !== 'note' ? m[2] : line.trim();
+    if (m && /^update/i.test(m[1])) item = `Update: ${m[2]}`;
+    (groups[type] = groups[type] || []).push(item.trim());
+  }
+  const blocks = TYPE_ORDER.filter((t) => groups[t]).map((t) => [
+    `\t\t<${t}>`,
+    ...groups[t].map((i) => `\t\t\t<item>${escapeXml(i)}</item>`),
+    `\t\t</${t}>`,
+  ].join('\n'));
+  return [
+    '\t<changelog>',
+    '\t\t<element>pkg_pdfviewer</element>',
+    '\t\t<type>package</type>',
+    `\t\t<version>${version}</version>`,
+    ...blocks,
+    '\t</changelog>',
+  ].join('\n');
+}
+
+// Adds (or replaces) the entry for this version, newest first.
+function addChangelog(xml, entry, version) {
+  const tag = (block, name) => (block.match(new RegExp(`<${name}>([^<]*)</${name}>`)) || [])[1];
+  const kept = (xml.match(/[ \t]*<changelog>[\s\S]*?<\/changelog>/g) || [])
+    .filter((b) => tag(b, 'version') !== version);
+  return ['<?xml version="1.0" encoding="utf-8"?>', '<changelogs>', entry, ...kept, '</changelogs>', ''].join('\n');
 }
 
 /* ---------- main ---------- */
@@ -304,7 +364,7 @@ function main(args) {
   }
 }
 
-module.exports = { addUpdate, releaseChangelog, releaseNotes, setManifestVersion, zip, crc32, packageZipName };
+module.exports = { addUpdate, addChangelog, changelogEntry, releaseChangelog, releaseNotes, setManifestVersion, zip, crc32, packageZipName };
 
 if (require.main === module) {
   try {
