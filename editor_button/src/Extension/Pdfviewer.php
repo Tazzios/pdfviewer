@@ -98,9 +98,10 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
         ];
 
         $options = [
-            'height'     => '520px',
-            'width'      => '800px',
-            'bodyHeight' => '70',
+            // Joomla 5/6 dialog: CSS sizes. Joomla 4 modal: bodyHeight (vh) and modalWidth (vw).
+            'height'     => '85vh',
+            'width'      => '900px',
+            'bodyHeight' => '80',
             'modalWidth' => '80',
         ];
 

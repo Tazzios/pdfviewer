@@ -22,6 +22,10 @@ $content  = $displayData['content'];
 $settings = json_encode(['button' => $defaults, 'content' => $content], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 $hasJd    = is_array($files) && count($files) > 0;
 ?>
+<style>
+    /* Keep the tag preview and Insert button visible when the dialog is low */
+    .pdfviewer-xtd-footer { position: sticky; bottom: 0; padding: .75rem 0; background: var(--body-bg, #fff); border-top: 1px solid var(--border-color, #dee2e6); }
+</style>
 <div class="container-popup">
     <form id="pdfviewer-form" class="pdfviewer-xtd"
           data-editor="<?php echo $e($editor); ?>"
@@ -142,8 +146,9 @@ $hasJd    = is_array($files) && count($files) > 0;
             </div>
         </div>
 
-        <p class="small text-muted mb-2">Tag: <code id="pdfviewer-preview"></code></p>
-
-        <button type="submit" class="btn btn-success">Insert</button>
+        <div class="pdfviewer-xtd-footer">
+            <p class="small text-muted mb-2">Tag: <code id="pdfviewer-preview"></code></p>
+            <button type="submit" class="btn btn-success">Insert</button>
+        </div>
     </form>
 </div>
