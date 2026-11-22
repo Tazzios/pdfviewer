@@ -1,0 +1,70 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Joomla 5 needs PHP 8.1+, Joomla 6 needs PHP 8.3+
+        php: ['8.1', '8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: PHP syntax check
+        run: |
+          find content_plugin editor_button tests -name '*.php' -print0 \
+            | xargs -0 -n1 php -l
+
+  manifests:
+    name: Joomla manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+      - name: XML is well formed
+        run: xmllint --noout content_plugin/pdfviewer.xml editor_button/pdfviewer.xml updates_plugin.xml
+      - name: Every file in the manifest exists
+        run: |
+          for dir in content_plugin editor_button; do
+            manifest="$dir/pdfviewer.xml"
+            for f in $(xmllint --xpath '//files/filename/text()' "$manifest"); do
+              test -f "$dir/$f" || { echo "::error file=$manifest::missing file $f"; exit 1; }
+            done
+            for d in $(xmllint --xpath '//files/folder/text()' "$manifest"); do
+              test -d "$dir/$d" || { echo "::error file=$manifest::missing folder $d"; exit 1; }
+            done
+          done
+
+  phpunit:
+    name: PHPUnit (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, mbstring
+          coverage: none
+      - name: Install dependencies
+        run: composer update --no-interaction --no-progress --prefer-dist
+      - name: Run tests
+        run: vendor/bin/phpunit

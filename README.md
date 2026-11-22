@@ -145,3 +145,12 @@ Create a custom text field (with large pdfs you maybe need multiple fields) copy
 If you want to customize PDFjs you can place an override in the following folder:
 >[TEMPLATE]/html/plg_content_pdfviewer/assets/pdfjs
 The codes checks if  '[TEMPLATE]/html/plg_content_pdfviewer/assets/pdfjs/web/viewer.html' exist if so it will be used instead of the default pdfjs viewer.
+
+## Development
+
+Run the automated tests (needs PHP 8.1+ and Composer):
+
+>composer update  
+>vendor/bin/phpunit
+
+The tests run the content plugin against the real Joomla Framework input filter, with small stand-ins for the Joomla CMS classes (`tests/Stubs/joomla.php`). GitHub Actions runs them, plus a PHP syntax check and a manifest check, on every push and pull request.

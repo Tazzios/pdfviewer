@@ -1,3 +1,12 @@
+Unreleased  
+Security: url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page  
+Security: jdownloadsid is now always an integer (SQL query for pdfimage)  
+Fix: nameddest url parameter was missing #nameddest=  
+Fix: popups on one page could get the same id  
+Improved: linktext, width and height are escaped  
+Improved: pdfimage shows a clear message when Imagick is missing and no longer shows server paths to visitors  
+New: automated tests (PHPUnit) and GitHub Actions checks  
+
 V1.6.0 September 2026  
 New: Joomla 6 compatible  
 Update: PDFjs to 6.3.289  
