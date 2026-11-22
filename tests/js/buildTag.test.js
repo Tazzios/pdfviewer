@@ -109,3 +109,24 @@ test('insert prefers the Joomla 5 JoomlaEditor API', () => {
   insertInEditor(parent, 'ed', 'tag');
   assert.deepEqual(calls, ['tag']);
 });
+
+test('modal is sized to the form, at most 90% of the window', () => {
+  const { fitToContent } = require(path.join(__dirname, '../../editor_button/media/js/pdfviewer.js'));
+  const rect = (height, bottom) => () => ({ height, bottom });
+  const box = { style: {}, getBoundingClientRect: rect(680) };
+  const frame = { closest: (sel) => (sel === 'dialog' ? box : null), getBoundingClientRect: rect(620) };
+  const doc = { querySelector: () => ({ getBoundingClientRect: rect(0, 500) }) };
+  const win = { frameElement: frame, pageYOffset: 0, parent: { innerHeight: 1000 } };
+
+  fitToContent(win, doc);
+  assert.equal(box.style.height, '568px'); // 500 + 8 + 60 header
+
+  win.parent.innerHeight = 400;
+  fitToContent(win, doc);
+  assert.equal(box.style.height, '360px');
+});
+
+test('fitting does nothing outside a modal', () => {
+  const { fitToContent } = require(path.join(__dirname, '../../editor_button/media/js/pdfviewer.js'));
+  assert.doesNotThrow(() => fitToContent({ frameElement: null }, { querySelector: () => null }));
+});

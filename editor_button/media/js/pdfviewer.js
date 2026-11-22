@@ -130,6 +130,33 @@
     }
   }
 
+  /**
+   * Makes the modal around this iframe just as high as the form, at most 90%
+   * of the window. Joomla 5/6 size the <dialog>, Joomla 4 the .modal-body.
+   */
+  function fitToContent(win, doc) {
+    try {
+      var frame = win.frameElement;
+      var form = doc.querySelector('.container-popup');
+      if (!frame || !form || !frame.closest) {
+        return;
+      }
+
+      var box = frame.closest('dialog') || frame.closest('.modal-body');
+      if (!box) {
+        return;
+      }
+
+      var chrome = box.getBoundingClientRect().height - frame.getBoundingClientRect().height;
+      var content = form.getBoundingClientRect().bottom + win.pageYOffset + 8;
+      var max = win.parent.innerHeight * 0.9;
+
+      box.style.height = Math.ceil(Math.min(max, content + chrome)) + 'px';
+    } catch (e) {
+      // Not allowed to reach the parent window: keep the size Joomla gave the modal
+    }
+  }
+
   function initDialog(doc) {
     var form = doc.getElementById('pdfviewer-form');
     if (!form) {
@@ -202,6 +229,7 @@
       show('pdfjs-group', viewer === 'pdfjs');
 
       $('preview').textContent = buildTag(values(), settings);
+      fitToContent(root, doc);
     }
 
     form.addEventListener('input', refresh);
@@ -219,7 +247,7 @@
     refresh();
   }
 
-  var api = { buildTag: buildTag, insertInEditor: insertInEditor, initDialog: initDialog };
+  var api = { buildTag: buildTag, insertInEditor: insertInEditor, initDialog: initDialog, fitToContent: fitToContent };
 
   if (typeof module === 'object' && module.exports) {
     module.exports = api;
