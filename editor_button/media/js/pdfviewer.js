@@ -153,6 +153,10 @@
           $('linktext').value = title;
         }
         lastTitle = title;
+      } else if (lastTitle !== '' && $('linktext').value === lastTitle) {
+        // Do not keep the jDownloads title as link text for a PDF link
+        $('linktext').value = '';
+        lastTitle = '';
       }
 
       show('jd-group', isJd);
