@@ -117,7 +117,7 @@ final class EditorButtonTest extends TestCase
         $this->assertSame('pdfviewer', $button->name);
         $this->assertSame('modal', $button->get('action'));
         $this->assertSame('editors-xtd_pdfviewer', $button->get('name'));
-        $this->assertSame('85vh', $button->getOptions()['height']);
+        $this->assertSame('min(680px, 90vh)', $button->getOptions()['height']);
 
         $link = $button->get('link');
         $this->assertStringStartsWith('index.php?option=com_ajax&plugin=pdfviewer&group=editors-xtd&format=html&tmpl=component&', $link);
@@ -203,7 +203,7 @@ final class EditorButtonTest extends TestCase
         $this->assertSame($button->get('link'), $legacy->get('link'));
         $this->assertSame('file', $legacy->get('icon'));
         $this->assertIsArray($legacy->get('options'), 'Joomla 4 ignores options given as a string');
-        $this->assertSame('80', $legacy->get('options')['bodyHeight']);
+        $this->assertSame('70', $legacy->get('options')['bodyHeight']);
     }
 
     public function testDialogNeedsToken(): void
