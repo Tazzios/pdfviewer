@@ -37,7 +37,7 @@ jobs:
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
       - name: XML is well formed
-        run: xmllint --noout content_plugin/pdfviewer.xml editor_button/pdfviewer.xml package/pkg_pdfviewer.xml updates_plugin.xml
+        run: xmllint --noout content_plugin/pdfviewer.xml editor_button/pdfviewer.xml package/pkg_pdfviewer.xml updates_plugin.xml changelog.xml
       - name: Every file in the manifest exists
         run: |
           for dir in content_plugin editor_button; do

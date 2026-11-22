@@ -18,6 +18,7 @@
 		<file type="plugin" id="pdfviewer" group="content">plg_content_pdfviewer.zip</file>
 		<file type="plugin" id="pdfviewer" group="editors-xtd">plg_editors-xtd_pdfviewer.zip</file>
 	</files>
+	<changelogurl>https://raw.githubusercontent.com/Tazzios/pdfviewer/main/changelog.xml</changelogurl>
 	<updateservers>
 		<server type="extension" priority="1" name="pdfviewer">https://raw.githubusercontent.com/Tazzios/pdfviewer/main/updates_plugin.xml</server>
 	</updateservers>
