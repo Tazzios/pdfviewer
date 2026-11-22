@@ -1,4 +1,4 @@
-Unreleased  
+V1.6.2 November 2026  
 Fix: pdfimage embed image was stretched to the full width in 1.6.1, it keeps the page proportions again  
 
 V1.6.1 November 2026  
