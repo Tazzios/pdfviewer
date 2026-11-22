@@ -1,0 +1,86 @@
+name: Release
+
+# Started by hand from the Actions tab with a version, for example 1.6.1.
+# Sets that version in the manifests, turns "Unreleased" in Changelog.md into
+# the release notes, builds pkg_pdfviewer_<version>.zip (content plugin and
+# editor button together) and publishes a GitHub release with it.
+#
+# Existing installs are NOT offered the update yet. Check the release first,
+# then run the workflow "Offer update to existing installs".
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version, for example 1.6.1'
+        required: true
+      draft:
+        description: 'Create the release as a draft (only visible to you)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency: release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check the version
+        run: |
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version must look like 1.6.1"; exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "::error::Tag v$VERSION already exists"; exit 1
+          fi
+
+      - name: Set the version and close the changelog section
+        run: node tools/release.js prepare "$VERSION"
+
+      - name: Test
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q libxml2-utils
+          xmllint --noout content_plugin/pdfviewer.xml editor_button/pdfviewer.xml package/pkg_pdfviewer.xml
+          node --test tests/js/*.test.js
+
+      - name: Build the package
+        run: |
+          node tools/release.js build
+          node tools/release.js notes "$VERSION" > dist/notes.md
+          cat dist/notes.md
+
+      - name: Commit and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content_plugin/pdfviewer.xml editor_button/pdfviewer.xml package/pkg_pdfviewer.xml Changelog.md
+          git commit -m "Release $VERSION"
+          git tag "v$VERSION"
+          git push origin HEAD:main "v$VERSION"
+
+      - name: Create the GitHub release
+        run: |
+          gh release create "v$VERSION" "dist/pkg_pdfviewer_$VERSION.zip" \
+            --title "v$VERSION" --notes-file dist/notes.md --verify-tag \
+            ${{ inputs.draft && '--draft' || '' }}
+          {
+            echo "### Release v$VERSION created"
+            echo
+            echo "Existing installs do not get the update yet."
+            echo "Test the zip, then run **Offer update to existing installs** with version $VERSION."
+          } >> "$GITHUB_STEP_SUMMARY"

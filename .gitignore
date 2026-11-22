@@ -10,3 +10,4 @@ pdfviewer.zip
 composer.lock
 .phpunit.cache/
 .phpunit.result.cache
+dist/

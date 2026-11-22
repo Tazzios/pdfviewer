@@ -83,7 +83,4 @@
 			
 		</fields>
 	</config>
-	    <updateservers>
-      <server type="extension" priority="2" name="pdfviewer">https://raw.githubusercontent.com/tazzios/pdfviewer/master/updates_plugin.xml</server>
-    </updateservers>
 </extension>
