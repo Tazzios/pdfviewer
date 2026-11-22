@@ -380,4 +380,27 @@ final class ContentPluginTest extends TestCase
             rmdir(JPATH_ADMINISTRATOR . '/components/com_jdownloads');
         }
     }
+
+    #[DataProvider('imageEmbedSizes')]
+    public function testPdfImageEmbedKeepsAspectRatio(string $width, string $height, string $maxWidth, string $heightPx): void
+    {
+        $method = new \ReflectionMethod(PlgContentPdfviewer::class, 'imageEmbedStyle');
+        $style  = $method->invoke(null, $width, $height);
+
+        // The width is only a maximum, so a fixed height can not stretch the image.
+        $this->assertStringContainsString('width:auto;', $style);
+        $this->assertStringContainsString('max-width:' . $maxWidth . ';', $style);
+        $this->assertStringContainsString('height:' . $heightPx . ';', $style);
+        $this->assertStringContainsString('object-fit:contain;', $style);
+        $this->assertDoesNotMatchRegularExpression('/(^|;)width:(?!auto)/', $style);
+    }
+
+    public static function imageEmbedSizes(): array
+    {
+        return [
+            'default 100%'  => ['100%', '800', '100%', '800px'],
+            'pixels'        => ['600', '600', '600px', '600px'],
+            'invalid width' => ['1px;background:url(x)', '500', '100%', '500px'],
+        ];
+    }
 }
