@@ -316,6 +316,15 @@ const TYPE_ORDER = ['security', 'fix', 'language', 'addition', 'change', 'remove
 
 const escapeXml = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+// changelog.xml is plain text in Joomla: drop markdown so no [text](url), `code`,
+// **bold** or trailing line-break spaces end up in it.
+const plainText = (t) => t
+  .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1') // [text](url) -> text
+  .replace(/<(https?:\/\/[^>\s]+)>/g, '$1') // <https://...> -> https://...
+  .replace(/`([^`]*)`/g, '$1')
+  .replace(/(\*\*|__)(.+?)\1/g, '$2')
+  .replace(/\s+$/, '');
+
 // The Joomla <changelog> block for one version, made from its Changelog.md section.
 function changelogEntry(text, version) {
   const groups = {};
@@ -325,7 +334,7 @@ function changelogEntry(text, version) {
     const type = (m && (CHANGE_TYPES.find(([re]) => re.test(m[1])) || [])[1]) || 'note';
     let item = m && type !== 'note' ? m[2] : line.trim();
     if (m && /^update/i.test(m[1])) item = `Update: ${m[2]}`;
-    (groups[type] = groups[type] || []).push(item.trim());
+    (groups[type] = groups[type] || []).push(plainText(item).trim());
   }
   const blocks = TYPE_ORDER.filter((t) => groups[t]).map((t) => [
     `\t\t<${t}>`,
