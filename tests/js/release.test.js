@@ -87,6 +87,14 @@ test('changelog.xml gets the changes of a version, grouped by type', () => {
   assert.equal(addChangelog(xml, entry, '1.6.2'), xml, 'running twice changes nothing');
 });
 
+test('changelog.xml contains plain text, no markdown', () => {
+  const log = 'v1.6.2 December 2026  \nFixed: thanks to [Someone](https://github.com/someone/) for `[pdfviewer]`  \nNew: **bold** and <https://example.com>  \n';
+  const entry = changelogEntry(log, '1.6.2');
+  assert.match(entry, /<item>thanks to Someone for \[pdfviewer\]<\/item>/);
+  assert.match(entry, /<item>bold and https:\/\/example\.com<\/item>/);
+  assert.doesNotMatch(entry, /\]\(|`|\*\*/);
+});
+
 test('the package points to changelog.xml', () => {
   assert.match(fs.readFileSync(path.join(ROOT, 'changelog.xml'), 'utf8'), /<element>pkg_pdfviewer<\/element>/);
   assert.match(fs.readFileSync(path.join(ROOT, 'package/pkg_pdfviewer.xml'), 'utf8'),
