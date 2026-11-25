@@ -11,3 +11,6 @@ composer.lock
 .phpunit.cache/
 .phpunit.result.cache
 dist/
+
+# IDE
+.idea/

@@ -9,7 +9,24 @@ use Joomla\CMS\TestDatabase;
 use Joomla\CMS\Uri\Uri;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use PlgContentPdfviewer;
+use Joomla\Event\Event;
+use Tazzios\Plugin\Content\Pdfviewer\Extension\Pdfviewer;
+
+/**
+ * Event like Joomla 5's ContentPrepareEvent.
+ */
+final class ContentPrepareEvent extends Event
+{
+    public function getContext(): string
+    {
+        return $this->getArgument('context');
+    }
+
+    public function getItem(): object
+    {
+        return $this->getArgument('subject');
+    }
+}
 
 /**
  * Tests for the {pdfviewer ...} content plugin.
@@ -43,11 +60,19 @@ final class ContentPluginTest extends TestCase
     {
         Factory::$application = new TestApplication($request);
 
-        $plugin  = new PlgContentPdfviewer(null, ['params' => array_merge(self::DEFAULT_PARAMS, $params)]);
-        $article = (object) ['text' => $text];
-        $pparams = null;
+        $plugin = new Pdfviewer(['params' => array_merge(self::DEFAULT_PARAMS, $params)]);
+        $plugin->setApplication(Factory::$application);
+        $plugin->setDatabase(Factory::$database);
 
-        $plugin->onContentPrepare($context, $article, $pparams, 0);
+        $article = (object) ['text' => $text];
+        $event   = new ContentPrepareEvent('onContentPrepare', [
+            'context' => $context,
+            'subject' => $article,
+            'params'  => null,
+            'page'    => 0,
+        ]);
+
+        $plugin->onContentPrepare($event);
 
         return $article->text;
     }
@@ -374,8 +399,12 @@ final class ContentPluginTest extends TestCase
 
         try {
             $html = $this->render('{pdfviewer jdownloadsid="4 OR 1" viewer=pdfimage}');
-            $this->assertStringContainsString('Imagick', $html);
-            $this->assertStringNotContainsString('OR', implode("\n", Factory::$database->queries));
+            $this->assertSame('The pdfimage viewer needs the PHP Imagick extension', $html);
+
+            $sql = implode("\n", Factory::$database->queries);
+            $this->assertStringNotContainsString('4 OR 1', $sql);
+            $this->assertStringContainsString('file.id = :fileid', $sql);
+            $this->assertStringContainsString('BIND :fileid, 4', $sql);
         } finally {
             rmdir(JPATH_ADMINISTRATOR . '/components/com_jdownloads');
         }
@@ -384,7 +413,7 @@ final class ContentPluginTest extends TestCase
     #[DataProvider('imageEmbedSizes')]
     public function testPdfImageEmbedKeepsAspectRatio(string $width, string $height, string $maxWidth, string $heightPx): void
     {
-        $method = new \ReflectionMethod(PlgContentPdfviewer::class, 'imageEmbedStyle');
+        $method = new \ReflectionMethod(Pdfviewer::class, 'imageEmbedStyle');
         $style  = $method->invoke(null, $width, $height);
 
         // The width is only a maximum, so a fixed height can not stretch the image.

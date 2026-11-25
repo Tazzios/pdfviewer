@@ -10,6 +10,7 @@
 use Joomla\CMS\Extension\PluginInterface;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\Database\DatabaseInterface;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\Event\DispatcherInterface;
@@ -23,7 +24,7 @@ return new class () implements ServiceProviderInterface {
             static function (Container $container) {
                 $config = (array) PluginHelper::getPlugin('editors-xtd', 'pdfviewer');
 
-                // Joomla 4 and 5 expect the dispatcher as first argument, Joomla 6 only the config.
+                // Joomla 5 expects the dispatcher as first argument, Joomla 6 only the config.
                 if (version_compare(JVERSION, '6.0', '<')) {
                     $plugin = new Pdfviewer($container->get(DispatcherInterface::class), $config);
                 } else {
@@ -31,6 +32,7 @@ return new class () implements ServiceProviderInterface {
                 }
 
                 $plugin->setApplication(Factory::getApplication());
+                $plugin->setDatabase($container->get(DatabaseInterface::class));
 
                 return $plugin;
             }

@@ -61,6 +61,34 @@ namespace Joomla\CMS\Plugin {
     }
 }
 
+namespace Joomla\Database {
+    interface DatabaseAwareInterface
+    {
+        public function setDatabase($db): void;
+    }
+
+    trait DatabaseAwareTrait
+    {
+        private $databaseAwareTraitDatabase;
+
+        protected function getDatabase()
+        {
+            return $this->databaseAwareTraitDatabase;
+        }
+
+        public function setDatabase($db): void
+        {
+            $this->databaseAwareTraitDatabase = $db;
+        }
+    }
+
+    final class ParameterType
+    {
+        public const INTEGER = 'int';
+        public const STRING = 'string';
+    }
+}
+
 namespace Joomla\CMS\Editor\Button {
     class Button
     {
@@ -97,11 +125,30 @@ namespace Joomla\CMS\Object {
 }
 
 namespace Joomla\CMS\Language {
+    /**
+     * Translates with the en-GB language files of both plugins, so a key
+     * that is missing from a language file shows up as the bare key.
+     */
     class Text
     {
+        private static ?array $strings = null;
+
         public static function _($string)
         {
-            return $string;
+            if (static::$strings === null) {
+                static::$strings = [];
+
+                foreach (glob(\dirname(__DIR__, 2) . '/*/language/en-GB/*.ini') as $file) {
+                    static::$strings += parse_ini_file($file, false, INI_SCANNER_RAW);
+                }
+            }
+
+            return static::$strings[strtoupper($string)] ?? $string;
+        }
+
+        public static function sprintf($string, ...$args)
+        {
+            return sprintf(static::_($string), ...$args);
         }
     }
 }
@@ -283,7 +330,10 @@ namespace Joomla\CMS {
 
         public function __call($method, $args)
         {
-            $this->parts[] = strtoupper($method) . ' ' . implode(', ', (array) $args[0]);
+            $this->parts[] = strtoupper($method) . ' ' . implode(', ', array_map(
+                static fn ($arg) => \is_array($arg) ? implode(', ', $arg) : (string) $arg,
+                \array_slice($args, 0, $method === 'bind' ? 2 : 1)
+            ));
 
             return $this;
         }
@@ -300,6 +350,11 @@ namespace Joomla\CMS {
         public array $result = [];
 
         public function getQuery($new = false)
+        {
+            return new TestQuery();
+        }
+
+        public function createQuery()
         {
             return new TestQuery();
         }
