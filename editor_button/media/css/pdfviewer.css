@@ -20,6 +20,13 @@
     box-sizing: border-box;
 }
 
+/* No space of the template below the form: the script sizes the dialog to the form */
+:has(.pdfviewer-xtd-popup) {
+    min-height: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
 .pdfviewer-xtd fieldset {
     min-width: 0;
     padding: 0;

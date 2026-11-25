@@ -110,20 +110,38 @@ test('insert prefers the Joomla 5 JoomlaEditor API', () => {
   assert.deepEqual(calls, ['tag']);
 });
 
-test('modal is sized to the form, at most 90% of the window', () => {
+test('modal is sized to the form, at most 96% of the window', () => {
   const { fitToContent } = require(path.join(__dirname, '../../editor_button/media/js/pdfviewer.js'));
   const rect = (height, bottom) => () => ({ height, bottom });
   const box = { style: {}, getBoundingClientRect: rect(680) };
   const frame = { closest: (sel) => (sel === 'dialog' ? box : null), getBoundingClientRect: rect(620) };
-  const doc = { querySelector: () => ({ getBoundingClientRect: rect(0, 500) }) };
+  const doc = {
+    querySelector: () => ({ getBoundingClientRect: rect(0, 500) }),
+    documentElement: { scrollHeight: 620, clientHeight: 620 },
+  };
   const win = { frameElement: frame, pageYOffset: 0, parent: { innerHeight: 1000 } };
 
   fitToContent(win, doc);
-  assert.equal(box.style.height, '580px'); // 500 + 20 + 60 header
+  assert.equal(box.style.height, '560px'); // 500 form + 60 header
 
   win.parent.innerHeight = 400;
   fitToContent(win, doc);
-  assert.equal(box.style.height, '360px');
+  assert.equal(box.style.height, '384px');
+});
+
+test('modal grows for space the template adds below the form', () => {
+  const { fitToContent } = require(path.join(__dirname, '../../editor_button/media/js/pdfviewer.js'));
+  const rect = (height, bottom) => () => ({ height, bottom });
+  const box = { style: {}, getBoundingClientRect: rect(680) };
+  const frame = { closest: (sel) => (sel === 'dialog' ? box : null), getBoundingClientRect: rect(620) };
+  const doc = {
+    querySelector: () => ({ getBoundingClientRect: rect(0, 500) }),
+    documentElement: { scrollHeight: 650, clientHeight: 620 },
+  };
+  const win = { frameElement: frame, pageYOffset: 0, parent: { innerHeight: 1000 } };
+
+  fitToContent(win, doc);
+  assert.equal(box.style.height, '590px'); // 560 + 30 overflow
 });
 
 test('fitting does nothing outside a modal', () => {
