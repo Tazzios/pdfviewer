@@ -19,7 +19,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tazzios\\Plugin\\EditorsXtd\\Pdfviewer\\": "editor_button/src/"
+            "Tazzios\\Plugin\\EditorsXtd\\Pdfviewer\\": "editor_button/src/",
+            "Tazzios\\Plugin\\Content\\Pdfviewer\\": "content_plugin/src/"
         }
     }
 }

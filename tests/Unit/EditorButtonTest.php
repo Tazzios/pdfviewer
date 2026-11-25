@@ -4,7 +4,6 @@ namespace Tazzios\Pdfviewer\Tests\Unit;
 
 use Joomla\CMS\Editor\Button\Button;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Object\CMSObject;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Session\Session;
 use Joomla\CMS\TestApplication;
@@ -92,6 +91,7 @@ final class EditorButtonTest extends TestCase
 
         $plugin = new Pdfviewer(null, ['type' => 'editors-xtd', 'name' => 'pdfviewer', 'params' => $params]);
         $plugin->setApplication($app);
+        $plugin->setDatabase(Factory::$database ??= new TestDatabase());
 
         return $plugin;
     }
@@ -111,7 +111,7 @@ final class EditorButtonTest extends TestCase
 
     public function testButtonForEditor(): void
     {
-        $button = $this->plugin(TestUser::editor())->onDisplay('jform_articletext');
+        $button = $this->plugin(TestUser::editor())->buildButton('jform_articletext');
 
         $this->assertInstanceOf(Button::class, $button);
         $this->assertSame('pdfviewer', $button->name);
@@ -128,20 +128,20 @@ final class EditorButtonTest extends TestCase
 
     public function testEditorIdIsUrlEncodedInLink(): void
     {
-        $button = $this->plugin(TestUser::editor())->onDisplay('a b&c');
+        $button = $this->plugin(TestUser::editor())->buildButton('a b&c');
 
         $this->assertStringEndsWith('&e_name=a%20b%26c', $button->get('link'));
     }
 
     public function testNoButtonForGuest(): void
     {
-        $this->assertNull($this->plugin(new TestUser())->onDisplay('jform_articletext'));
-        $this->assertNull($this->plugin(null)->onDisplay('jform_articletext'));
+        $this->assertNull($this->plugin(new TestUser())->buildButton('jform_articletext'));
+        $this->assertNull($this->plugin(null)->buildButton('jform_articletext'));
     }
 
     public function testNoButtonForUserWithoutArticleRights(): void
     {
-        $this->assertNull($this->plugin(TestUser::editor([]))->onDisplay('jform_articletext'));
+        $this->assertNull($this->plugin(TestUser::editor([]))->buildButton('jform_articletext'));
     }
 
     public function testButtonForUserWhoMayCreateInOneCategory(): void
@@ -149,19 +149,19 @@ final class EditorButtonTest extends TestCase
         $user             = TestUser::editor([]);
         $user->categories = [8];
 
-        $this->assertNotNull($this->plugin($user)->onDisplay('jform_articletext'));
+        $this->assertNotNull($this->plugin($user)->buildButton('jform_articletext'));
     }
 
     public function testButtonForUserWhoIsEditingAnArticle(): void
     {
         $plugin = $this->plugin(TestUser::editor([]), [], ['com_content.edit.article.id' => [12]]);
 
-        $this->assertNotNull($plugin->onDisplay('jform_articletext'));
+        $this->assertNotNull($plugin->buildButton('jform_articletext'));
     }
 
     public function testButtonForUserWhoMayEditOwnArticles(): void
     {
-        $this->assertNotNull($this->plugin(TestUser::editor(['core.edit.own']))->onDisplay('jform_articletext'));
+        $this->assertNotNull($this->plugin(TestUser::editor(['core.edit.own']))->buildButton('jform_articletext'));
     }
 
     public function testButtonsSetupEventAddsButton(): void
@@ -190,20 +190,6 @@ final class EditorButtonTest extends TestCase
         $this->plugin(new TestUser())->onEditorButtonsSetup($event);
 
         $this->assertSame([], $event->added);
-    }
-
-    public function testJoomla4ButtonIsCmsObjectWithOptionsArray(): void
-    {
-        $plugin = $this->plugin(TestUser::editor());
-        $button = $plugin->onDisplay('jform_articletext');
-        $legacy = $plugin->legacyButton($button->props, $button->getOptions());
-
-        $this->assertInstanceOf(CMSObject::class, $legacy);
-        $this->assertTrue($legacy->get('modal'));
-        $this->assertSame($button->get('link'), $legacy->get('link'));
-        $this->assertSame('file', $legacy->get('icon'));
-        $this->assertIsArray($legacy->get('options'), 'Joomla 4 ignores options given as a string');
-        $this->assertSame('70', $legacy->get('options')['bodyHeight']);
     }
 
     public function testDialogNeedsToken(): void
@@ -370,7 +356,7 @@ final class EditorButtonTest extends TestCase
         }
     }
 
-    public function testAjaxEventJoomla5AddsResult(): void
+    public function testAjaxEventAddsResult(): void
     {
         $event = new AjaxResultEvent('onAjaxPdfviewer');
 
@@ -380,7 +366,7 @@ final class EditorButtonTest extends TestCase
         $this->assertStringContainsString('id="pdfviewer-form"', $event->results[0]);
     }
 
-    public function testAjaxEventJoomla4SetsResultArgument(): void
+    public function testGenericAjaxEventSetsResultArgument(): void
     {
         $event = new Event('onAjaxPdfviewer', ['result' => ['earlier']]);
 
@@ -425,7 +411,7 @@ final class EditorButtonTest extends TestCase
 
     public function testButtonLoadsFallbackDialogStylesOnEditorPage(): void
     {
-        $this->plugin(TestUser::editor())->onDisplay('jform_articletext');
+        $this->plugin(TestUser::editor())->buildButton('jform_articletext');
 
         $this->assertSame(
             'plg_editors-xtd_pdfviewer/dialog-host.css',
@@ -435,7 +421,7 @@ final class EditorButtonTest extends TestCase
 
     public function testNoDialogStylesWithoutButton(): void
     {
-        $this->plugin(null)->onDisplay('jform_articletext');
+        $this->plugin(null)->buildButton('jform_articletext');
 
         $this->assertSame([], Factory::$application->document->styles);
     }

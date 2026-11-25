@@ -8,13 +8,12 @@
 namespace Tazzios\Plugin\EditorsXtd\Pdfviewer\Extension;
 
 use Joomla\CMS\Editor\Button\Button;
-use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Object\CMSObject;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Session\Session;
-use Joomla\Database\DatabaseInterface;
+use Joomla\Database\DatabaseAwareInterface;
+use Joomla\Database\DatabaseAwareTrait;
 use Joomla\Event\EventInterface;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Registry\Registry;
@@ -26,15 +25,15 @@ use Joomla\Registry\Registry;
 /**
  * Editor button that opens a dialog to insert a {pdfviewer ...} tag.
  *
- * Works on Joomla 4.4, 5 and 6:
- * - Joomla 5 and 6 call onEditorButtonsSetup and get a Button object.
- * - Joomla 4 calls onDisplay directly and gets a CMSObject.
+ * Joomla 5 and 6 call onEditorButtonsSetup, which adds a Button object.
  *
  * The dialog itself is served through com_ajax (onAjaxPdfviewer) and is only
  * shown to logged in users who may write articles, with a valid form token.
  */
-final class Pdfviewer extends CMSPlugin implements SubscriberInterface
+final class Pdfviewer extends CMSPlugin implements SubscriberInterface, DatabaseAwareInterface
 {
+    use DatabaseAwareTrait;
+
     /**
      * Script asset with the dialog logic.
      */
@@ -53,6 +52,17 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
     public const HOST_STYLE_ASSET = 'plg_editors-xtd_pdfviewer.dialog-host';
 
     /**
+     * Icon of the button: a page with "PDF".
+     */
+    private const ICON_SVG = '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">'
+        . '<path fill="currentColor" d="'
+        . 'M6 2h8l6 6v14H4V2h2zm7 1.5V9h5.5L13 3.5zM7 13v5h1.5v-1.6h.9c1.1 0 1.9-.7 1.9-1.7S10.5 13 '
+        . '9.4 13H7zm1.5 1.2h.8c.3 0 .5.2.5.5s-.2.5-.5.5h-.8v-1zM12 13v5h1.8c1.4 0 2.4-1 2.4-2.5S15.2 '
+        . '13 13.8 13H12zm1.5 1.3h.3c.6 0 1 .5 1 1.2s-.4 1.2-1 1.2h-.3v-2.4zM17 '
+        . '13v5h1.5v-1.9h1.6v-1.2h-1.6v-.7h1.8V13H17z'
+        . '"/></svg>';
+
+    /**
      * Load the language file on instantiation.
      *
      * @var boolean
@@ -68,7 +78,7 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
     }
 
     /**
-     * Joomla 5+: add the button to the registry.
+     * Adds the button to the registry of the editor.
      */
     public function onEditorButtonsSetup(EventInterface $event): void
     {
@@ -76,7 +86,7 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
             return;
         }
 
-        $button = $this->onDisplay($event->getEditorId());
+        $button = $this->buildButton((string) $event->getEditorId());
 
         if ($button) {
             $event->getButtonsRegistry()->add($button);
@@ -84,13 +94,11 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
     }
 
     /**
-     * Builds the button. Called directly by Joomla 4.
+     * Builds the button, or null when the user may not use it.
      *
      * @param   string  $name  The id of the editor the button belongs to
-     *
-     * @return  Button|CMSObject|null
      */
-    public function onDisplay($name, $asset = 0, $author = 0)
+    public function buildButton(string $name): ?Button
     {
         if (!$this->canUseButton()) {
             return null;
@@ -107,40 +115,17 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
             'link'    => $link,
             'text'    => Text::_('PLG_EDITORSXTD_PDFVIEWER_BUTTON'),
             'icon'    => 'file',
-            'iconSVG' => '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M6 2h8l6 6v14H4V2h2zm7 1.5V9h5.5L13 3.5zM7 13v5h1.5v-1.6h.9c1.1 0 1.9-.7 1.9-1.7S10.5 13 9.4 13H7zm1.5 1.2h.8c.3 0 .5.2.5.5s-.2.5-.5.5h-.8v-1zM12 13v5h1.8c1.4 0 2.4-1 2.4-2.5S15.2 13 13.8 13H12zm1.5 1.3h.3c.6 0 1 .5 1 1.2s-.4 1.2-1 1.2h-.3v-2.4zM17 13v5h1.5v-1.9h1.6v-1.2h-1.6v-.7h1.8V13H17z"/></svg>',
+            'iconSVG' => self::ICON_SVG,
             'name'    => $this->_type . '_' . $this->_name,
         ];
 
+        // Size of Joomla's dialog, as CSS values
         $options = [
-            // Joomla 5/6 dialog: CSS sizes. Joomla 4 modal: bodyHeight (vh) and modalWidth (vw).
-            'height'     => 'min(680px, 90vh)',
-            'width'      => '900px',
-            'bodyHeight' => '70',
-            'modalWidth' => '80',
+            'height' => 'min(680px, 90vh)',
+            'width'  => '900px',
         ];
 
-        // Joomla 5 and later
-        if (class_exists(Button::class)) {
-            return new Button($this->_name, $props, $options);
-        }
-
-        return $this->legacyButton($props, $options);
-    }
-
-    /**
-     * Joomla 4 has no Button class and expects a CMSObject.
-     */
-    public function legacyButton(array $props, array $options): CMSObject
-    {
-        $button = new CMSObject();
-
-        foreach ($props as $key => $value) {
-            $button->set($key, $value);
-        }
-
-        $button->set('options', $options);
-
-        return $button;
+        return new Button($this->_name, $props, $options);
     }
 
     /**
@@ -150,14 +135,14 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
     {
         $html = $this->renderDialog();
 
-        // Joomla 5+ AjaxEvent
+        // AjaxEvent of com_ajax
         if (method_exists($event, 'addResult')) {
             $event->addResult($html);
 
             return;
         }
 
-        // Joomla 4 generic event
+        // Generic event, when another extension triggers it
         $result   = (array) $event->getArgument('result', []);
         $result[] = $html;
         $event->setArgument('result', $result);
@@ -175,7 +160,7 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
         }
 
         $app   = $this->getApplication();
-        $input = method_exists($app, 'getInput') ? $app->getInput() : $app->input;
+        $input = $app->getInput();
 
         $displayData = [
             'editor'          => preg_replace('#[^A-Z0-9\-\_\[\]]#i', '', (string) $input->getCmd('e_name', '')),
@@ -258,7 +243,8 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
             return false;
         }
 
-        if ($user->authorise('core.create', 'com_content')
+        if (
+            $user->authorise('core.create', 'com_content')
             || $user->authorise('core.edit', 'com_content')
             || $user->authorise('core.edit.own', 'com_content')
             || \count($user->getAuthorisedCategories('com_content', 'core.create')) > 0
@@ -280,8 +266,8 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
             return null;
         }
 
-        $db    = Factory::getContainer()->get(DatabaseInterface::class);
-        $query = $db->getQuery(true)
+        $db    = $this->getDatabase();
+        $query = $db->createQuery()
             ->select($db->quoteName(['id', 'title']))
             ->from($db->quoteName('#__jdownloads_files'))
             ->where($db->quoteName('published') . ' = 1')

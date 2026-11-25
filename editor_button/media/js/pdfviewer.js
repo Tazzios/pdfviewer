@@ -131,7 +131,7 @@
   }
 
   /**
-   * Makes the modal around this iframe just as high as the form, at most 90%
+   * Makes the modal around this iframe just as high as the form, at most 96%
    * of the window. Joomla 5/6 size the <dialog>, Joomla 4 the .modal-body.
    */
   function fitToContent(win, doc) {
@@ -148,10 +148,17 @@
       }
 
       var chrome = box.getBoundingClientRect().height - frame.getBoundingClientRect().height;
-      var content = form.getBoundingClientRect().bottom + win.pageYOffset + 20;
-      var max = win.parent.innerHeight * 0.9;
+      var content = form.getBoundingClientRect().bottom + win.pageYOffset;
+      var max = Math.floor(win.parent.innerHeight * 0.96);
+      var height = Math.min(max, Math.ceil(content + chrome));
 
-      box.style.height = Math.ceil(Math.min(max, content + chrome)) + 'px';
+      box.style.height = height + 'px';
+
+      // Anything the template adds below the form: grow instead of scroll
+      var overflow = doc.documentElement.scrollHeight - doc.documentElement.clientHeight;
+      if (overflow > 0 && height < max) {
+        box.style.height = Math.min(max, height + overflow) + 'px';
+      }
     } catch (e) {
       // Not allowed to reach the parent window: keep the size Joomla gave the modal
     }
@@ -245,6 +252,13 @@
     });
 
     refresh();
+
+    // Measure again when images, late styles and web fonts are in
+    var fit = function () { fitToContent(root, doc); };
+    root.addEventListener('load', fit);
+    if (doc.fonts && doc.fonts.ready) {
+      doc.fonts.ready.then(fit);
+    }
   }
 
   var api = { buildTag: buildTag, insertInEditor: insertInEditor, initDialog: initDialog, fitToContent: fitToContent };
