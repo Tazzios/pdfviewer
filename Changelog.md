@@ -2,7 +2,7 @@ Unreleased
 Fix: editor button dialog looked broken in the frontend with site templates that do not style Joomla dialogs (e.g. Gantry): close button below the title and labels cut off  
 Fix: editor button dialog in the frontend had empty space below the form and a scrollbar  
 Change: content plugin rebuilt as a Joomla 5/6 plugin (namespace, service provider, event subscriber); no change for visitors  
-Change: all texts of both plugins are in language files (en-GB), so they can be translated  
+Change: all texts of both plugins are in language files (en-GB), so they can be translated; an update also replaces old language files in administrator/language  
 Change: removed leftover Joomla 4 code and deprecated database calls (getQuery(true), CMSObject)  
 
 V1.6.2 November 2026  

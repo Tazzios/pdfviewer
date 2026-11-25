@@ -44,6 +44,12 @@ final class JoomlaStandardsTest extends TestCase
         $this->assertSame($element, strtolower((string) $manifest->name));
         $this->assertFileExists($root . '/language/en-GB/' . $element . '.ini');
         $this->assertFileExists($root . '/language/en-GB/' . $element . '.sys.ini');
+
+        // Installed in administrator/language too, so updates replace older copies there
+        $languages = array_map('strval', $manifest->xpath('languages/language'));
+        $this->assertSame('language', (string) $manifest->languages['folder']);
+        $this->assertContains('en-GB/' . $element . '.ini', $languages);
+        $this->assertContains('en-GB/' . $element . '.sys.ini', $languages);
     }
 
     #[DataProvider('pluginProvider')]

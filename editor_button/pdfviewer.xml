@@ -16,6 +16,11 @@
 		<folder>tmpl</folder>
 		<folder>language</folder>
 	</files>
+	<!-- Also installed in administrator/language, so an update replaces older copies there -->
+	<languages folder="language">
+		<language tag="en-GB">en-GB/plg_editors-xtd_pdfviewer.ini</language>
+		<language tag="en-GB">en-GB/plg_editors-xtd_pdfviewer.sys.ini</language>
+	</languages>
 	<media destination="plg_editors-xtd_pdfviewer" folder="media">
 		<folder>css</folder>
 		<folder>js</folder>

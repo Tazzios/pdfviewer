@@ -16,6 +16,11 @@
 		<folder>language</folder>
 		<folder>assets</folder>
 	</files>
+	<!-- Also installed in administrator/language, so an update replaces older copies there -->
+	<languages folder="language">
+		<language tag="en-GB">en-GB/plg_content_pdfviewer.ini</language>
+		<language tag="en-GB">en-GB/plg_content_pdfviewer.sys.ini</language>
+	</languages>
 	<config>
 		<fields name="params">
 			<fieldset name="basic">
