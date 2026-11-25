@@ -422,4 +422,143 @@ final class EditorButtonTest extends TestCase
             $this->assertDoesNotMatchRegularExpression('/\b' . preg_quote($old, '/') . '\b/', $code, $old . ' does not exist in Joomla 4+');
         }
     }
+
+    public function testButtonLoadsFallbackDialogStylesOnEditorPage(): void
+    {
+        $this->plugin(TestUser::editor())->onDisplay('jform_articletext');
+
+        $this->assertSame(
+            'plg_editors-xtd_pdfviewer/dialog-host.css',
+            Factory::$application->document->styles[Pdfviewer::HOST_STYLE_ASSET]
+        );
+    }
+
+    public function testNoDialogStylesWithoutButton(): void
+    {
+        $this->plugin(null)->onDisplay('jform_articletext');
+
+        $this->assertSame([], Factory::$application->document->styles);
+    }
+
+    public function testDialogLoadsItsOwnStylesheet(): void
+    {
+        $html = $this->plugin(TestUser::editor(), $this->validRequest())->renderDialog();
+
+        $this->assertSame(
+            'plg_editors-xtd_pdfviewer/pdfviewer.css',
+            Factory::$application->document->styles[Pdfviewer::STYLE_ASSET]
+        );
+        $this->assertStringNotContainsString('<style', $html, 'styles belong in media/css/pdfviewer.css');
+        $this->assertStringContainsString('class="container-popup pdfviewer-xtd-popup"', $html);
+    }
+
+    /**
+     * Site templates such as Gantry have no padding on the tmpl=component page,
+     * so Bootstrap's .row (negative margins) cut off the labels on the left.
+     */
+    public function testDialogLayoutDoesNotUseBootstrapGrid(): void
+    {
+        $html = $this->plugin(TestUser::editor(), $this->validRequest())->renderDialog();
+
+        $this->assertDoesNotMatchRegularExpression('/class="[^"]*\b(row|col|col-[a-z0-9-]+)\b/', $html);
+        $this->assertSame(1, substr_count($html, 'class="pdfviewer-xtd-columns"'));
+        $this->assertSame(2, substr_count($html, 'class="pdfviewer-xtd-column"'));
+        $this->assertStringContainsString('class="pdfviewer-xtd-pair mb-3" id="pdfviewer-size-group"', $html);
+    }
+
+    public function testDialogStylesheetCoversLayoutWithoutBootstrap(): void
+    {
+        $css = $this->css('pdfviewer.css');
+
+        foreach (['.pdfviewer-xtd-popup', '.pdfviewer-xtd-columns', '.pdfviewer-xtd-pair', '.pdfviewer-xtd-footer'] as $selector) {
+            $this->assertMatchesRegularExpression('/' . preg_quote($selector, '/') . '\s*\{/', $css, $selector . ' is styled');
+        }
+
+        $this->assertMatchesRegularExpression('/\.pdfviewer-xtd-popup\s*\{[^}]*padding:/', $css, 'the dialog content has its own padding');
+        $this->assertMatchesRegularExpression('/\.pdfviewer-xtd \[hidden\]\s*\{[^}]*display:\s*none !important/', $css, 'hidden groups stay hidden');
+        $this->assertStringNotContainsString('margin-left: -', $css);
+
+        // Fallback form styles must not beat the template's own form styles
+        foreach (['.form-control', '.form-select', '.form-label'] as $class) {
+            $this->assertMatchesRegularExpression('/:where\([^)]*' . preg_quote($class, '/') . '/', $css, $class . ' fallback uses :where()');
+        }
+
+        foreach ($this->selectors($css) as $selector) {
+            $this->assertStringContainsString('pdfviewer-xtd', $selector, 'every rule stays inside the dialog: ' . $selector);
+        }
+    }
+
+    public function testInsertButtonIsGreenWithoutBootstrap(): void
+    {
+        $html = $this->plugin(TestUser::editor(), $this->validRequest())->renderDialog();
+        $css  = $this->css('pdfviewer.css');
+
+        $this->assertMatchesRegularExpression('/<button type="submit" class="btn btn-success">Insert<\/button>/', $html);
+        $this->assertMatchesRegularExpression(
+            '/\.pdfviewer-xtd \.btn\.btn-success\s*\{[^}]*color:\s*#fff;[^}]*background-color:\s*var\(--success, #198754\)/',
+            $css,
+            'the Insert button gets its green colour from the plugin, not only from the template'
+        );
+    }
+
+    public function testHostStylesheetOnlyTouchesJoomlaDialog(): void
+    {
+        $css = $this->css('dialog-host.css');
+
+        foreach (['dialog[open]', '.joomla-dialog-header', '.joomla-dialog-body', 'iframe.iframe-content'] as $part) {
+            $this->assertStringContainsString($part, $css);
+        }
+
+        $this->assertMatchesRegularExpression('/\.joomla-dialog-header\s*\{[^}]*display:\s*flex/', $css, 'icon, title and close button on one line');
+        $this->assertMatchesRegularExpression('/iframe\.iframe-content\s*\{[^}]*height:\s*100%/', $css, 'the iframe fills the dialog');
+
+        foreach ($this->selectors($css) as $selector) {
+            $this->assertStringStartsWith(':where(joomla-dialog', $selector, 'host styles only touch the Joomla dialog: ' . $selector);
+        }
+    }
+
+    public function testManifestInstallsStylesheets(): void
+    {
+        $root     = dirname(__DIR__, 2) . '/editor_button';
+        $manifest = simplexml_load_file($root . '/pdfviewer.xml');
+        $folders  = array_map('strval', $manifest->media->xpath('folder'));
+
+        $this->assertContains('css', $folders);
+        $this->assertContains('js', $folders);
+        $this->assertFileExists($root . '/media/css/pdfviewer.css');
+        $this->assertFileExists($root . '/media/css/dialog-host.css');
+    }
+
+    private function css(string $file): string
+    {
+        $css = file_get_contents(dirname(__DIR__, 2) . '/editor_button/media/css/' . $file);
+
+        // Without comments
+        return preg_replace('#/\*.*?\*/#s', '', $css);
+    }
+
+    /**
+     * All selectors of a stylesheet, with the selectors inside @media blocks.
+     *
+     * @return  string[]
+     */
+    private function selectors(string $css): array
+    {
+        $css       = preg_replace('/@media[^{]*\{/', '', $css);
+        $selectors = [];
+
+        preg_match_all('/([^{}]+)\{/', $css, $matches);
+
+        foreach ($matches[1] as $group) {
+            foreach (preg_split('/,(?![^()]*\))/', $group) as $selector) {
+                if (trim($selector) !== '') {
+                    $selectors[] = trim($selector);
+                }
+            }
+        }
+
+        $this->assertNotEmpty($selectors);
+
+        return $selectors;
+    }
 }

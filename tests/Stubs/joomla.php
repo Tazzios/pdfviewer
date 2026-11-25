@@ -255,6 +255,7 @@ namespace Joomla\CMS {
     class TestDocument
     {
         public array $scripts = [];
+        public array $styles = [];
 
         public function getWebAssetManager()
         {
@@ -264,6 +265,13 @@ namespace Joomla\CMS {
         public function registerAndUseScript($name, $uri = '', $options = [], $attributes = [], $dependencies = [])
         {
             $this->scripts[$name] = $uri;
+
+            return $this;
+        }
+
+        public function registerAndUseStyle($name, $uri = '', $options = [], $attributes = [], $dependencies = [])
+        {
+            $this->styles[$name] = $uri;
 
             return $this;
         }

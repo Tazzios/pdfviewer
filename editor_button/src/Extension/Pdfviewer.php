@@ -41,6 +41,18 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
     public const SCRIPT_ASSET = 'plg_editors-xtd_pdfviewer.dialog';
 
     /**
+     * Style asset with the layout of the dialog content (inside the iframe).
+     */
+    public const STYLE_ASSET = 'plg_editors-xtd_pdfviewer.dialog';
+
+    /**
+     * Style asset for the page with the editor: fallback styles for Joomla's
+     * dialog, for site templates that do not style it (only Atum and
+     * Cassiopeia do).
+     */
+    public const HOST_STYLE_ASSET = 'plg_editors-xtd_pdfviewer.dialog-host';
+
+    /**
      * Load the language file on instantiation.
      *
      * @var boolean
@@ -86,6 +98,8 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
 
         $link = 'index.php?option=com_ajax&plugin=pdfviewer&group=editors-xtd&format=html&tmpl=component&'
             . Session::getFormToken() . '=1&e_name=' . rawurlencode((string) $name);
+
+        $this->useHostStyle();
 
         $props = [
             'action'  => 'modal',
@@ -170,14 +184,19 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
             'defaults'        => $this->getButtonDefaults($content),
         ];
 
-        $app->getDocument()->getWebAssetManager()->registerAndUseScript(
-            self::SCRIPT_ASSET,
-            'plg_editors-xtd_pdfviewer/pdfviewer.js',
-            // The file time as version, so browsers fetch the script again after a change
-            ['version' => (string) (@filemtime(JPATH_ROOT . '/media/plg_editors-xtd_pdfviewer/js/pdfviewer.js') ?: 'auto')],
-            ['defer' => true],
-            ['core']
-        );
+        $app->getDocument()->getWebAssetManager()
+            ->registerAndUseStyle(
+                self::STYLE_ASSET,
+                'plg_editors-xtd_pdfviewer/pdfviewer.css',
+                ['version' => static::mediaVersion('css/pdfviewer.css')]
+            )
+            ->registerAndUseScript(
+                self::SCRIPT_ASSET,
+                'plg_editors-xtd_pdfviewer/pdfviewer.js',
+                ['version' => static::mediaVersion('js/pdfviewer.js')],
+                ['defer' => true],
+                ['core']
+            );
 
         $layout = PluginHelper::getLayoutPath($this->_type, $this->_name);
 
@@ -187,6 +206,38 @@ final class Pdfviewer extends CMSPlugin implements SubscriberInterface
 
             return (string) ob_get_clean();
         })($layout, $displayData);
+    }
+
+    /**
+     * Loads the fallback dialog styles on the page with the editor.
+     */
+    private function useHostStyle(): void
+    {
+        $app = $this->getApplication();
+
+        if (!$app || !method_exists($app, 'getDocument')) {
+            return;
+        }
+
+        $document = $app->getDocument();
+
+        if (!$document || !method_exists($document, 'getWebAssetManager')) {
+            return;
+        }
+
+        $document->getWebAssetManager()->registerAndUseStyle(
+            self::HOST_STYLE_ASSET,
+            'plg_editors-xtd_pdfviewer/dialog-host.css',
+            ['version' => static::mediaVersion('css/dialog-host.css')]
+        );
+    }
+
+    /**
+     * The file time as version, so browsers fetch a file again after a change.
+     */
+    private static function mediaVersion(string $file): string
+    {
+        return (string) (@filemtime(JPATH_ROOT . '/media/plg_editors-xtd_pdfviewer/' . $file) ?: 'auto');
     }
 
     /**

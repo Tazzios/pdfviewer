@@ -22,11 +22,7 @@ $content  = $displayData['content'];
 $settings = json_encode(['button' => $defaults, 'content' => $content], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 $hasJd    = is_array($files) && count($files) > 0;
 ?>
-<style>
-    /* Keep the tag preview and Insert button visible when the dialog is low */
-    .pdfviewer-xtd-footer { position: sticky; bottom: 0; padding: .75rem 0; background: var(--body-bg, #fff); border-top: 1px solid var(--border-color, #dee2e6); }
-</style>
-<div class="container-popup">
+<div class="container-popup pdfviewer-xtd-popup">
     <form id="pdfviewer-form" class="pdfviewer-xtd"
           data-editor="<?php echo $e($editor); ?>"
           data-settings="<?php echo $e($settings); ?>">
@@ -50,8 +46,8 @@ $hasJd    = is_array($files) && count($files) > 0;
             <?php endif; ?>
         </fieldset>
 
-        <div class="row">
-            <div class="col-sm-6">
+        <div class="pdfviewer-xtd-columns">
+            <div class="pdfviewer-xtd-column">
                 <?php if ($hasJd) : ?>
                     <div class="mb-3" id="pdfviewer-jd-group">
                         <label class="form-label" for="pdfviewer-jdownloadsid">jDownloads file</label>
@@ -88,12 +84,12 @@ $hasJd    = is_array($files) && count($files) > 0;
                     </select>
                 </div>
 
-                <div class="row mb-3" id="pdfviewer-size-group">
-                    <div class="col">
+                <div class="pdfviewer-xtd-pair mb-3" id="pdfviewer-size-group">
+                    <div>
                         <label class="form-label" for="pdfviewer-width">Width</label>
                         <input class="form-control" type="text" id="pdfviewer-width" placeholder="100% or 800">
                     </div>
-                    <div class="col">
+                    <div>
                         <label class="form-label" for="pdfviewer-height">Height</label>
                         <input class="form-control" type="text" id="pdfviewer-height" placeholder="800">
                     </div>
@@ -105,7 +101,7 @@ $hasJd    = is_array($files) && count($files) > 0;
                 </div>
             </div>
 
-            <div class="col-sm-6">
+            <div class="pdfviewer-xtd-column">
                 <div class="mb-3" id="pdfviewer-search-group">
                     <label class="form-label" for="pdfviewer-search">Search</label>
                     <input class="form-control" type="text" id="pdfviewer-search">

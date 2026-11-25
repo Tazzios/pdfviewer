@@ -17,6 +17,7 @@
 		<folder>language</folder>
 	</files>
 	<media destination="plg_editors-xtd_pdfviewer" folder="media">
+		<folder>css</folder>
 		<folder>js</folder>
 	</media>
 	<config>

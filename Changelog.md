@@ -1,3 +1,6 @@
+Unreleased  
+Fix: editor button dialog looked broken in the frontend with site templates that do not style Joomla dialogs (e.g. Gantry): close button below the title and labels cut off  
+
 V1.6.2 November 2026  
 Fix: pdfimage embed image was stretched to the full width in 1.6.1, it keeps the page proportions again  
 

@@ -1,0 +1,75 @@
+/**
+ * Fallback styling for the Joomla dialog (<joomla-dialog>) that shows the
+ * pdfviewer editor button.
+ *
+ * Joomla's dialog has no styles of its own: Atum and Cassiopeia style it in
+ * their template.css. Other site templates (Gantry, YOOtheme, ...) don't, and
+ * the dialog then shows the title, icon and close button below each other and
+ * an iframe that does not fill the dialog. These rules copy what the core
+ * templates do (same values, so Atum and Cassiopeia look the same as
+ * before). Every selector is scoped to joomla-dialog, so nothing outside the
+ * dialog is touched, and :where() keeps the specificity as low as the core
+ * template rules.
+ */
+:where(joomla-dialog dialog[open]) {
+    display: flex;
+    max-height: 96vh;
+    padding: 0;
+    color: inherit;
+    background: var(--body-bg, #fff);
+    border: 1px solid rgba(0, 0, 0, .175);
+    border-radius: .3rem;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+:where(joomla-dialog) .joomla-dialog-container {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: column;
+    width: 100%;
+}
+
+:where(joomla-dialog) .joomla-dialog-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+}
+
+:where(joomla-dialog) .joomla-dialog-header h3 {
+    margin: 0;
+}
+
+:where(joomla-dialog) .joomla-dialog-header .header-icon {
+    margin-inline-end: .375rem;
+}
+
+:where(joomla-dialog) .joomla-dialog-header.empty,
+:where(joomla-dialog) .joomla-dialog-footer.empty {
+    display: none;
+}
+
+:where(joomla-dialog) .buttons-holder {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-inline-start: auto;
+}
+
+:where(joomla-dialog) .joomla-dialog-body {
+    position: relative;
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+:where(joomla-dialog) iframe.iframe-content {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
