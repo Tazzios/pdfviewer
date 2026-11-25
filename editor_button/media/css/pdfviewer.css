@@ -110,3 +110,27 @@
 .pdfviewer-xtd [hidden] {
     display: none !important;
 }
+
+/*
+ * Insert button: green like in the backend. Templates such as Gantry have no
+ * (or a different) .btn-success, so the colours are set here as well.
+ */
+.pdfviewer-xtd .btn.btn-success {
+    display: inline-block;
+    padding: .375rem .75rem;
+    font: inherit;
+    line-height: 1.5;
+    color: #fff;
+    cursor: pointer;
+    background-color: var(--success, #198754);
+    background-image: none;
+    border: 1px solid var(--success, #198754);
+    border-radius: .25rem;
+}
+
+.pdfviewer-xtd .btn.btn-success:hover,
+.pdfviewer-xtd .btn.btn-success:focus {
+    color: #fff;
+    background-color: var(--success, #198754);
+    filter: brightness(.9);
+}

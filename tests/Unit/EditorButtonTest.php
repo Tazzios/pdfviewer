@@ -488,6 +488,19 @@ final class EditorButtonTest extends TestCase
         }
     }
 
+    public function testInsertButtonIsGreenWithoutBootstrap(): void
+    {
+        $html = $this->plugin(TestUser::editor(), $this->validRequest())->renderDialog();
+        $css  = $this->css('pdfviewer.css');
+
+        $this->assertMatchesRegularExpression('/<button type="submit" class="btn btn-success">Insert<\/button>/', $html);
+        $this->assertMatchesRegularExpression(
+            '/\.pdfviewer-xtd \.btn\.btn-success\s*\{[^}]*color:\s*#fff;[^}]*background-color:\s*var\(--success, #198754\)/',
+            $css,
+            'the Insert button gets its green colour from the plugin, not only from the template'
+        );
+    }
+
     public function testHostStylesheetOnlyTouchesJoomlaDialog(): void
     {
         $css = $this->css('dialog-host.css');
