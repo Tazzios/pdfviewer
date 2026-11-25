@@ -1,0 +1,112 @@
+/**
+ * Layout of the pdfviewer editor button dialog (inside the dialog iframe).
+ *
+ * The dialog page is rendered with the active template (tmpl=component).
+ * Atum (backend) and Cassiopeia style Bootstrap forms, but other site
+ * templates (Gantry, YOOtheme, ...) may have no padding on the component
+ * page or no Bootstrap at all. So the layout does not depend on the
+ * Bootstrap grid (.row has negative margins that cut off the labels) and
+ * the form gets basic styling as a fallback. Fallback rules use :where()
+ * so they have no specificity and the template's own form styles win.
+ */
+.pdfviewer-xtd-popup {
+    box-sizing: border-box;
+    padding: .75rem 1rem 0;
+}
+
+.pdfviewer-xtd-popup *,
+.pdfviewer-xtd-popup *::before,
+.pdfviewer-xtd-popup *::after {
+    box-sizing: border-box;
+}
+
+.pdfviewer-xtd fieldset {
+    min-width: 0;
+    padding: 0;
+    margin: 0 0 1rem;
+    border: 0;
+}
+
+/* Two columns from 576px, one column on small screens */
+.pdfviewer-xtd-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 1.5rem;
+}
+
+@media (min-width: 576px) {
+    .pdfviewer-xtd-columns {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.pdfviewer-xtd-column {
+    min-width: 0;
+}
+
+/* Width and height next to each other */
+.pdfviewer-xtd-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+/* Basic form styling when the template has no Bootstrap */
+:where(.pdfviewer-xtd) :where(.mb-3) {
+    margin-bottom: 1rem;
+}
+
+:where(.pdfviewer-xtd) :where(.form-label) {
+    display: block;
+    margin-bottom: .5rem;
+}
+
+:where(.pdfviewer-xtd) :where(.form-control, .form-select) {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: .375rem .75rem;
+    font: inherit;
+    line-height: 1.5;
+}
+
+:where(.pdfviewer-xtd) :where(.form-check-inline) {
+    display: inline-block;
+    margin-right: 1rem;
+}
+
+:where(.pdfviewer-xtd) :where(.form-text) {
+    margin-top: .25rem;
+    font-size: .875em;
+    opacity: .75;
+}
+
+:where(.pdfviewer-xtd) :where(.visually-hidden) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Keep the tag preview and Insert button visible when the dialog is low */
+.pdfviewer-xtd-footer {
+    position: sticky;
+    bottom: 0;
+    padding: .75rem 0;
+    background: var(--body-bg, #fff);
+    border-top: 1px solid var(--border-color, #dee2e6);
+}
+
+.pdfviewer-xtd-footer code {
+    word-break: break-all;
+}
+
+/* The script hides groups with the hidden attribute; display: grid above would undo that */
+.pdfviewer-xtd [hidden] {
+    display: none !important;
+}
