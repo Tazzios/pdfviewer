@@ -100,3 +100,18 @@ test('the package points to changelog.xml', () => {
   assert.match(fs.readFileSync(path.join(ROOT, 'package/pkg_pdfviewer.xml'), 'utf8'),
     /<changelogurl>https:\/\/raw\.githubusercontent\.com\/Tazzios\/pdfviewer\/main\/changelog\.xml<\/changelogurl>/);
 });
+
+test('changelog.xml leaves out pull request numbers at the end of a line', () => {
+  const log = 'V1.6.3 November 2026  \nFix: nameddest was missing #nameddest= #46  \nChange: language files #57  \nNew: two PRs #46, #47  \nNew: issue #14 in the middle stays\n';
+  const xml = changelogEntry(log, '1.6.3');
+  assert.match(xml, /<item>nameddest was missing #nameddest=<\/item>/);
+  assert.match(xml, /<change>\n\t\t\t<item>language files<\/item>/);
+  assert.match(xml, /<item>two PRs<\/item>/);
+  assert.match(xml, /<item>issue #14 in the middle stays<\/item>/);
+  assert.doesNotMatch(xml, /#4[67]|#57/);
+});
+
+test('the release notes keep pull request numbers (GitHub links them)', () => {
+  const notes = releaseNotes('V1.6.3 November 2026  \nChange: language files #57  \n', '1.6.3');
+  assert.match(notes, /^- Change: language files #57$/m);
+});

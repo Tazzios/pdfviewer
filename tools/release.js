@@ -117,7 +117,7 @@ function sectionBody(text, version) {
 
 function releaseNotes(text, version) {
   const body = sectionBody(text, version);
-  const items = body.map((l) => (/^(New|Fix|Fixed|Improved|Update|Security|Removed|Changed):/i.test(l) ? `- ${l}` : l));
+  const items = body.map((l) => (/^(New|Fix|Fixed|Improved|Update|Security|Removed|Change|Changed):/i.test(l) ? `- ${l}` : l));
   return [
     ...items,
     '',
@@ -308,7 +308,7 @@ const CHANGE_TYPES = [
   [/^security$/i, 'security'],
   [/^fix(ed)?$/i, 'fix'],
   [/^(new|added)$/i, 'addition'],
-  [/^(improved|update|updated|changed)$/i, 'change'],
+  [/^(improved|update|updated|change|changed)$/i, 'change'],
   [/^removed?$/i, 'remove'],
   [/^language$/i, 'language'],
 ];
@@ -317,8 +317,10 @@ const TYPE_ORDER = ['security', 'fix', 'language', 'addition', 'change', 'remove
 const escapeXml = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // changelog.xml is plain text in Joomla: drop markdown so no [text](url), `code`,
-// **bold** or trailing line-break spaces end up in it.
+// **bold**, trailing line-break spaces or pull request numbers (" #57",
+// " #46, #47" at the end of a line) end up in it.
 const plainText = (t) => t
+  .replace(/\s+#\d+(?:\s*,?\s*#\d+)*\s*$/, '')
   .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1') // [text](url) -> text
   .replace(/<(https?:\/\/[^>\s]+)>/g, '$1') // <https://...> -> https://...
   .replace(/`([^`]*)`/g, '$1')
