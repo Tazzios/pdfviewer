@@ -7,7 +7,7 @@
 	<license>GNU/GPLv3 www.gnu.org/licenses/gpl-3.0.html</license>
 	<authorEmail></authorEmail>
 	<authorUrl>https://github.com/Tazzios</authorUrl>
-	<version>1.6.2</version>
+	<version>1.6.3</version>
 	<description>PLG_CONTENT_PDFVIEWER_XML_DESCRIPTION</description>
 	<namespace path="src">Tazzios\Plugin\Content\Pdfviewer</namespace>
 	<files>
