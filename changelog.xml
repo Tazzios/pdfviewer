@@ -3,6 +3,20 @@
 	<changelog>
 		<element>pkg_pdfviewer</element>
 		<type>package</type>
+		<version>1.6.3</version>
+		<fix>
+			<item>editor button dialog looked broken in the frontend with site templates that do not style Joomla dialogs (e.g. Gantry)</item>
+			<item>editor button dialog in the frontend had empty space below the form and a scrollbar</item>
+		</fix>
+		<change>
+			<item>content plugin rebuilt as a Joomla 5/6 plugin (namespace, service provider, event subscriber)</item>
+			<item>all texts of both plugins are in language files (en-GB), so they can be translated</item>
+			<item>removed leftover Joomla 4 code and deprecated database calls (getQuery(true), CMSObject)</item>
+		</change>
+	</changelog>
+	<changelog>
+		<element>pkg_pdfviewer</element>
+		<type>package</type>
 		<version>1.6.2</version>
 		<security>
 			<item>url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page</item>
