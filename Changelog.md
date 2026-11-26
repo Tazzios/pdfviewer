@@ -1,23 +1,23 @@
 Unreleased  
-Fix: editor button dialog looked broken in the frontend with site templates that do not style Joomla dialogs (e.g. Gantry)  
-Fix: editor button dialog in the frontend had empty space below the form and a scrollbar  
-Change: content plugin rebuilt as a Joomla 5/6 plugin (namespace, service provider, event subscriber)  
-Change: all texts of both plugins are in language files (en-GB), so they can be translated  
-Change: removed leftover Joomla 4 code and deprecated database calls (getQuery(true), CMSObject)  
+Fix: editor button dialog looked broken in the frontend with site templates that do not style Joomla dialogs (e.g. Gantry) #56  
+Fix: editor button dialog in the frontend had empty space below the form and a scrollbar #57  
+Change: content plugin rebuilt as a Joomla 5/6 plugin (namespace, service provider, event subscriber) #57  
+Change: all texts of both plugins are in language files (en-GB), so they can be translated #57  
+Change: removed leftover Joomla 4 code and deprecated database calls (getQuery(true), CMSObject) #57  
 
 V1.6.2 November 2026  
-Fix: pdfimage embed image was stretched to the full width in 1.6.1, it keeps the page proportions again  
+Fix: pdfimage embed image was stretched to the full width in 1.6.1, it keeps the page proportions again #52  
 
 V1.6.1 November 2026  
-New: content plugin and editor button are now installed together as one package (pkg_pdfviewer)  
-New: editor button rebuilt for Joomla 5 and 6, with its own default settings   
-Security: url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page  
-Security: jdownloadsid is now always an integer (SQL query for pdfimage)  
-Fix: nameddest url parameter was missing #nameddest=  
-Fix: popups on one page could get the same id  
-Improved: linktext, width and height are escaped  
-Improved: pdfimage shows a clear message when Imagick is missing and no longer shows server paths to visitors  
-Update: PDFjs to 6.5.438  
+New: content plugin and editor button are now installed together as one package (pkg_pdfviewer) #50  
+New: editor button rebuilt for Joomla 5 and 6, with its own default settings #47  
+Security: url parameters (search, nameddest, zoom, pagemode, phrase, highlight) could inject HTML/JavaScript into the page #46  
+Security: jdownloadsid is now always an integer (SQL query for pdfimage) #46  
+Fix: nameddest url parameter was missing #nameddest= #46  
+Fix: popups on one page could get the same id #46  
+Improved: linktext, width and height are escaped #46  
+Improved: pdfimage shows a clear message when Imagick is missing and no longer shows server paths to visitors #46  
+Update: PDFjs to 6.5.438 #49  
 
 V1.6.0 September 2026  
 New: Joomla 6 compatible  
